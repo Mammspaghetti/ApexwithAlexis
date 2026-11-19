@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Legacy_Avenant_Form_Enabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Interrupteur de l&apos;ancien formulaire d&apos;avenant du panneau PTF. Lorsqu&apos;il est désactivé, l&apos;action « Créer un avenant » ouvre le parcours basé sur la matrice.</description>
+    <label>Ancien formulaire d&apos;avenant</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

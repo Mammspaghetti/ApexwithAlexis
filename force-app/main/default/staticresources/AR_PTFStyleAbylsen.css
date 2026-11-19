@@ -1,0 +1,236 @@
+
+  /* ── Session 56 : socle graphique ABYLSEN_AT_V11 (AR_PTFTemplateAbylsen.page /
+     AR_PTFAvenant.page) ────────────────────────────────────────────────────────────────
+     Feuille DÉDIÉE, indépendante d'AR_PTFStyle.css (partagée par le générique et l'ABMI) :
+     décision de la session 56 §3 — aucune classe commune entre chartes, la duplication de
+     CSS coûte moins qu'une régression croisée (même raisonnement que la session 35 sur la
+     duplication de page Visualforce par gabarit). Toutes les classes sont préfixées "aby-".
+
+     Palette mesurée dans docs/gabarits/SIGMA__PTF_AT_v11_FR.docx (valeurs w:fill, jamais
+     estimées) : #C3D770 (en-têtes / colonnes de gauche des tableaux de la page de garde),
+     #EFF5DF (corps de ces mêmes tableaux), #C0C0C0 (filets). Le reste du document est noir
+     sur blanc dans le modèle Word — aucune trace ici du magenta (#D31876) ni des bandeaux
+     noirs (#1a1a1a) de la charte House of ABY : ce sont des couleurs internes à l'outil,
+     pas à Abylsen. Exception assumée : le bandeau interne "APERÇU — DOCUMENT NON
+     CONTRACTUEL" reste en magenta dans la page elle-même (style inline, pas ici) — c'est un
+     indicateur d'outil commun aux quatre gabarits, pas un élément de la charte client. */
+
+  @page { size: A4; margin: 0; }
+  /* Session 58d : correctif confirmé en réel, sans-serif seul — cf. AR_PTFStyle.css et
+     docs/58d-sans-serif-la-piste-documentee.md. */
+  body { font-family: sans-serif; font-size: 9pt; color: #000000; }
+  table { border-collapse: collapse; width: 100%; }
+  td { vertical-align: top; }
+  p { margin: 0 0 6px 0; font-size: 9pt; line-height: 1.45; }
+
+  /* ── Page de garde ── */
+  /* Session 111 (point 1) : padding horizontal pour marges de lecture en pleine page. */
+  /* Session 127 : page de garde pleine page. L'ancienne table .aby-cover-page mettait 18 mm de
+     padding sur TOUT son contenu (bandeau et pied compris) : grosse marge blanche autour de la page.
+     Conteneur à la hauteur de la page (296 mm, 1 mm de marge contre une page blanche parasite),
+     position:relative pour ancrer le pied en bas ; marges de lecture sur les seuls tableaux. */
+  .aby-cover { position: relative; height: 296mm; page-break-after: always; }
+  .aby-cov-body { padding: 0 12mm; }
+
+  /* Session 127 : bandeau d'aperçu hors flux, répété en haut de chaque page, au-dessus du contenu. */
+  .aby-preview-banner { position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+    background-color: #000000; color: #FFFFFF; text-align: center; font-weight: bold;
+    font-size: 9pt; letter-spacing: 1px; padding: 5px 0; }
+
+  /* Bandeau de garde = word/media/image4.jpg (AR_PTFAbylsenAssets), pas du CSS (session 56
+     §1) : ne contient PAS le titre (vérifié sur le PDF modèle), imprimé ici en overlay texte
+     à droite du filet vertical dessiné dans l'image (mesuré à 67,7 % de la largeur). Premier
+     essai en marge négative sur une table (sans position:absolute, jamais utilisé ailleurs
+     dans le projet) : le titre disparaissait purement et simplement au rendu réel (PDF
+     regénéré, session 56). position:absolute essayé ensuite et RETENU — le moteur PDF de
+     cette org le supporte correctement (déjà établi dans la même session que
+     -fs-page-sequence/counter(page) fonctionnent hors @page, cf. §5) : vérifié sur PDF
+     régénéré, texte bien positionné à droite du filet. Un position:absolute ne réserve
+     aucune hauteur dans le flux normal : sans hauteur explicite sur le conteneur, le titre
+     chevauchait le tableau Rédacteur/Valideur qui suit — surtout visible sur le titre plus
+     long de l'avenant (4 lignes). Hauteur calculée depuis le ratio réel de l'image
+     (605/2480) à la largeur de contenu de la page (182mm = A4 moins les marges @page). */
+  /* Session 111 (point 1): hauteur recalculée pour pleine largeur A4 — 605/2480 × 210mm ≈ 51.2mm. */
+  .aby-cov-banner-wrap { position: relative; height: 51.2mm; margin-bottom: 0; }
+  .aby-cov-banner-img { width: 100%; display: block; }
+  .aby-cov-title-overlay { position: absolute; top: 21%; left: 69%; width: 29%; }
+  .aby-cov-title-main { font-size: 12pt; font-weight: bold; text-transform: uppercase;
+    color: #000000; line-height: 1.25; }
+  /* .aby-cov-entity / .aby-cov-badge retirées (session 58, A22) : le bandeau du modèle ne porte
+     que les trois lignes du titre — "Abylsen SIGMA" et "ASSISTANCE TECHNIQUE — AT V11" étaient des
+     reliquats du badge House of ABY, absents du modèle, et la cause du chevauchement titre/filet
+     sur l'avenant (titre à 4 lignes butant sur le bas du bandeau, cf. docs/57 §6). */
+
+  /* Session 111 (point 1) : padding horizontal pour marges de lecture en pleine page (margin: 0 @page). */
+  /* Session 127 : padding de table retiré (ignoré en border-collapse, marges portées par .aby-cov-body). */
+  .aby-2box-table td { padding: 6px; vertical-align: top; }
+  .aby-box { border: 1px solid #FFFFFF; }
+  /* Session 127 : UNE table par bloc à deux colonnes — même hauteur pour les deux cellules d'une ligne. */
+  .aby-grid2 { width: 100%; table-layout: fixed; border-collapse: collapse; }
+  .aby-grid2 td { border: 1px solid #FFFFFF; }
+  .aby-box-hd { background-color: #C3D770; color: #000000; font-size: 7pt; font-weight: bold;
+    text-transform: uppercase; padding: 5px 10px; }
+  .aby-box-body { background-color: #EFF5DF; padding: 8px 10px; font-size: 8.5pt; color: #000000; }
+
+  /* ── Tableau d'identification (session 57, A2) : Référence PTF / Client / Projet + Version n°,
+     seul bloc de la page de garde totalement absent avant cette session. Colonne de gauche
+     (libellé) sur #C3D770, corps sur #EFF5DF — mêmes teintes que .aby-box-hd/-body, répétées par
+     ligne plutôt qu'en en-tête de tableau unique, cf. le modèle v11. ── */
+  /* Session 111 (point 1) : padding horizontal pour pleine page. */
+  .aby-ident { margin-bottom: 4mm; }
+  .aby-ident td.k { background-color: #C3D770; color: #000000; font-weight: bold; font-size: 7.5pt;
+    text-transform: uppercase; padding: 6px 10px; width: 22%; border: 1px solid #FFFFFF; }
+  .aby-ident td.v { background-color: #EFF5DF; color: #000000; font-size: 8.5pt; padding: 6px 10px;
+    border: 1px solid #FFFFFF; }
+
+  /* ── Boîtes à plusieurs lignes (session 57, A3/A4) : Rédacteur/Valideur et Interlocuteurs CLIENT
+     partagent la même structure — en-tête vert, trois lignes de corps, une seule remplie côté
+     modèle de données actuel (qui ne porte qu'un rédacteur/valideur/interlocuteur). Les lignes
+     vides restent des <td> vides, jamais un tiret. ── */
+  .aby-box3-hd { background-color: #C3D770; color: #000000; font-size: 7pt; font-weight: bold;
+    text-transform: uppercase; padding: 5px 10px; border: 1px solid #FFFFFF; }
+  .aby-box3-row { background-color: #EFF5DF; color: #000000; font-size: 8.5pt; padding: 5px 10px;
+    border: 1px solid #FFFFFF; height: 12px; }
+
+  /* ── Pied de garde = word/media/image5.jpg (AR_PTFAbylsenAssets, session 57 §7) : filet + bloc
+     vert + "www.abylsen.com", extrait en session 56 mais jamais câblé jusqu'à cette session —
+     remplace l'ancien encart gris "document confidentiel" (classe .aby-cov-conf, retirée), absent
+     du modèle (A7). ── */
+  /* Session 111 (point 1) : padding pour pleine page (pied courant touches bas de la page). */
+  /* Session 127 : pied d'image bord à bord, ancré en bas de la page de garde. */
+  .aby-cov-footer-wrap { position: absolute; left: 0; bottom: 0; width: 100%; }
+  .aby-cov-footer-img { width: 100%; display: block; }
+
+  /* ── Table unique paginée : en-tête / pied répétés (-fs-table-paginate, cf. AR_PTFStyle.css
+     doctrine — @page ne supporte pas de marges de contenu répété sur cette org). Le
+     -fs-page-sequence ci-dessous est l'expérience de la session 56 §5 (numéro de page),
+     à retirer selon le résultat consigné dans docs/56-socle-charte-abylsen.md. ── */
+  /* -fs-page-sequence:start RETIRÉ (session 58, expérience) : avec lui, le pied affichait un
+     compteur local à cette table (1 sur la 1re page de contenu, la page de garde exclue) alors que
+     target-counter(attr(href), page) dans le sommaire (ci-dessus) résout un compteur GLOBAL de
+     document (page de garde = 1) — écart de 1 constaté en PDF réel entre les deux. À tester sans
+     -fs-page-sequence : si counter(page) rejoint alors le compteur global (page de garde comprise),
+     pied et sommaire s'accordent sans décalage fabriqué. */
+  /* Session 111 (point 1) : padding horizontal et vertical pour marges de lecture en pleine page. */
+  /* Session 127 : table-layout:fixed — aucun contenu ne peut plus élargir la table paginée
+     au-delà de la page (cause du texte coupé à droite sur les pages 2+, cf. sommaire). */
+  .aby-flow-table { -fs-table-paginate: paginate; table-layout: fixed; width: 100%; }
+  .aby-flow-table tbody tr td { padding: 0 18mm; }
+
+  /* En-tête courant = word/media/image2.jpg seul (session 56 §4/§1) : le modèle Word ne
+     superpose AUCUN texte sur cet en-tête (vérifié sur les pages 2 à 13 du PDF modèle) —
+     contrairement à la version précédente de ce gabarit qui affichait client/réf/date ici. */
+  .aby-rh-table td { padding: 0 0 8px 0; }
+  .aby-rh-img { width: 100%; display: block; }
+
+  /* Pied courant = texte seul, AUCUNE image (session 56 §1 — corrige la table de session 56
+     qui supposait un bandeau image identique au pied de garde ; vérifié : le pied répété du
+     modèle Word est un bloc centré, sans aucun graphique). */
+  /* Session 111 (point 1) : padding-bottom pour pied courant qui ne colle pas au bord. */
+  .aby-rf-table td { border-top: 1px solid #C0C0C0; padding: 6px 18mm 18mm 18mm; }
+  .aby-rf-center { text-align: center; }
+  .aby-rf-brand { font-size: 7pt; font-weight: bold; color: #000000; }
+  .aby-rf-conf { font-size: 6.5pt; font-weight: bold; color: #000000; margin-top: 2px; }
+  .aby-rf-ref { font-size: 6.5pt; color: #000000; margin-top: 2px; }
+  .aby-rf-pagenum { text-align: right; font-size: 8pt; color: #000000; margin-top: 2px; }
+  /* Session 58 (0bis) : le modèle imprime un nombre nu, jamais "p.1" — préfixe retiré. */
+  .aby-pagenum-test:before { content: counter(page); }
+
+  /* ── Titres de section (plain noir, sans bandeau — session 56 §2 : "aucune trace de
+     #1a1a1a", le bandeau sombre du gabarit précédent était une couleur House of ABY). ── */
+  .aby-sec-banner { margin: 0 0 10px 0; }
+  .aby-sec-banner h1 { font-size: 14pt; font-weight: bold; text-transform: uppercase;
+    color: #000000; margin: 0; }
+  .aby-sec-ref { font-size: 7.5pt; color: #000000; margin-top: 3px; }
+  .aby-sec-title { font-size: 11pt; font-weight: bold; color: #000000; margin: 14px 0 8px 0; }
+  .aby-sub-title { font-size: 9.5pt; font-weight: bold; color: #000000; margin: 10px 0 6px 0; }
+  .aby-art-num { font-size: 10pt; font-weight: bold; color: #000000; margin: 12px 0 4px 0; }
+  .aby-art-sub { font-size: 9pt; font-weight: bold; color: #000000; margin: 8px 0 4px 0; }
+  /* Session 58b (A32) : 3.2.1/3.2.2/3.2.3 sont en gras ITALIQUE dans le modèle, pas en gras
+     simple comme les autres sous-titres numérotés (10.1, 11.1, 15.x, 18.x...) — classe dédiée
+     posée seulement sur ces trois, .aby-art-sub reste inchangée partout ailleurs. */
+  .aby-art-sub-bi { font-size: 9pt; font-weight: bold; font-style: italic; color: #000000; margin: 8px 0 4px 0; }
+  .aby-p { font-size: 8pt; line-height: 1.42; margin: 0 0 6px 0; text-align: justify; color: #000000; }
+  .aby-bullets { margin: 0 0 6px 18px; padding: 0; }
+  .aby-bullets li { font-size: 8pt; line-height: 1.4; margin-bottom: 3px; color: #000000; }
+  /* Session 59 (articles 10 et 18.2/18.3 de la Section II) : dans le .docx source, ces listes sont
+     de vraies listes Word numérotées dont le glyphe de puce est un tiret (word/numbering.xml, numId
+     7 et 11, lvlText "-") — le tiret n'existe donc PAS dans le texte du <w:t> lui-même, à la
+     différence des articles 1/5/7/15.4 où le tiret fait partie du texte littéral. Le reproduire ici
+     en texte littéral aurait fait diverger scripts/check-ptf-cg-articles-vs-docx.js du .docx source
+     sans raison — ce ::before restitue le même rendu visuel sans ajouter de caractère au texte
+     source. */
+  .aby-dash::before { content: "- "; }
+  .aby-toc-h1 { font-weight: bold; font-size: 9pt; padding: 5px 0 2px 0; color: #000000; }
+  .aby-toc-h2 { font-size: 8pt; padding: 1px 0 1px 16px; color: #000000; }
+
+  /* ── Sommaire à numéros de page (session 58, A8) : trois colonnes (libellé / points de conduite /
+     numéro), le numéro résolu par target-counter(attr(href), page) sur un lien vide pointant l'id du
+     titre visé. Mécanisme JAMAIS testé avant cette session (docs/56-socle-charte-abylsen.md §5 : la
+     seule expérience faite porte sur le compteur COURANT dans un pied répété, pas sur un renvoi
+     depuis une AUTRE page) — CSS Generated Content for Paged Media niveau 3, support très rarement
+     implémenté hors Prince/WeasyPrint. Si le moteur PDF de cette org l'ignore, la cellule reste
+     vide (aucune exception, content: '' par défaut) : jamais un numéro deviné à la place. Les points
+     de conduite sont un long ruban de points, tronqué à la largeur de la cellule par overflow:hidden
+     — pas de vrais points "au pas" (pas de flexbox/JS disponible ici), mais visuellement équivalent. */
+  /* Session 58b (finition §7) : table-layout:fixed + largeurs en % (session 58) détachaient les
+     points de conduite du texte sur toute ligne plus courte que 74% — visible au premier coup
+     d'œil sur la page la plus regardée du document. Le sommaire A30 passe désormais à 18 lignes
+     d'un seul article chacune (jamais plus le grief "12 — ... · 13 — ..." qui avait motivé le
+     figeage des largeurs) : retour à un dimensionnement au contenu (chaque ligne est sa PROPRE
+     <table>, donc chacune se dimensionne indépendamment). lbl/pg en "width:1%" (technique standard
+     de dimensionnement "au contenu" dans un tableau HTML — force le moteur à ne leur allouer que
+     leur largeur intrinsèque) ; dots récupère tout l'espace restant, ruban continu du texte au
+     numéro, tronqué par overflow:hidden si jamais une ligne future dépassait. */
+  /* Session 127 : libellé + points dans la même cellule (div.clip, nowrap, overflow:hidden),
+     table-layout:fixed, numéro dans une colonne fixe de 7 mm. Le ruban en cellule séparée
+     (sessions 58/58b) fixait la largeur minimale de la table à ~200 mm et débordait la page. */
+  .aby-toc-row { width: 100%; table-layout: fixed; border-collapse: collapse; }
+  .aby-toc-row td { padding: 0; border: none; }
+  .aby-toc-row td.lbl .clip { overflow: hidden; white-space: nowrap; }
+  .aby-toc-row .dots { letter-spacing: 2px; }
+  .aby-toc-row td.pg { width: 7mm; text-align: right; white-space: nowrap; }
+  .aby-toc-row td.pg a { text-decoration: none; color: #000000; }
+  .aby-toc-row td.pg a:after { content: target-counter(attr(href), page); }
+  .aby-toc-h1-row .lbl, .aby-toc-h1-row .pg a { font-weight: bold; font-size: 9pt; }
+  .aby-toc-h1-row td { padding: 5px 0 2px 0; }
+  .aby-toc-h2-row .lbl, .aby-toc-h2-row .pg a { font-size: 8pt; }
+  .aby-toc-h2-row td { padding: 1px 0; }
+  .aby-toc-h2-row td.lbl { padding-left: 16px; }
+  /* .aby-kv (tableau clé/valeur) retirée (session 58b, A32) : ses trois derniers usages
+     (3.2.2/3.2.3/3.3) sont passés en texte courant, comme 3.2.1 depuis la session 58 — plus
+     aucun tableau clé/valeur de ce type dans le gabarit Abylsen ni l'avenant. */
+
+  /* Session 58b (A34) : bordures pleines sur TOUTES les cellules (modèle), pas seulement des
+     filets horizontaux — border-collapse pour éviter les doubles traits entre cellules adjacentes.
+     Les "cinq lignes dont deux vides à € HT" du modèle sont un artefact de gabarit vierge, jamais
+     reproduites (règle du projet : une valeur absente n'imprime rien, cf. docs/58b). */
+  .aby-sch { border-collapse: collapse; }
+  .aby-sch th { background-color: #FFFFFF; color: #000000; padding: 5px 10px; text-align: left;
+    font-size: 7.5pt; font-weight: bold; border: 1px solid #C0C0C0; }
+  .aby-sch th.r, .aby-sch td.r { text-align: right; }
+  .aby-sch td { border: 1px solid #C0C0C0; padding: 4px 10px; font-size: 8.5pt; color: #000000; }
+  .aby-sch .tot td { background-color: #EFF5DF; color: #000000; font-weight: bold; padding: 6px 10px; }
+
+  .aby-note { font-size: 7.5pt; color: #000000; font-style: italic; margin-top: 4px; }
+  .aby-lbl { font-size: 7pt; font-weight: bold; text-transform: uppercase; color: #000000; }
+  /* Session 58b (A33) : découverte en contrôle PDF réel (image par image, PyMuPDF) — un
+     font-weight:bold posé en style INLINE sur un <p>/<apex:outputText>, ou un <strong> enveloppant
+     de l'<apex:outputText>, ne s'imprime PAS en gras sur le moteur PDF de cette org (comparaison
+     visuelle directe, stricte égalité de graisse avec le texte non gras adjacent — RIB de 4.5,
+     "Trimestrielle"/"Suivi de projet" de 3.2.3, "Client :" de la page de garde, tous invisibles à
+     ce défaut en lecture de code, tous déjà "gras" dans le HTML source avant cette découverte).
+     Le gras posé via une CLASSE de la feuille de style externe (.aby-lbl, .aby-art-num,
+     .aby-sig-box-lbl, h1) s'imprime correctement, lui — vérifié sur les mêmes PDF. Classe dédiée
+     ci-dessous : à utiliser pour tout texte devant apparaître gras dans ces gabarits, jamais
+     "style=font-weight:bold" ni "<strong>" seul. Reste à généraliser à "Client :" (page de garde,
+     hors périmètre de cette session) et à tout usage futur de <strong> dans ce fichier. */
+  .aby-bold { font-weight: bold; }
+
+  .aby-sig-table { margin-top: 16px; }
+  .aby-sig-hd { padding: 6px 0; font-size: 9pt; font-weight: bold; color: #000000; }
+  .aby-sig-box { padding: 12px 14px 12px 0; }
+  .aby-sig-box-lbl { font-size: 9pt; font-weight: bold; color: #000000; margin-bottom: 8px; }
+  .aby-sig-line { font-size: 8.5pt; color: #000000; margin-bottom: 6px; }
+  .aby-sig-area { border: 1px dashed #C0C0C0; height: 40px; text-align: center; font-size: 7.5pt;
+    color: #888888; font-style: italic; padding-top: 14px; margin: 6px 0; }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Validated_Matrix_Sync_Enabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Interrupteur de synchronisation entre les matrices de prix et la liste des matrices validées. Désactivé par défaut.</description>
+    <label>Synchronisation des matrices validées</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

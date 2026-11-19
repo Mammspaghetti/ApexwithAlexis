@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TP_My_Team__c</fullName>
+    <formula>OR(
+$User.Id = TP_User__r.TP_DD__c,
+$User.Id = TP_User__r.TP_DA__c,
+$User.Id = TP_User__r.TP_RA__c,
+$User.Id = TP_User__r.TP_MC__c,
+$User.Id = TP_User__r.TP_Directeur_Recrutement_Consultant__c,
+$User.Id = TP_User__r.TP_HTA__c,
+$User.Id = TP_User__r.TP_TAM__c,
+$User.Id = TP_User__r.AB_TAS__c,
+$User.Id = TP_User__r.TP_Directeur__c,
+$User.Id = TP_User__r.TP_Directeur_commercial__c,
+$User.Id = TP_User__r.TP_Directeur_commercial_groupe__c,
+$User.Id = TP_User__r.TP_Directeur_d_agence__c,
+$User.Id = TP_User__r.AB_Acc_s_autre__c,
+$User.Id = OwnerId
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>My Team</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

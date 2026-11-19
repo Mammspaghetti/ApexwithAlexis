@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Draft_Purge_Enabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Interrupteur général de la purge automatique des brouillons. Désactivé par défaut.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Purge des brouillons activée</label>
+    <type>Checkbox</type>
+</CustomField>

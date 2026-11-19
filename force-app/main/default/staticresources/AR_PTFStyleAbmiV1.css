@@ -1,0 +1,168 @@
+/* AR_PTFStyleAbmiV1 — session 130 : gabarit ABMI_DQ012 (AR_PTFTemplateAbmi.page), feuille GÉNÉRÉE par
+   scripts/ptf/abmi-dq012/build.py. Mesures relevées sur le PDF Word du modèle (points).
+   Polices : le moteur PDF n'a qu'Helvetica ; chaque police Word (Calibri Light, Century Gothic,
+   Arial Narrow…) est rendue en Helvetica à une taille de CHASSE ÉQUIVALENTE (Calibri Light 11 pt ->
+   Helvetica 9,9 pt), avec la hauteur de ligne de la police Word : mêmes longueurs de ligne, mêmes
+   positions verticales que le modèle. Le générique garde AR_PTFStyle.css. */
+@page {
+  size: 595.3pt 841.9pt;
+  margin: 83.2pt 15pt 36pt 20pt;
+  @top-left { content: element(abmiHeader); vertical-align: top; }
+  @bottom-left { content: element(abmiFooter); vertical-align: top; }
+}
+@page :first {
+  margin-bottom: 48.7pt;
+  @top-left { content: element(abmiHeaderFirst); vertical-align: top; }
+  @bottom-left { content: element(abmiFooterFirst); vertical-align: top; }
+}
+body { font-family: sans-serif; color: #000000; margin: 0; }
+.abmi-content { width: 517.4pt; margin-left: 22.55pt; }
+.w-p { margin: 0; }
+.w-numbox { display: inline-block; text-indent: 0; }
+.w-tab { display: inline-block; }
+.w-cbx { display: inline-block; width: 6.2pt; height: 6.2pt; border: 0.6pt solid #000000; margin: 0 1.5pt 0 0.6pt; }
+.w-ln { display: block; overflow: hidden; text-indent: 0; page-break-inside: avoid; }
+.w-ln-last { text-align: left; }
+.w-fill { display: inline-block; width: 100%; height: 0; }
+.w-pb { page-break-after: always; height: 0; }
+.w-pre { white-space: pre-line; }
+.w-b { font-weight: bold; }
+.w-u { text-decoration: underline; }
+table.w-tbl { border-collapse: collapse; table-layout: fixed; }
+
+/* En-tête pages 2+ : logo (42,5 ; 17,6 pt, 86,7 × 56,6 pt) + « Offre : réf. » calé à droite. */
+.abmi-h, .abmi-h1 { position: running(abmiHeader); width: 575.3pt; height: 83.2pt; }
+.abmi-h1 { position: running(abmiHeaderFirst); }
+.abmi-logo { position: absolute; left: 22.5pt; top: 17.6pt; width: 86.7pt; height: 56.6pt; }
+.abmi-logo-first { top: 19.1pt; }
+.abmi-h-ref { position: absolute; right: 37.4pt; top: 31.2pt; font-size: 9.9pt; line-height: 13.43pt; text-align: right; }
+.abmi-h-lbl { font-size: 9.9pt; }
+/* Pied pages 2+ : lien Century Gothic 10 pt (#0462C1 souligné) à 45,4 pt, numéro Century Gothic 8 pt. */
+.abmi-f { position: running(abmiFooter); width: 575.3pt; height: 36pt; }
+.abmi-f-web { position: absolute; left: 25.4pt; top: 4.1pt; font-size: 10.7pt; color: #0462C1; text-decoration: underline; }
+.abmi-f-num { position: absolute; left: 528.6pt; top: 5.7pt; font-size: 8.56pt; }
+.abmi-f-num:before { content: counter(page); }
+/* Pied page 1 : mentions légales, Arial Narrow 8 pt (-> Helvetica 6,56 pt), alignées à droite. */
+.abmi-f1 { position: running(abmiFooterFirst); width: 535.45pt; text-align: right; padding-top: 0; font-size: 6.56pt; line-height: 9.2pt; }
+
+.abmi-preview { position: absolute; top: 0; left: -20pt; width: 595.3pt; background-color: #000000; color: #FFFFFF;
+  text-align: center; font-weight: bold; font-size: 9pt; padding: 3pt 0; }
+
+/* Sommaire (TM1 / TM2) : numéro | libellé + points | page (target-counter). */
+table.abmi-toc { width: 517.4pt; table-layout: fixed; border-collapse: collapse; }
+table.abmi-toc td { padding: 0; white-space: nowrap; overflow: hidden; }
+table.abmi-toc td.pg { text-align: right; font-weight: normal; }
+table.abmi-toc td.pg a { color: #000000; text-decoration: none; }
+table.abmi-toc td.pg a:after { content: target-counter(attr(href), page); }
+table.abyToc1 { margin-top: 3pt; margin-bottom: 3pt; }
+table.abyToc1 td { font-size: 9.9pt; line-height: 13.43pt; font-weight: bold; }
+table.abyToc1 col.n { width: 24.1pt; }
+table.abyToc2 { margin-bottom: 3pt; }
+table.abyToc2 td { font-size: 9.9pt; line-height: 13.43pt; }
+table.abyToc2 col.n { width: 40pt; }
+table.abyToc2 td.n { padding-left: 9.9pt; }
+table.abmi-toc col.pg { width: 14pt; }
+table.abmi-toc .dots { letter-spacing: 0.5pt; }
+
+/* Organigramme 3.4 */
+.abmi-orga { position: relative; width: 447pt; height: 380pt; }
+.abmi-orga .o-client { position: absolute; left: 35.45pt; top: 10pt; font-size: 9pt; line-height: 12.2pt; }
+.abmi-orga .o-img { position: absolute; left: 2.45pt; top: 65pt; width: 447pt; height: 315pt; }
+.abmi-orga .o-txt { position: absolute; color: #FFFFFF; text-align: center; font-size: 7.5pt; line-height: 9pt; font-weight: bold; }
+table.abmiToc5 td.n, table.abmiToc5 td.lbl { color: #383154; }
+table.abmiToc5 .dots { color: #000000; }
+table.abmiToc5w col.n { width: 50.1pt; }
+
+/* ── classes générées (une par combinaison de styles Word) ── */
+.c0 { line-height:12.21pt; font-size:9.0pt; text-align:justify; height:12.21pt; }
+.c1 { line-height:13.43pt; font-size:9.9pt; margin-left:248.1pt; text-align:left; height:13.43pt; }
+.c2 { font-size:9.9pt; }
+.c3 { line-height:13.43pt; font-size:9.9pt; margin-left:276.45pt; text-align:left; }
+.c4 { line-height:13.43pt; font-size:9.9pt; margin-left:276.45pt; text-align:left; height:13.43pt; }
+.c5 { line-height:13.43pt; font-size:9.9pt; text-align:left; height:13.43pt; }
+.c6 { font-size:12.6pt; color:#FFFFFF; }
+.c7 { line-height:17.09pt; font-size:12.6pt; text-align:left; background-color:#383154; border-top:0.5pt solid #000000; border-left:0.5pt solid #000000; padding-left:4.0pt; margin-left:-4.5pt; border-bottom:0.5pt solid #000000; border-right:0.5pt solid #000000; padding-right:4.0pt; margin-right:-4.5pt; padding-top:1.0pt; padding-bottom:1.0pt; }
+.c8 { line-height:13.43pt; font-size:9.9pt; text-align:justify; height:13.43pt; }
+.c9 { font-size:9.9pt; text-decoration:underline; }
+.c10 { line-height:13.43pt; font-size:9.9pt; text-align:left; }
+.c11 { line-height:13.43pt; font-size:9.9pt; margin-left:42.55pt; text-indent:-42.55pt; text-align:left; height:13.43pt; }
+.c12 { line-height:13.43pt; font-size:9.9pt; text-align:justify; }
+.c13 { line-height:13.43pt; font-size:9.9pt; text-align:center; }
+.c14 { line-height:15.44pt; font-size:9.9pt; padding-bottom:10.0pt; text-align:left; height:15.44pt; }
+.c15 { line-height:15.44pt; font-size:9.9pt; padding-bottom:10.0pt; text-align:center; }
+.c16 { line-height:42.72pt; font-size:31.5pt; text-align:justify; height:42.72pt; }
+.c17 { line-height:29.3pt; font-size:21.6pt; text-align:justify; height:29.3pt; }
+.c18 { line-height:17.09pt; font-size:12.6pt; text-align:justify; height:17.09pt; }
+.c19 { font-size:31.5pt; color:#EF546B; }
+.c20 { line-height:42.72pt; font-size:31.5pt; margin-left:-28.35pt; text-align:center; }
+.c21 { line-height:17.09pt; font-size:12.6pt; margin-left:-28.35pt; text-align:center; height:17.09pt; }
+.c22 { font-size:12.6pt; color:#383154; }
+.c23 { line-height:17.09pt; font-size:12.6pt; text-align:center; }
+.c24 { line-height:34.18pt; font-size:25.2pt; text-align:justify; height:34.18pt; }
+.c25 { line-height:14.49pt; font-size:9.9pt; padding-bottom:8.0pt; text-align:left; height:14.49pt; }
+.c26 { line-height:17.09pt; font-size:12.6pt; text-align:left; background-color:#383154; }
+.c27 { line-height:17.09pt; font-size:12.6pt; text-align:left; }
+.c28 { font-size:9.9pt; color:#FFFFFF; }
+.c29 { line-height:13.43pt; font-size:9.9pt; text-align:center; height:13.43pt; }
+.c30 { line-height:14.65pt; font-size:10.8pt; margin-left:141.8pt; text-indent:35.45pt; text-align:left; height:14.65pt; }
+.c31 { line-height:13.17pt; font-size:9.0pt; padding-bottom:8.0pt; text-align:left; height:13.17pt; }
+.c32 { line-height:17.09pt; font-size:12.6pt; text-align:center; background-color:#383154; }
+.c33 { line-height:14.65pt; font-size:10.8pt; text-align:justify; height:14.65pt; }
+.c34 { line-height:17.09pt; font-size:12.6pt; text-align:justify; background-color:#383154; padding-left:35.45pt; margin-top:6.0pt; }
+.c35 { font-size:9.9pt; color:#383154; }
+.c36 { line-height:13.43pt; font-size:9.9pt; padding-top:12.0pt; padding-bottom:12.0pt; margin-left:21.25pt; text-indent:-21.25pt; text-align:justify; }
+.c37 { font-size:9.9pt; color:#EF546B; }
+.c38 { line-height:13.43pt; font-size:9.9pt; margin-left:54.0pt; text-align:justify; }
+.c39 { font-size:9.74pt; }
+.c40 { font-size:9.79pt; }
+.c41 { line-height:13.43pt; font-size:9.9pt; margin-left:53.4pt; text-align:justify; }
+.c42 { line-height:13.43pt; font-size:9.9pt; padding-bottom:12.0pt; margin-left:21.25pt; text-indent:-21.25pt; text-align:justify; }
+.c43 { font-size:9.72pt; }
+.c44 { font-size:9.8pt; }
+.c45 { font-size:9.9pt; font-style:italic; }
+.c46 { line-height:17.09pt; font-size:12.6pt; text-align:justify; background-color:#383154; padding-left:35.45pt; }
+.c47 { line-height:13.43pt; font-size:9.9pt; padding-top:0.58pt; margin-left:54.0pt; text-indent:-18.0pt; text-align:justify; }
+.c48 { line-height:12.21pt; font-size:9.0pt; text-align:left; height:12.21pt; }
+.c49 { line-height:13.43pt; font-size:9.9pt; padding-top:6.0pt; padding-bottom:6.0pt; text-align:center; }
+.c50 { line-height:13.43pt; font-size:9.9pt; padding-top:18.0pt; text-align:justify; height:13.43pt; }
+.c51 { font-size:9.77pt; }
+.c52 { line-height:13.43pt; font-size:9.9pt; padding-top:6.0pt; text-align:justify; }
+.c53 { font-size:9.0pt; }
+.c54 { line-height:12.21pt; font-size:9.0pt; text-align:justify; }
+.c55 { line-height:13.43pt; font-size:9.9pt; padding-bottom:12.0pt; margin-left:36.85pt; text-align:justify; }
+.c56 { font-size:9.86pt; }
+.c57 { line-height:13.43pt; font-size:9.9pt; padding-top:12.0pt; padding-bottom:12.0pt; margin-left:36.85pt; text-align:justify; }
+.c58 { font-size:9.84pt; }
+.c59 { font-size:9.82pt; }
+.c60 { line-height:13.43pt; font-size:9.9pt; margin-left:71.25pt; text-align:left; }
+.c61 { font-size:11.0pt; }
+.c62 { line-height:14.63pt; font-size:9.9pt; text-align:justify; }
+.c63 { line-height:14.63pt; font-size:11.0pt; text-align:justify; }
+.c64 { line-height:12.21pt; font-size:9.0pt; padding-top:3.0pt; padding-bottom:3.0pt; text-align:center; }
+.c65 { line-height:12.21pt; font-size:9.0pt; padding-top:2.0pt; padding-bottom:2.0pt; text-align:center; }
+.c66 { line-height:12.21pt; font-size:9.0pt; padding-top:2.0pt; padding-bottom:2.0pt; text-align:justify; }
+.c67 { line-height:12.21pt; font-size:9.0pt; padding-bottom:2.0pt; text-align:justify; }
+.c68 { line-height:12.21pt; font-size:9.0pt; padding-top:2.0pt; padding-bottom:2.0pt; text-align:left; }
+.c69 { font-size:8.53pt; }
+.c70 { font-size:8.64pt; }
+.c71 { font-size:9.88pt; }
+.c72 { line-height:13.43pt; font-size:9.9pt; text-align:center; background-color:#EF546B; border-top:0.5pt solid #000000; border-left:0.5pt solid #000000; padding-left:4.0pt; margin-left:-4.5pt; border-bottom:0.5pt solid #000000; border-right:0.5pt solid #000000; padding-right:4.0pt; margin-right:-4.5pt; padding-top:0.0pt; padding-bottom:2.0pt; }
+.c73 { font-size:9.71pt; }
+.c74 { line-height:13.43pt; font-size:9.9pt; padding-top:12.0pt; padding-bottom:12.0pt; margin-left:21.25pt; text-align:justify; }
+.c75 { line-height:17.09pt; font-size:12.6pt; text-indent:-34.0pt; text-align:justify; background-color:#383154; padding-left:35.45pt; }
+.c76 { font-size:7.2pt; color:#383154; }
+.c77 { line-height:9.77pt; font-size:7.2pt; margin-left:49.9pt; text-indent:-36.85pt; text-align:justify; }
+.c78 { line-height:7.32pt; font-size:5.4pt; text-align:justify; height:7.32pt; }
+.c79 { font-size:7.2pt; }
+.c80 { line-height:9.77pt; font-size:7.2pt; text-align:justify; }
+.c81 { line-height:9.77pt; font-size:7.2pt; text-align:justify; height:9.77pt; }
+.c82 { line-height:9.77pt; font-size:7.2pt; margin-left:49.9pt; text-align:justify; }
+.c83 { font-size:7.1pt; }
+.c84 { font-size:7.16pt; }
+.c85 { font-size:7.2pt; color:#EF546B; }
+.c86 { line-height:9.77pt; font-size:7.2pt; padding-top:0.42pt; margin-left:22.85pt; text-indent:-18.0pt; text-align:justify; }
+.c87 { line-height:9.77pt; font-size:7.2pt; text-align:left; }
+.c88 { line-height:9.77pt; font-size:7.2pt; text-align:center; }
+.c89 { font-size:7.2pt; color:#0563C1; text-decoration:underline; }
+.c90 { line-height:9.77pt; font-size:7.2pt; text-align:left; height:9.77pt; }
+.c91 { line-height:4.88pt; font-size:3.6pt; text-align:justify; height:4.88pt; }

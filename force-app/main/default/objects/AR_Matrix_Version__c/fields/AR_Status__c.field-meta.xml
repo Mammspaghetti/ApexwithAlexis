@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Status__c</fullName>
+    <description>Statut de la matrice au moment du snapshot.</description>
+    <label>Statut</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Brouillon</fullName>
+                <default>false</default>
+                <label>Brouillon</label>
+            </value>
+            <value>
+                <fullName>Validée</fullName>
+                <default>false</default>
+                <label>Validée</label>
+            </value>
+            <value>
+                <fullName>En dérogation</fullName>
+                <default>false</default>
+                <label>En dérogation</label>
+            </value>
+            <value>
+                <fullName>Validée par dérogation</fullName>
+                <default>false</default>
+                <label>Validée par dérogation</label>
+            </value>
+            <value>
+                <fullName>Refusée</fullName>
+                <default>false</default>
+                <label>Refusée</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Contract_Coefficient_Applied__c</fullName>
+    <description>Coefficient CDI/CDD utilisé pour calculer le coût journalier total. La valeur est conservée au calcul et reste inchangée après la décision de la matrice. Sans objet pour les statuts Indépendant, VIE et Nearshore.</description>
+    <externalId>false</externalId>
+    <label>Coefficient contrat appliqué</label>
+    <precision>7</precision>
+    <required>false</required>
+    <scale>4</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,33 @@
+<template>
+  <div class="picker">
+    <select
+      class="picker-select"
+      aria-label={i18n.AR_PTF_ModificationType}
+      onchange={handleTypeChange}
+    >
+      <template for:each={selectOptions} for:item="opt">
+        <option key={opt.value} value={opt.value} selected={opt.selected}>
+          {opt.label}
+        </option>
+      </template>
+    </select>
+    <template if:true={isOther}>
+      <input
+        class="picker-detail"
+        type="text"
+        placeholder={i18n.AR_PTF_ModificationDetailPlaceholder}
+        aria-label={i18n.AR_PTF_ModificationDetail}
+        maxlength={detailMaxLength}
+        value={_detail}
+        oninput={handleDetailInput}
+        onkeydown={handleDetailKeydown}
+      />
+      <template if:true={showCounter}>
+        <span class="picker-counter">{counterLabel}</span>
+      </template>
+    </template>
+    <template if:true={loadError}>
+      <p class="picker-error" role="alert">{loadError}</p>
+    </template>
+  </div>
+</template>

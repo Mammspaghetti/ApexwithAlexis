@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Unique_Key__c</fullName>
+    <caseSensitive>true</caseSensitive>
+    <description>Identifiant « entité:utilisateur » posé par le service : interdit d&apos;ajouter deux fois le même utilisateur sur une même entité.</description>
+    <externalId>false</externalId>
+    <label>Clé unique</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

@@ -1,0 +1,61 @@
+<template>
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:false={isLoading}>
+    <template if:false={hasAnyAccess}>
+      <div class="admin-denied">
+        <lightning-icon icon-name="utility:lock" size="medium"></lightning-icon>
+        <p>{i18n.AR_ADM_AccessDenied}</p>
+      </div>
+    </template>
+
+    <template if:true={hasAnyAccess}>
+      <div class="admin-tabs" role="tablist">
+        <template for:each={tabItems} for:item="tab">
+          <button
+            key={tab.key}
+            class={tab.cssClass}
+            data-tab={tab.key}
+            onclick={handleTabClick}
+            type="button"
+            role="tab"
+          >
+            {tab.label}
+          </button>
+        </template>
+      </div>
+
+      <div class="admin-tab-content">
+        <template if:true={isGeneral}>
+          <c-ar-admin-general-settings></c-ar-admin-general-settings>
+        </template>
+        <template if:true={isCorridors}>
+          <c-ar-admin-corridors></c-ar-admin-corridors>
+        </template>
+        <template if:true={isPtfEntities}>
+          <c-ar-admin-ptf-entities></c-ar-admin-ptf-entities>
+        </template>
+        <template if:true={isCurrency}>
+          <c-ar-admin-currency-rates></c-ar-admin-currency-rates>
+        </template>
+        <template if:true={isCommercial}>
+          <c-ar-admin-account-commercial></c-ar-admin-account-commercial>
+        </template>
+        <template if:true={isVie}>
+          <c-ar-admin-vie-referential></c-ar-admin-vie-referential>
+        </template>
+        <template if:true={isNearshore}>
+          <c-ar-admin-nearshore-referential></c-ar-admin-nearshore-referential>
+        </template>
+        <template if:true={isReasons}>
+          <c-ar-admin-reasons></c-ar-admin-reasons>
+        </template>
+      </div>
+    </template>
+  </template>
+</template>

@@ -1,0 +1,27 @@
+<aura:component >
+
+    <aura:attribute name="defaultDuration" type="Integer" default="5000" description="Toast duration in milliseconds. The default is 5000ms"/>
+
+    <aura:attribute name="_toasts" type="Object[]" default="[]" access="private"/>
+
+	<aura:handler event="c:EVT_ShowToast" action="{!c.handleShowToast}"/>
+
+
+    <div class="slds-notify_container slds-is-fixed">
+        <aura:iteration items="{!v._toasts}" var="toast"  >
+            
+            <div class="slds-size_1-of-1">
+                <div class="{!'slds-notify slds-notify_toast slds-theme_' + toast.type}" >
+                    
+                    <lightning:icon iconName="{!'utility:' + toast.type}" variant="inverse" size="small" class="slds-m-right_small"/>
+                    
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">{!toast.title ? toast.title : toast.message}</h2>
+                        <p class="{!and(toast.title, toast.message) ? '' : 'slds-hide'}">{!toast.message}</p>
+                    </div>
+                    
+                </div>
+            </div>
+        </aura:iteration>
+    </div>
+</aura:component>

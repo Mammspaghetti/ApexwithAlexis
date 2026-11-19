@@ -1,0 +1,41 @@
+<template>
+  <div class="sales-arguments-panel">
+    <button
+      type="button"
+      class="sales-arguments-toggle"
+      onclick={handleToggle}
+      aria-expanded={isOpen}
+    >
+      <lightning-icon
+        icon-name={toggleIcon}
+        size="xx-small"
+        class="sales-arguments-chevron"
+      ></lightning-icon>
+      <span class="sales-arguments-title">{i18n.AR_SAP_Title}</span>
+      <template if:true={hasArguments}>
+        <span class="sales-arguments-count">{argumentCountLabel}</span>
+      </template>
+    </button>
+    <template if:true={isOpen}>
+      <div class="sales-arguments-body">
+        <template if:true={hasArguments}>
+          <ul class="sales-arguments-list">
+            <template for:each={arguments} for:item="arg">
+              <li key={arg.key} class="sales-arguments-item">{arg.text}</li>
+            </template>
+          </ul>
+        </template>
+        <template if:true={hasNotes}>
+          <ul class="sales-arguments-notes">
+            <template for:each={notesForDisplay} for:item="note">
+              <li key={note.key} class="sales-arguments-note">{note.text}</li>
+            </template>
+          </ul>
+        </template>
+        <template if:true={showEmptyState}>
+          <p class="sales-arguments-empty">{i18n.AR_SAP_NotEnoughData}</p>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

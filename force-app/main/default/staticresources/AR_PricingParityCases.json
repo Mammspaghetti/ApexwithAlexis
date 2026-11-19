@@ -1,0 +1,2772 @@
+{
+  "_comment": "Jeu de cas de référence unique (session 27, prompts/session-27-filet-de-tests.md §1) — rejoué à l'identique par AR_PricingParityTest.cls (Apex) et arPricingEngine.parity.test.js (Jest), lu depuis CE fichier par les deux suites, jamais dupliqué. Chaque `expected` a été calculé à la main depuis les formules de CLAUDE.md, documenté dans `notes`, JAMAIS généré par AR_PricingCalculator ni arPricingEngine — voir docs/27-filet-de-tests.md pour la méthode de vérification (script de recoupement one-shot, pas la source de vérité). `contractCoefficientApplied` ajouté en session 28 (CDD + coefficient administrable, prompts/session-28-ecarts-contractuels.md §1) sur les 14 cas. `workingDaysPerYearApplied` ajouté en session 48 (cascade jours travaillés par entité, prompts/session-48-coefficient-et-jours-par-entite.md) sur les 14 cas — égal à context.workingDaysPerYear si fourni, sinon 218 (JOURS_TRAVAIL_DEFAULT), jamais null. Cas « Fréquences » : chaque frais ramené au jour dans son unité de saisie (PC/jour, téléphone/mois, formation/EPI/autre/mission, OFII/an) ; `expected.feeBreakdown` (clé, montant saisi, unité, diviseur, source du diviseur, valeur/jour) est comparé par les deux suites quand il est présent.",
+  "cases": [
+    {
+      "name": "CDI baseline, sans frais, sans RFA",
+      "notes": "cjm = round(45000*1.01*2/218) = round(45000*2.02/218) = round(90900/218) = round(417.0917...) = 417. total=417 (aucun frais). floor=ceil(417/0.80)=ceil(521.25)=522. target=ceil(417/0.75)=ceil(556)=556. ideal=ceil(417/0.70)=ceil(595.714...)=596. top10FromIdeal=ceil(596*1.1)=ceil(655.6)=656 (>0 comparables donc retenu). mc2Jour=700-417=283 -> mc2PerDay=283.0. mc2%=283/700*100=40.42857...->HALF_UP 2dp=40.43. segment: 40.43>=30 -> superstar. contractCoefficientApplied=2.02 (défaut moteur, non fourni dans le context).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 417,
+        "tjmFloor": 522,
+        "tjmTarget": 556,
+        "tjmIdeal": 596,
+        "tjmTop10": 656,
+        "mc2PerDay": 283.0,
+        "mc2PercentHuman": 40.43,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 283.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "INDEP, markup sous le plafond, pas d'écart",
+      "notes": "cjm = 300 + 54 = 354 (markupApplied=54 saisi = markupCalcule). markupCalcule = MIN(300*18%, 60) = MIN(54, 60) = 54.00 -> pas de plafond, mismatch=false (54==54). total=354. floor=ceil(354/0.8)=ceil(442.5)=443. target=ceil(354/0.75)=ceil(472)=472. ideal=ceil(354/0.7)=ceil(505.714...)=506. top10FromIdeal=ceil(506*1.1)=ceil(556.6)=557. mc2Jour=500-354=146 -> mc2PerDay=146.0. mc2%=146/500*100=29.2 exact ->29.20. segment: 25<=29.20<30 -> recommended. contractCoefficientApplied=null (INDEP, coefficient sans objet).",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 300,
+        "markupApplied": 54
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 500,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 354,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 354,
+        "tjmFloor": 443,
+        "tjmTarget": 472,
+        "tjmIdeal": 506,
+        "tjmTop10": 557,
+        "mc2PerDay": 146.0,
+        "mc2PercentHuman": 29.2,
+        "corridorSegment": "recommended",
+        "markupCalcule": 54.0,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 354.0,
+        "mc2PerDayEurEquivalent": 146.0,
+        "tjmEurEquivalent": 500.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "INDEP, markup plafonné à 60, écart déclaré",
+      "notes": "raw markup = 400*18% = 72 > plafond 60 -> markupCalcule=60.00. markupApplied=65 saisi != 60 -> mismatch=true. cjm=400+65=465. total=465. floor=ceil(465/0.8)=ceil(581.25)=582. target=ceil(465/0.75)=ceil(620)=620. ideal=ceil(465/0.7)=ceil(664.2857...)=665. top10FromIdeal=ceil(665*1.1)=ceil(731.5)=732. mc2Jour=600-465=135->135.0. mc2%=135/600*100=22.5->22.50. segment: 20<=22.5<25 -> low_margin. contractCoefficientApplied=null (INDEP).",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 400,
+        "markupApplied": 65
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 465,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 465,
+        "tjmFloor": 582,
+        "tjmTarget": 620,
+        "tjmIdeal": 665,
+        "tjmTop10": 732,
+        "mc2PerDay": 135.0,
+        "mc2PercentHuman": 22.5,
+        "corridorSegment": "low_margin",
+        "markupCalcule": 60.0,
+        "markupMismatch": true,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 465.0,
+        "mc2PerDayEurEquivalent": 135.0,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "VIE, devise étrangère avec taux, RFA non nulle",
+      "notes": "cjm=180 (indemnité VIE, devise propre GBP). feeOM=10+15+5=30. feePonctuels=0 (gratuityDays=0). total=180+30+0=210. RFA=10%: floor=ceil(210/(1-0.10-0.20))=ceil(210/0.70)=ceil(300)=300. target=ceil(210/0.65)=ceil(323.0769...)=324. ideal=ceil(210/0.60)=ceil(350)=350. top10FromIdeal=ceil(350*1.1)=385. mc2Jour=400*0.90-210=360-210=150->150.0. mc2%=150/400*100=37.5->37.50. segment: >=30 -> superstar. Équivalents EUR (taux 1.17, 1 GBP = 1.17 EUR) : total*1.17=245.70, mc2*1.17=175.50, tjm*1.17=468.00. contractCoefficientApplied=null (VIE).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 180,
+        "feeIk": 10,
+        "feeMeals": 15,
+        "feeLodging": 5
+      },
+      "rfaPercent": 10,
+      "proposedTjm": 400,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1.17,
+      "expected": {
+        "cjm": 180,
+        "feeOmPerDay": 30,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 210,
+        "tjmFloor": 300,
+        "tjmTarget": 324,
+        "tjmIdeal": 350,
+        "tjmTop10": 385,
+        "mc2PerDay": 150.0,
+        "mc2PercentHuman": 37.5,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.17,
+        "totalDailyCostEurEquivalent": 245.7,
+        "mc2PerDayEurEquivalent": 175.5,
+        "tjmEurEquivalent": 468.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "NEARSHORE, jours travaillés surchargés (200), MC2 exactement à la borne cible 25,00 %",
+      "notes": "cjm=300 (CJM nearshore, devise propre). feeOmPerDay=10 REPORTÉ mais NON appliqué au total pour NEARSHORE (formule CLAUDE.md : INDEP/NEARSHORE = CJM + gratuité*CJM/jours, pas de frais OM/ponctuels dans le total). gratuityDays=0 -> total=cjm=300. floor=ceil(300/0.8)=375. target=ceil(300/0.75)=400. ideal=ceil(300/0.7)=ceil(428.571...)=429. top10FromIdeal=ceil(429*1.1)=ceil(471.9)=472. TJM choisi pour mc2%=25,00 exactement : mc2Jour=0.25*tjm et mc2Jour=tjm-300 => 0.75*tjm=300 => tjm=400. mc2Jour=100->100.0. mc2%=100/400*100=25.00 pile. segment: `p < targetPercent(25)` est FAUX pour p=25.00 (comparaison stricte) -> tombe dans le palier suivant -> recommended, PAS low_margin. C'est la borne exacte que les deux moteurs doivent classer identiquement. contractCoefficientApplied=null (NEARSHORE).",
+      "context": {
+        "contractType": "NEARSHORE",
+        "cjmNearshore": 300,
+        "feeIk": 10,
+        "workingDaysPerYear": 200
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 400,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 300,
+        "feeOmPerDay": 10,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 300,
+        "tjmFloor": 375,
+        "tjmTarget": 400,
+        "tjmIdeal": 429,
+        "tjmTop10": 472,
+        "mc2PerDay": 100.0,
+        "mc2PercentHuman": 25.0,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 200,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 300.0,
+        "mc2PerDayEurEquivalent": 100.0,
+        "tjmEurEquivalent": 400.0,
+        "feePonctuelsDivisorDays": 200,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Borne exacte plancher 20,00 % -> low_margin, pas below_floor",
+      "notes": "CDI salaire 43200 -> cjm=round(43200*2.02/218)=round(87264/218)=round(400.2936...)=400. total=400. floor=ceil(400/0.8)=500. target=ceil(400/0.75)=ceil(533.33...)=534. ideal=ceil(400/0.7)=ceil(571.428...)=572. top10FromIdeal=ceil(572*1.1)=ceil(629.2)=630. TJM=500 pour mc2%=20,00 pile : mc2Jour=500-400=100->100.0, mc2%=100/500*100=20.00. segment: `p<floorPercent(20)` faux pour p=20.00 (comparaison stricte) -> low_margin, PAS below_floor. contractCoefficientApplied=2.02 (défaut moteur).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43200,
+        "workingDaysPerYear": 218
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 500,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 400,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 400,
+        "tjmFloor": 500,
+        "tjmTarget": 534,
+        "tjmIdeal": 572,
+        "tjmTop10": 630,
+        "mc2PerDay": 100.0,
+        "mc2PercentHuman": 20.0,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 400.0,
+        "mc2PerDayEurEquivalent": 100.0,
+        "tjmEurEquivalent": 500.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Borne exacte idéal 30,00 % -> superstar, pas recommended",
+      "notes": "VIE cjmVie=350, sans frais. total=350. floor=ceil(350/0.8)=438 (ceil 437.5). target=ceil(350/0.75)=ceil(466.66...)=467. ideal=ceil(350/0.7)=500 pile. top10FromIdeal=ceil(500*1.1)=550. TJM=500 pour mc2%=30,00 pile : mc2Jour=500-350=150->150.0, mc2%=150/500*100=30.00. segment: `p<idealPercent(30)` faux pour p=30.00 -> tombe dans le else final -> superstar, PAS recommended. contractCoefficientApplied=null (VIE).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 350
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 500,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 350,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 350,
+        "tjmFloor": 438,
+        "tjmTarget": 467,
+        "tjmIdeal": 500,
+        "tjmTop10": 550,
+        "mc2PerDay": 150.0,
+        "mc2PercentHuman": 30.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 350.0,
+        "mc2PerDayEurEquivalent": 150.0,
+        "tjmEurEquivalent": 500.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Segment below_floor (même base que la borne 20 %, TJM plus bas)",
+      "notes": "Même cjm/total que le cas \"Borne exacte plancher\" (CDI 43200 -> cjm=400, total=400, mêmes seuils floor=500/target=534/ideal=572/top10=630). TJM=450 : mc2Jour=450-400=50->50.0. mc2%=50/450*100=11.1111...repeating ->HALF_UP 2dp=11.11. segment: 11.11<20 -> below_floor. contractCoefficientApplied=2.02 (défaut moteur).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43200,
+        "workingDaysPerYear": 218
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 450,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 400,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 400,
+        "tjmFloor": 500,
+        "tjmTarget": 534,
+        "tjmIdeal": 572,
+        "tjmTop10": 630,
+        "mc2PerDay": 50.0,
+        "mc2PercentHuman": 11.11,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 400.0,
+        "mc2PerDayEurEquivalent": 50.0,
+        "tjmEurEquivalent": 450.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Corridor grand compte surchargé (15/22/28) — classification différente du corridor par défaut",
+      "notes": "VIE cjmVie=350 (même base que la borne 30 %), thresholdPercents={15,22,28} au lieu de {20,25,30}. floor=ceil(350/(1-0-0.15))=ceil(350/0.85)=ceil(411.7647...)=412. target=ceil(350/0.78)=ceil(448.7179...)=449. ideal=ceil(350/0.72)=ceil(486.111...)=487. top10FromIdeal=ceil(487*1.1)=ceil(535.7)=536. TJM=450 : mc2Jour=450-350=100->100.0. mc2%=100/450*100=22.2222...->22.22. segment avec l'override (15/22/28) : `p<15` faux, `p<22` faux (22.22 n'est PAS < 22), `p<28` vrai -> recommended. Avec les seuils PAR DÉFAUT (20/25/30) le même 22.22 % aurait donné low_margin (20<=22.22<25) — preuve que le branchement du corridor grand compte est bien pris en compte par les deux moteurs. contractCoefficientApplied=null (VIE).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 350
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 450,
+      "top10Comparables": 0,
+      "thresholdPercents": {
+        "floorPercent": 15,
+        "targetPercent": 22,
+        "idealPercent": 28
+      },
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 350,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 350,
+        "tjmFloor": 412,
+        "tjmTarget": 449,
+        "tjmIdeal": 487,
+        "tjmTop10": 536,
+        "mc2PerDay": 100.0,
+        "mc2PercentHuman": 22.22,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 350.0,
+        "mc2PerDayEurEquivalent": 100.0,
+        "tjmEurEquivalent": 450.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "RFA proche de 100 % — dénominateur (1-%RFA-x) négatif, borné à 0,01",
+      "notes": "VIE cjmVie=200, RFA=90%. Pour les 3 seuils, (1-0.90-x) est négatif (x=0.20/0.25/0.30) donc borné au plancher MIN_THRESHOLD_DENOMINATOR=0.01 -> les TROIS seuils valent ceil(200/0.01)=20000 (identiques, car tous bornés à la même valeur). top10FromIdeal=ceil(20000*1.1)=22000. TJM=300 : mc2Jour=300*(1-0.90)-200=30-200=-170->-170.0. mc2%=-170/300*100=-56.6666...->HALF_UP (arrondi loin de zéro pour un négatif)=-56.67. segment: -56.67<20 -> below_floor. Cas cible explicitement demandé par le prompt de session : vérifier que les deux moteurs appliquent le MÊME plancher de dénominateur. contractCoefficientApplied=null (VIE).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 200
+      },
+      "rfaPercent": 90,
+      "proposedTjm": 300,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 200,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 200,
+        "tjmFloor": 20000,
+        "tjmTarget": 20000,
+        "tjmIdeal": 20000,
+        "tjmTop10": 22000,
+        "mc2PerDay": -170.0,
+        "mc2PercentHuman": -56.67,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 200.0,
+        "mc2PerDayEurEquivalent": -170.0,
+        "tjmEurEquivalent": 300.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Dégradé : salaire nul (CDI), TJM non renseigné",
+      "notes": "CDI annualSalary=null -> cjm=round(0*2.02/218)=0. total=0. floor=ceil(0/0.8)=0. target=0. ideal=0. top10FromIdeal=ceil(0*1.1)=0. proposedTjm=null -> mc2PerDay=0.0, mc2%=0.00 (garde `tjm==null`). segment: 0<20 -> below_floor. tjmEurEquivalent=null (proposedTjm null des deux côtés). contractCoefficientApplied=2.02 (CDI, défaut moteur — indépendant de la valeur du salaire).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": null,
+        "workingDaysPerYear": 218
+      },
+      "rfaPercent": 0,
+      "proposedTjm": null,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 0,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 0,
+        "tjmFloor": 0,
+        "tjmTarget": 0,
+        "tjmIdeal": 0,
+        "tjmTop10": 0,
+        "mc2PerDay": 0.0,
+        "mc2PercentHuman": 0.0,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 0.0,
+        "mc2PerDayEurEquivalent": 0.0,
+        "tjmEurEquivalent": null,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Dégradé : TJM négatif (garde-fou session 18b)",
+      "notes": "Même base que la borne 20 % (CDI 43200 -> cjm=400, total=400, floor=500/target=534/ideal=572/top10=630). TJM=-100 : la garde `tjm<=0` (Apex) / `!tjm || tjm<0` (JS) bloque avant division -> mc2PerDay=0.0, mc2%=0.00. segment: 0<20 -> below_floor. tjmEurEquivalent N'EST PAS null ici (proposedTjm=-100 n'est pas null, juste négatif) : -100*1=-100.00 — ce champ est calculé indépendamment de la garde MC2. contractCoefficientApplied=2.02 (CDI, défaut moteur).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43200,
+        "workingDaysPerYear": 218
+      },
+      "rfaPercent": 0,
+      "proposedTjm": -100,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 400,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 400,
+        "tjmFloor": 500,
+        "tjmTarget": 534,
+        "tjmIdeal": 572,
+        "tjmTop10": 630,
+        "mc2PerDay": 0.0,
+        "mc2PercentHuman": 0.0,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 400.0,
+        "mc2PerDayEurEquivalent": 0.0,
+        "tjmEurEquivalent": -100.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Frais ponctuels complets (gratuité + extras) et jours travaillés surchargés (200)",
+      "notes": "CDI salaire 40000, jours=200 -> cjm=round(40000*2.02/200)=round(80800/200)=round(404)=404 (exact). feeOM=5+8+7=20. gratuite=gratuityDays(3)*cjm(404)=1212, ramenée au jour par le diviseur de repli 200 (pas de durée de mission) = 6.06. PC=10 €/jour, tel quel = 10. Téléphone 0. Formation=20 par mission, repli 200 -> 0.1. feePonctuelsPerDay=6.06+10+0.1=16.16. total=404+20+16.16=440.16. RFA=5% : floor=ceil(440.16/0.75)=ceil(586.88)=587. target=ceil(440.16/0.70)=ceil(628.8)=629. ideal=ceil(440.16/0.65)=ceil(677.169...)=678. top10FromIdeal=ceil(678*1.1)=ceil(745.8)=746. TJM=750 : mc2Jour=750*0.95-440.16=712.5-440.16=272.34->HALF_UP 1dp=272.3. mc2%=272.34/750*100=36.312->36.31. segment: >=30 -> superstar. contractCoefficientApplied=2.02 (défaut moteur).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 40000,
+        "workingDaysPerYear": 200,
+        "feeIk": 5,
+        "feeMeals": 8,
+        "feeLodging": 7,
+        "gratuityDays": 3,
+        "feeComputer": 10,
+        "feePhone": 0,
+        "feeTraining": 20
+      },
+      "rfaPercent": 5,
+      "proposedTjm": 750,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 404,
+        "feeOmPerDay": 20,
+        "feePonctuelsPerDay": 16.16,
+        "totalDailyCost": 440.16,
+        "tjmFloor": 587,
+        "tjmTarget": 629,
+        "tjmIdeal": 678,
+        "tjmTop10": 746,
+        "mc2PerDay": 272.3,
+        "mc2PercentHuman": 36.31,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 200,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 440.16,
+        "mc2PerDayEurEquivalent": 272.3,
+        "tjmEurEquivalent": 750.0,
+        "feePonctuelsDivisorDays": 200,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "CDD, coefficient administrable personnalisé (2,10), frais OM/ponctuels comme un CDI",
+      "notes": "Session 28 (prompts/session-28-ecarts-contractuels.md §1) : CDD ajouté au moteur, même formule que CDI mais coefficient lu depuis AR_General_Setting__c.AR_CDD_Coefficient__c (ici 2,10, pas le défaut 2,02, pour prouver que le paramètre administrable est bien appliqué par les deux moteurs). cjm=round(50000*2.10/218)=round(105000/218)=round(481.6513...)=482. total=482 (aucun frais). floor=ceil(482/0.8)=ceil(602.5)=603. target=ceil(482/0.75)=ceil(642.6666...)=643. ideal=ceil(482/0.7)=ceil(688.5714...)=689. top10FromIdeal=ceil(689*1.1)=ceil(757.9)=758. mc2Jour=700-482=218->218.0. mc2%=218/700*100=31.142857...->HALF_UP 2dp=31.14. segment: >=30 -> superstar. contractCoefficientApplied=2.10 (celui fourni dans le context, pas le défaut).",
+      "context": {
+        "contractType": "CDD",
+        "annualSalary": 50000,
+        "workingDaysPerYear": 218,
+        "contractCoefficient": 2.1
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 482,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 482,
+        "tjmFloor": 603,
+        "tjmTarget": 643,
+        "tjmIdeal": 689,
+        "tjmTop10": 758,
+        "mc2PerDay": 218.0,
+        "mc2PercentHuman": 31.14,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.1,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 482.0,
+        "mc2PerDayEurEquivalent": 218.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Session 121 — CDI 60-day mission, formation €1,500 -> fraisPonctuels€25/day",
+      "notes": "Session 121 : frais ponctuels divisés par jours de mission (60) au lieu de jours travaillés/an (218). cjm=round(45000*2.02/218)=417. Formation=1500 / 60 jours = 25.0 €/jour (au lieu de 1500/218=6.88€/jour l'ancienne règle). total=417+0+25=442. floor=ceil(442/0.8)=553. target=ceil(442/0.75)=590. ideal=ceil(442/0.7)=632. top10=ceil(632*1.1)=696. mc2Jour=650-442=208->208.0. mc2%=208/650*100=32.0. segment: superstar. feePonctuelsDivisorDays=60, feePonctuelsDivisorSource='mission'. contractCoefficientApplied=2.02. Poste saisi en formation (frais par mission) : le PC se saisit désormais par jour et n'est plus divisé.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 60,
+        "feeTraining": 1500
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 25.0,
+        "totalDailyCost": 442,
+        "tjmFloor": 553,
+        "tjmTarget": 590,
+        "tjmIdeal": 632,
+        "tjmTop10": 696,
+        "mc2PerDay": 208.0,
+        "mc2PercentHuman": 32.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 442.0,
+        "mc2PerDayEurEquivalent": 208.0,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 60,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Session 121 — CDI 400-day mission, formation €3,000 -> fraisPonctuels€7.5/day",
+      "notes": "Session 121 : frais ponctuels divisés par jours de mission (400) au lieu de jours travaillés/an (218). cjm=417. Formation=3000 / 400 jours = 7.5 €/jour (au lieu de 3000/218=13.76€/jour l'ancienne règle). total=417+0+7.5=424.5. floor=ceil(424.5/0.8)=531. target=ceil(424.5/0.75)=566. ideal=ceil(424.5/0.7)=607. top10=ceil(607*1.1)=668. mc2Jour=600-424.5=175.5->175.5. mc2%=175.5/600*100=29.25. segment: recommended. feePonctuelsDivisorDays=400, feePonctuelsDivisorSource='mission'. contractCoefficientApplied=2.02. Poste saisi en formation (frais par mission) : le PC se saisit désormais par jour et n'est plus divisé.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 400,
+        "feeTraining": 3000
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 7.5,
+        "totalDailyCost": 424.5,
+        "tjmFloor": 531,
+        "tjmTarget": 566,
+        "tjmIdeal": 607,
+        "tjmTop10": 668,
+        "mc2PerDay": 175.5,
+        "mc2PercentHuman": 29.25,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 424.5,
+        "mc2PerDayEurEquivalent": 175.5,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 400,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Session 121 — CDI sans missionDays (fallback year_fallback), formation €1,500",
+      "notes": "Session 121 : frais ponctuels divisés par jours travaillés/an (218) quand missionDays absent ou ≤0 (brouillon sans dates). cjm=417. Formation=1500 / 218 jours = 6.88 €/jour (l'ancienne règle, repli year_fallback). total=417+0+6.88=423.88. floor=ceil(423.88/0.8)=530. target=ceil(423.88/0.75)=566. ideal=ceil(423.88/0.7)=606. top10=ceil(606*1.1)=667. mc2Jour=600-423.88=176.12->176.1. mc2%=176.12/600*100=29.35. segment: recommended. feePonctuelsDivisorDays=218, feePonctuelsDivisorSource='year_fallback'. contractCoefficientApplied=2.02. Poste saisi en formation (frais par mission) : le PC se saisit désormais par jour et n'est plus divisé.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 0,
+        "feeTraining": 1500
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 6.8807339449541285,
+        "totalDailyCost": 423.8807339449541,
+        "tjmFloor": 530,
+        "tjmTarget": 566,
+        "tjmIdeal": 606,
+        "tjmTop10": 667,
+        "mc2PerDay": 176.1,
+        "mc2PercentHuman": 29.35,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 423.88,
+        "mc2PerDayEurEquivalent": 176.1,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Session 180b — Avenant CDI, période courte (43 j ouvrés), frais ponctuels à zéro",
+      "notes": "Avenant : la matrice décrit la période amendée (1er mai → 30 juin 2026 = 43 jours ouvrés, missionDays=43). cjm=round(36000*2.02/218)=round(72720/218)=round(333.578...)=334. Aucun frais : feePonctuelsPerDay=0 (diviseur 43, source 'mission'). total=334. floor=ceil(334/0.8)=ceil(417.5)=418. target=ceil(334/0.75)=ceil(445.333...)=446. ideal=ceil(334/0.7)=ceil(477.142...)=478. top10FromIdeal=ceil(478*1.1)=ceil(525.8)=526. mc2Jour=440-334=106 -> mc2PerDay=106.0. mc2%=106/440*100=24.0909...->HALF_UP 2dp=24.09. segment: 20<=24.09<25 -> low_margin. contractCoefficientApplied=2.02.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 36000,
+        "workingDaysPerYear": 218,
+        "missionDays": 43
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 440,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 334,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 334,
+        "tjmFloor": 418,
+        "tjmTarget": 446,
+        "tjmIdeal": 478,
+        "tjmTop10": 526,
+        "mc2PerDay": 106.0,
+        "mc2PercentHuman": 24.09,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 334.0,
+        "mc2PerDayEurEquivalent": 106.0,
+        "tjmEurEquivalent": 440.0,
+        "feePonctuelsDivisorDays": 43,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Session 180b — Avenant CDI, période courte (43 j ouvrés), frais ponctuels repris et réamortis",
+      "notes": "Même avenant, formation de 860 € reprise de la matrice d'origine (décision du 14/10/2026, Q2 B) : réamortie sur les 43 jours de l'avenant, 860/43=20.0 €/j (et non sur 218). cjm=334. total=334+0+20=354. floor=ceil(354/0.8)=ceil(442.5)=443. target=ceil(354/0.75)=ceil(472)=472. ideal=ceil(354/0.7)=ceil(505.714...)=506. top10FromIdeal=ceil(506*1.1)=ceil(556.6)=557. mc2Jour=500-354=146 -> 146.0. mc2%=146/500*100=29.2 -> 29.20. segment: 25<=29.20<30 -> recommended.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 36000,
+        "workingDaysPerYear": 218,
+        "missionDays": 43,
+        "feeTraining": 860
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 500,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 334,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 20.0,
+        "totalDailyCost": 354,
+        "tjmFloor": 443,
+        "tjmTarget": 472,
+        "tjmIdeal": 506,
+        "tjmTop10": 557,
+        "mc2PerDay": 146.0,
+        "mc2PercentHuman": 29.2,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 354.0,
+        "mc2PerDayEurEquivalent": 146.0,
+        "tjmEurEquivalent": 500.0,
+        "feePonctuelsDivisorDays": 43,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Session 180b — Avenant INDEP, période courte (59 j ouvrés), jours de gratuité réamortis",
+      "notes": "Avenant d'un indépendant sur 59 jours ouvrés (missionDays=59) : cjm=300+54=354 (markupApplied=54=markupCalcule=MIN(300*18%,60), pas d'écart). 10 jours de gratuité repris de l'origine : gratuité=10*354=3540, /59 = 60.0 €/j (feePonctuelsPerDay=60.0). total INDEP=354+60=414. floor=ceil(414/0.8)=ceil(517.5)=518. target=ceil(414/0.75)=ceil(552)=552. ideal=ceil(414/0.7)=ceil(591.428...)=592. top10FromIdeal=ceil(592*1.1)=ceil(651.2)=652. mc2Jour=560-414=146 -> 146.0. mc2%=146/560*100=26.0714...->26.07. segment: 25<=26.07<30 -> recommended. contractCoefficientApplied=null (INDEP).",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 300,
+        "markupApplied": 54,
+        "workingDaysPerYear": 218,
+        "missionDays": 59,
+        "gratuityDays": 10
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 560,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 354,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 60.0,
+        "totalDailyCost": 414,
+        "tjmFloor": 518,
+        "tjmTarget": 552,
+        "tjmIdeal": 592,
+        "tjmTop10": 652,
+        "mc2PerDay": 146.0,
+        "mc2PercentHuman": 26.07,
+        "corridorSegment": "recommended",
+        "markupCalcule": 54.0,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 414.0,
+        "mc2PerDayEurEquivalent": 146.0,
+        "tjmEurEquivalent": 560.0,
+        "feePonctuelsDivisorDays": 59,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Fréquences — CDI, chaque frais dans son unité (PC/jour, téléphone/mois, formation+EPI+autre/mission, OFII/an)",
+      "notes": "CDI 50000 €, 200 j/an, mission 150 j. cjm=50000*2.02/200=505. feeOm=5. PC 4 €/j -> 4. Téléphone 50 €/mois -> 50*12/200=3. Formation 900/150=6. EPI 300/150=2. Autre 300/150=2. OFII 1650/200=8.25 (÷ jours travaillés, pas ÷ 150). feePonctuels=4+3+6+2+8.25+2=25.25. total=505+5+25.25=535.25. floor=ceil(535.25/0.80)=ceil(669.06)=670. target=ceil(535.25/0.75)=ceil(713.67)=714. ideal=ceil(535.25/0.70)=ceil(764.64)=765. top10=ceil(765*1.1)=ceil(841.5)=842. TJM 700: mc2Jour=164.75->164.8 (arrondi 1 déc.). mc2%=164.75/700=23.5357->23.54. segment low_margin. divisor des frais par mission=150 (source mission).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 50000,
+        "workingDaysPerYear": 200,
+        "missionDays": 150,
+        "feeIk": 5,
+        "feeComputer": 4,
+        "feePhone": 50,
+        "feeTraining": 900,
+        "feeEpi": 300,
+        "feeOfiiTax": 1650,
+        "feeOther": 300
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 505,
+        "feeOmPerDay": 5,
+        "feePonctuelsPerDay": 25.25,
+        "totalDailyCost": 535.25,
+        "tjmFloor": 670,
+        "tjmTarget": 714,
+        "tjmIdeal": 765,
+        "tjmTop10": 842,
+        "mc2PerDay": 164.8,
+        "mc2PercentHuman": 23.54,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 200,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 535.25,
+        "mc2PerDayEurEquivalent": 164.8,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 150,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [
+          {
+            "key": "feeComputer",
+            "amount": 4,
+            "unit": "day",
+            "divisor": 1,
+            "divisorSource": null,
+            "perDay": 4
+          },
+          {
+            "key": "feePhone",
+            "amount": 50,
+            "unit": "month",
+            "divisor": 200,
+            "divisorSource": "working_days",
+            "perDay": 3
+          },
+          {
+            "key": "feeTraining",
+            "amount": 900,
+            "unit": "mission",
+            "divisor": 150,
+            "divisorSource": "mission",
+            "perDay": 6
+          },
+          {
+            "key": "feeEpi",
+            "amount": 300,
+            "unit": "mission",
+            "divisor": 150,
+            "divisorSource": "mission",
+            "perDay": 2
+          },
+          {
+            "key": "feeOfiiTax",
+            "amount": 1650,
+            "unit": "year",
+            "divisor": 200,
+            "divisorSource": "working_days",
+            "perDay": 8.25
+          },
+          {
+            "key": "feeOther",
+            "amount": 300,
+            "unit": "mission",
+            "divisor": 150,
+            "divisorSource": "mission",
+            "perDay": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "Fréquences — CDI sans durée de mission : formation/autre repliées sur les jours travaillés, téléphone et OFII inchangés",
+      "notes": "CDI 50000 €, 200 j/an, missionDays 0 (repli). cjm=505. Téléphone 25 €/mois -> 25*12/200=1.5. Formation 400 ÷ 200 (repli jours travaillés)=2. OFII 1000/200=5. feePonctuels=8.5. total=513.5. floor=ceil(513.5/0.80)=ceil(641.875)=642. target=ceil(513.5/0.75)=ceil(684.67)=685. ideal=ceil(513.5/0.70)=ceil(733.57)=734. top10=ceil(734*1.1)=ceil(807.4)=808. TJM 650: mc2Jour=136.5. mc2%=136.5/650=21.00. segment low_margin. divisor=200, source year_fallback.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 50000,
+        "workingDaysPerYear": 200,
+        "missionDays": 0,
+        "feePhone": 25,
+        "feeTraining": 400,
+        "feeOfiiTax": 1000
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 505,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 8.5,
+        "totalDailyCost": 513.5,
+        "tjmFloor": 642,
+        "tjmTarget": 685,
+        "tjmIdeal": 734,
+        "tjmTop10": 808,
+        "mc2PerDay": 136.5,
+        "mc2PercentHuman": 21.0,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 200,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 513.5,
+        "mc2PerDayEurEquivalent": 136.5,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 200,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [
+          {
+            "key": "feePhone",
+            "amount": 25,
+            "unit": "month",
+            "divisor": 200,
+            "divisorSource": "working_days",
+            "perDay": 1.5
+          },
+          {
+            "key": "feeTraining",
+            "amount": 400,
+            "unit": "mission",
+            "divisor": 200,
+            "divisorSource": "working_days",
+            "perDay": 2
+          },
+          {
+            "key": "feeOfiiTax",
+            "amount": 1000,
+            "unit": "year",
+            "divisor": 200,
+            "divisorSource": "working_days",
+            "perDay": 5
+          }
+        ]
+      }
+    },
+    {
+      "name": "Fréquences — VIE, taxe OFII annuelle ÷ jours travaillés même sur une mission de 100 j",
+      "notes": "VIE cjm 200, 220 j/an, mission 100 j. feeOm=10. OFII 1650/220=7.5 (÷ jours travaillés, pas ÷ 100 : sinon 16.5). feePonctuels=7.5. total=200+10+7.5=217.5. floor=ceil(217.5/0.80)=ceil(271.875)=272. target=ceil(217.5/0.75)=290. ideal=ceil(217.5/0.70)=ceil(310.71)=311. top10=ceil(311*1.1)=ceil(342.1)=343. TJM 300: mc2Jour=82.5. mc2%=82.5/300=27.50. segment recommended. divisor mission=100 (source mission, ne concerne pas l'OFII).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 200,
+        "workingDaysPerYear": 220,
+        "missionDays": 100,
+        "feeIk": 10,
+        "feeOfiiTax": 1650
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 300,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 200,
+        "feeOmPerDay": 10,
+        "feePonctuelsPerDay": 7.5,
+        "totalDailyCost": 217.5,
+        "tjmFloor": 272,
+        "tjmTarget": 290,
+        "tjmIdeal": 311,
+        "tjmTop10": 343,
+        "mc2PerDay": 82.5,
+        "mc2PercentHuman": 27.5,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 220,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 217.5,
+        "mc2PerDayEurEquivalent": 82.5,
+        "tjmEurEquivalent": 300.0,
+        "feePonctuelsDivisorDays": 100,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [
+          {
+            "key": "feeOfiiTax",
+            "amount": 1650,
+            "unit": "year",
+            "divisor": 220,
+            "divisorSource": "working_days",
+            "perDay": 7.5
+          }
+        ]
+      }
+    },
+    {
+      "name": "Session 239b — CDI, deux périodes (cas de Matthieu) : hébergement 85 €/j puis IK 12 €/j",
+      "notes": "cjm=round(45000*2.02/218)=417. Mission 200 j. P1 hébergement 85 €/j ; P2 180 j à IK 12 €/j -> P1 = 200 - 180 = 20 j. Lissé = (20*85 + 180*12) / 200 = (1700 + 2160) / 200 = 19,30 €/j. total = 417 + 19,30 = 436,30. floor = ceil(436,30/0,80) = 546 ; target = ceil(/0,75) = 582 ; ideal = ceil(/0,70) = 624 ; top10 = ceil(624*1,10) = 687. mc2Jour = 700 - 436,30 = 263,70 ; mc2% = 263,70/700 = 37,67 -> superstar. Aucun dépassement, durée connue.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 200,
+        "feeLodging": 85,
+        "feePeriods": [
+          {
+            "days": 180,
+            "feeIk": 12,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 19.3,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 436.3,
+        "tjmFloor": 546.0,
+        "tjmTarget": 582.0,
+        "tjmIdeal": 624.0,
+        "tjmTop10": 687.0,
+        "mc2PerDay": 263.7,
+        "mc2PercentHuman": 37.67,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 436.3,
+        "mc2PerDayEurEquivalent": 263.7,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 200.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 20.0,
+            "perDay": 85.0
+          },
+          {
+            "index": 2,
+            "days": 180.0,
+            "perDay": 12.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 239b — CDI, fraction non terminante (218 j, P1 50 €/j, P2 100 j à 10 €/j)",
+      "notes": "cjm=417. Mission 218 j. P1 = 218 - 100 = 118 j. Lissé = (118*50 + 100*10) / 218 = 6900 / 218 = 31,6513761468... (tolérance 1e-9). total = 417 + 31,65137614678899 = 448,65137614678899. floor = ceil(/0,80) = 561 ; target = ceil(/0,75) = 599 ; ideal = ceil(/0,70) = 641 ; top10 = ceil(641*1,10) = 706 ; mc2Jour = 700 - 448,6514 = 251,3486 -> 251,3 ; mc2% = 35,91 -> superstar.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 218,
+        "feeLodging": 50,
+        "feePeriods": [
+          {
+            "days": 100,
+            "feeIk": 10,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 31.65137614678899,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 448.651376146789,
+        "tjmFloor": 561.0,
+        "tjmTarget": 599.0,
+        "tjmIdeal": 641.0,
+        "tjmTop10": 706.0,
+        "mc2PerDay": 251.3,
+        "mc2PercentHuman": 35.91,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 448.65,
+        "mc2PerDayEurEquivalent": 251.3,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 218.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 118.0,
+            "perDay": 50.0
+          },
+          {
+            "index": 2,
+            "days": 100.0,
+            "perDay": 10.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 239b — CDI, trois périodes (100 j : P1 40 €/j, P2 30 j à 20 €/j, P3 50 j à 10 €/j)",
+      "notes": "cjm=417. Mission 100 j. P1 = 100 - 30 - 50 = 20 j. Lissé = (20*40 + 30*20 + 50*10) / 100 = (800 + 600 + 500) / 100 = 19,00. total = 436,00. floor = ceil(545,0) = 545 ; target = ceil(581,33) = 582 ; ideal = ceil(622,86) = 623 ; top10 = ceil(685,3) = 686 ; mc2Jour = 264 -> 264,0 ; mc2% = 37,71 -> superstar.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 100,
+        "feeLodging": 40,
+        "feePeriods": [
+          {
+            "days": 30,
+            "feeIk": 20,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          },
+          {
+            "days": 50,
+            "feeIk": 0,
+            "feeMeals": 10,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 19.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 436.0,
+        "tjmFloor": 545.0,
+        "tjmTarget": 582.0,
+        "tjmIdeal": 623.0,
+        "tjmTop10": 686.0,
+        "mc2PerDay": 264.0,
+        "mc2PercentHuman": 37.71,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 436.0,
+        "mc2PerDayEurEquivalent": 264.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 20.0,
+            "perDay": 40.0
+          },
+          {
+            "index": 2,
+            "days": 30.0,
+            "perDay": 20.0
+          },
+          {
+            "index": 3,
+            "days": 50.0,
+            "perDay": 10.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 239b — CDI, dépassement (mission 100 j, périodes ajoutées 120 j : P1 ramenée à 0 j)",
+      "notes": "cjm=417. Mission 100 j ; P2 80 j à 20 €/j, P3 40 j à 10 €/j : somme 120 j > 100 j, donc P1 = max(0, 100-120) = 0 j (P1 à 40 €/j sans poids). Lissé = (80*20 + 40*10) / 120 = 2000 / 120 = 16,6666... ; total = 433,666... ; feePeriodsExceedMission = true.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 100,
+        "feeLodging": 40,
+        "feePeriods": [
+          {
+            "days": 80,
+            "feeIk": 20,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          },
+          {
+            "days": 40,
+            "feeIk": 0,
+            "feeMeals": 10,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 16.666666666666668,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 433.6666666666667,
+        "tjmFloor": 543.0,
+        "tjmTarget": 579.0,
+        "tjmIdeal": 620.0,
+        "tjmTop10": 682.0,
+        "mc2PerDay": 266.3,
+        "mc2PercentHuman": 38.05,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 433.67,
+        "mc2PerDayEurEquivalent": 266.3,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 0.0,
+            "perDay": 40.0
+          },
+          {
+            "index": 2,
+            "days": 80.0,
+            "perDay": 20.0
+          },
+          {
+            "index": 3,
+            "days": 40.0,
+            "perDay": 10.0
+          }
+        ],
+        "feePeriodsExceedMission": true,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 239b — CDI, durée de mission inconnue (missionDays 0) : valeur de P1, indicateur levé",
+      "notes": "cjm=417. missionDays = 0 : pas de lissage possible. Frais OM = valeur de P1 = 30 €/j ; feePeriodsMissionUnknown = true ; P1 sans jours (null). total = 447. Divisor des frais ponctuels : repli jours travaillés (218).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "feeLodging": 30,
+        "feePeriods": [
+          {
+            "days": 50,
+            "feeIk": 10,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 30.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 447.0,
+        "tjmFloor": 559.0,
+        "tjmTarget": 596.0,
+        "tjmIdeal": 639.0,
+        "tjmTop10": 703.0,
+        "mc2PerDay": 253.0,
+        "mc2PercentHuman": 36.14,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 447.0,
+        "mc2PerDayEurEquivalent": 253.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 218.0,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": null,
+            "perDay": 30.0
+          },
+          {
+            "index": 2,
+            "days": 50.0,
+            "perDay": 10.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": true
+      }
+    },
+    {
+      "name": "Session 239b — INDEP avec périodes : coût identique au même cas sans périodes",
+      "notes": "INDEP : cjm = 400 + markup 60 (min(400*18 %, 60) = 60, pas d'écart). Les frais OM ne comptent pas dans le coût INDEP : total = 460 + gratuité 0 = 460, comme sans périodes. feeOmPerDay (lissé 19,30) et feeOmPeriods restent renseignés pour l'affichage ; aucun effet sur les seuils ni la MC2.",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 400,
+        "markupApplied": 60,
+        "workingDaysPerYear": 218,
+        "missionDays": 200,
+        "feeLodging": 85,
+        "feePeriods": [
+          {
+            "days": 180,
+            "feeIk": 12,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 460.0,
+        "feeOmPerDay": 19.3,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 460.0,
+        "tjmFloor": 575.0,
+        "tjmTarget": 614.0,
+        "tjmIdeal": 658.0,
+        "tjmTop10": 724.0,
+        "mc2PerDay": 240.0,
+        "mc2PercentHuman": 34.29,
+        "corridorSegment": "superstar",
+        "markupCalcule": 60.0,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 460.0,
+        "mc2PerDayEurEquivalent": 240.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 200.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 20.0,
+            "perDay": 85.0
+          },
+          {
+            "index": 2,
+            "days": 180.0,
+            "perDay": 12.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 239b — CDI, liste de périodes vide : résultat identique au cas sans la clé (non-régression)",
+      "notes": "cjm=417. Mission 200 j, P1 hébergement 85 €/j, aucune période ajoutée : frais OM = 85 €/j ; total = 502. floor = 628 ; target = 670 ; ideal = 718 ; top10 = 790 ; mc2Jour = 198 -> 198,0 ; mc2% = 28,29 -> recommended. feeOmPeriods vide, pas de dépassement, durée connue.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 200,
+        "feeLodging": 85,
+        "feePeriods": []
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 700,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 85.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 502.0,
+        "tjmFloor": 628.0,
+        "tjmTarget": 670.0,
+        "tjmIdeal": 718.0,
+        "tjmTop10": 790.0,
+        "mc2PerDay": 198.0,
+        "mc2PercentHuman": 28.29,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 502.0,
+        "mc2PerDayEurEquivalent": 198.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 200.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeOmPeriods": [],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 1 — cas client : mission 120 j, P1 650, P2 60 j à 700",
+      "notes": "P1 = 60 j ; (60×650 + 60×700)/120 = 675,00. Exceed faux. Coût CDI 45 000 € (CJM 417).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 120,
+        "tjmPeriods": [
+          {
+            "days": 60,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 258.0,
+        "mc2PercentHuman": 38.22,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 258.0,
+        "tjmEurEquivalent": 675.0,
+        "feePonctuelsDivisorDays": 120.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 675.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 60.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 60.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 2 — fraction non terminante : mission 218 j, P1 650, P2 100 j à 700",
+      "notes": "P1 = 118 j ; (118×650 + 100×700)/218 = 672,9357798165… ; stocké 672,94.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 218,
+        "tjmPeriods": [
+          {
+            "days": 100,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 255.9,
+        "mc2PercentHuman": 38.03,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 255.9,
+        "tjmEurEquivalent": 672.94,
+        "feePonctuelsDivisorDays": 218.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 672.9357798165138,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 118.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 100.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 3 — trois périodes : mission 100 j, P1 600, P2 30 j à 650, P3 50 j à 700",
+      "notes": "P1 = 20 j ; (20×600 + 30×650 + 50×700)/100 = 665,00.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 100,
+        "tjmPeriods": [
+          {
+            "days": 30,
+            "tjm": 650
+          },
+          {
+            "days": 50,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 248.0,
+        "mc2PercentHuman": 37.29,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 248.0,
+        "tjmEurEquivalent": 665.0,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 665.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 20.0,
+            "tjm": 600.0
+          },
+          {
+            "index": 2,
+            "days": 30.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 3,
+            "days": 50.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 4 — dépassement : mission 100 j, P1 600, P2 80 j à 700, P3 40 j à 800",
+      "notes": "Autres = 120 ≥ 100 : P1 = 0 j ; (80×700 + 40×800)/120 = 733,3333… ; exceed vrai.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 100,
+        "tjmPeriods": [
+          {
+            "days": 80,
+            "tjm": 700
+          },
+          {
+            "days": 40,
+            "tjm": 800
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 316.3,
+        "mc2PercentHuman": 43.14,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 316.3,
+        "tjmEurEquivalent": 733.33,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 733.3333333333334,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 0.0,
+            "tjm": 600.0
+          },
+          {
+            "index": 2,
+            "days": 80.0,
+            "tjm": 700.0
+          },
+          {
+            "index": 3,
+            "days": 40.0,
+            "tjm": 800.0
+          }
+        ],
+        "tjmPeriodsExceedMission": true,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 5 — égalité : mission 100 j, P1 600, P2 100 j à 700",
+      "notes": "Autres = 100 = mission : P1 = 0 j ; pondéré 700 ; exceed vrai (test ≥).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 100,
+        "tjmPeriods": [
+          {
+            "days": 100,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 283.0,
+        "mc2PercentHuman": 40.43,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 283.0,
+        "tjmEurEquivalent": 700.0,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 700.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 0.0,
+            "tjm": 600.0
+          },
+          {
+            "index": 2,
+            "days": 100.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": true,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 6 — durée inconnue : mission 0, P1 650, P2 50 j à 700",
+      "notes": "Pondéré = P1 (650) ; missionUnknown vrai ; P1 sans jours (null).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 0,
+        "tjmPeriods": [
+          {
+            "days": 50,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 233.0,
+        "mc2PercentHuman": 35.85,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 233.0,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 218.0,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "tjmWeighted": 650.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": null,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 50.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": true
+      }
+    },
+    {
+      "name": "Session 254b — TJM 7 — combiné TJM + frais : CDI CJM 330, RFA 5 %, mission 200 j",
+      "notes": "Coefficient 2,18 pour un CJM exact de 330 (33 000 × 2,18 / 218). P1 650 (140 j) + P2 60 j à 700 : pondéré 665,00. Frais P1 hébergement 85 (20 j) + P2 180 j IK 12 : lissé 19,30 ; coût 349,30 ; MC2/j = 665×0,95 − 349,30 = 282,45 ; MC2 % = 42,4737 %.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 33000,
+        "contractCoefficient": 2.18,
+        "workingDaysPerYear": 218,
+        "missionDays": 200,
+        "feeLodging": 85,
+        "feePeriods": [
+          {
+            "days": 180,
+            "feeIk": 12,
+            "feeMeals": 0,
+            "feeLodging": 0,
+            "feeOmOther": 0
+          }
+        ],
+        "tjmPeriods": [
+          {
+            "days": 60,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 5,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 330.0,
+        "feeOmPerDay": 19.3,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 349.3,
+        "tjmFloor": 466.0,
+        "tjmTarget": 499.0,
+        "tjmIdeal": 538.0,
+        "tjmTop10": 592.0,
+        "mc2PerDay": 282.5,
+        "mc2PercentHuman": 42.47,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.18,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 349.3,
+        "mc2PerDayEurEquivalent": 282.5,
+        "tjmEurEquivalent": 665.0,
+        "feePonctuelsDivisorDays": 200.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 665.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 140.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 60.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false,
+        "feeOmPeriods": [
+          {
+            "index": 1,
+            "days": 20.0,
+            "perDay": 85.0
+          },
+          {
+            "index": 2,
+            "days": 180.0,
+            "perDay": 12.0
+          }
+        ],
+        "feePeriodsExceedMission": false,
+        "feePeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 8 — liste vide : résultat identique au cas sans la clé",
+      "notes": "tjmPeriods vide = même résultat que sans la clé (non-régression) : pondéré = 650.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 120,
+        "tjmPeriods": []
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 233.0,
+        "mc2PercentHuman": 35.85,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 233.0,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 120.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 650.0,
+        "tjmPeriods": [],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 9 — INDEP avec périodes : les périodes s'appliquent, coût identique",
+      "notes": "INDEP CJM 400 + markup 60 (plafond) = 460 ; mission 100 j ; P1 600 (60 j) + P2 40 j à 700 : (60×600 + 40×700)/100 = 640,00. Coût 460 (même que sans périodes).",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 400,
+        "markupApplied": 60,
+        "missionDays": 100,
+        "tjmPeriods": [
+          {
+            "days": 40,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 460.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 460.0,
+        "tjmFloor": 575.0,
+        "tjmTarget": 614.0,
+        "tjmIdeal": 658.0,
+        "tjmTop10": 724.0,
+        "mc2PerDay": 180.0,
+        "mc2PercentHuman": 28.13,
+        "corridorSegment": "recommended",
+        "markupCalcule": 60.0,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 460.0,
+        "mc2PerDayEurEquivalent": 180.0,
+        "tjmEurEquivalent": 640.0,
+        "feePonctuelsDivisorDays": 100.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 640.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 60.0,
+            "tjm": 600.0
+          },
+          {
+            "index": 2,
+            "days": 40.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 254b — TJM 10 — devise GBP, taux gelé : l'équivalent EUR part du pondéré",
+      "notes": "Pondéré 675,00 (cas 1) ; taux 1,17 : tjmEurEquivalent = 675 × 1,17 = 789,75.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 120,
+        "tjmPeriods": [
+          {
+            "days": 60,
+            "tjm": 700
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1.17,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 522.0,
+        "tjmTarget": 556.0,
+        "tjmIdeal": 596.0,
+        "tjmTop10": 656.0,
+        "mc2PerDay": 258.0,
+        "mc2PercentHuman": 38.22,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.17,
+        "totalDailyCostEurEquivalent": 487.89,
+        "mc2PerDayEurEquivalent": 301.86,
+        "tjmEurEquivalent": 789.75,
+        "feePonctuelsDivisorDays": 120.0,
+        "feePonctuelsDivisorSource": "mission",
+        "tjmWeighted": 675.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 60.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 60.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 265a — Régie 1 — produits = vendus (218/218) : identique au mode éteint",
+      "notes": "VIE CJM 380, TJM 495, RFA 0 ; ratio 1 ; MC2/j 115,00 ; MC2 % 23,2323 (= mode éteint).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrRatio": 1.0
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 475,
+        "tjmTarget": 507,
+        "tjmIdeal": 543,
+        "tjmTop10": 598,
+        "mc2PerDay": 115.0,
+        "mc2PercentHuman": 23.23,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 115.0,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": 1.0,
+        "totalDailyCostPiloted": 380.0,
+        "mc2PerDayTheoretical": 115.0,
+        "mc2PercentTheoretical": 23.23
+      }
+    },
+    {
+      "name": "Session 265a — Régie 2 — 212 produits pour 218 vendus",
+      "notes": "ratio 212/218 = 0,972477… ; coût piloté 369,5413 ; MC2/j 125,4587 (125,5) ; MC2 % 25,3452 ; mode éteint 115,0 / 23,23.",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrRatio": 0.972477064220183
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 462,
+        "tjmTarget": 493,
+        "tjmIdeal": 528,
+        "tjmTop10": 581,
+        "mc2PerDay": 125.5,
+        "mc2PercentHuman": 25.35,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 125.5,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": 0.972477064220183,
+        "totalDailyCostPiloted": 369.54128440367,
+        "mc2PerDayTheoretical": 115.0,
+        "mc2PercentTheoretical": 23.23
+      }
+    },
+    {
+      "name": "Session 265a — Régie 3 — 243 produits pour 218 vendus (surproduction)",
+      "notes": "ratio 243/218 = 1,114679… ; coût piloté 423,5780 ; MC2/j 71,4220 (71,4) ; MC2 % 14,4287 ; below_floor.",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrRatio": 1.114678899082569
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 530,
+        "tjmTarget": 565,
+        "tjmIdeal": 606,
+        "tjmTop10": 667,
+        "mc2PerDay": 71.4,
+        "mc2PercentHuman": 14.43,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 71.4,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": 1.114678899082569,
+        "totalDailyCostPiloted": 423.577981651376,
+        "mc2PerDayTheoretical": 115.0,
+        "mc2PercentTheoretical": 23.23
+      }
+    },
+    {
+      "name": "Session 265a — Régie 4 — RFA 5 %, 228 produits pour 218 vendus",
+      "notes": "ratio 228/218 ; coût piloté 397,4312 ; MC2/j 72,8188 (72,8) ; MC2 % sur TJM brut = 14,7109 (le cadrage cite 15,4851 = MC2/j ÷ TJM net, formule non retenue : le moteur divise par le TJM, mode éteint inchangé).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrRatio": 1.045871559633028
+      },
+      "rfaPercent": 5,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 530,
+        "tjmTarget": 568,
+        "tjmIdeal": 612,
+        "tjmTop10": 674,
+        "mc2PerDay": 72.8,
+        "mc2PercentHuman": 14.71,
+        "corridorSegment": "below_floor",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 72.8,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": 1.045871559633028,
+        "totalDailyCostPiloted": 397.43119266055,
+        "mc2PerDayTheoretical": 90.3,
+        "mc2PercentTheoretical": 18.23
+      }
+    },
+    {
+      "name": "Session 265a — Régie 5 — mode actif + périodes de TJM (cas 1 de la 254)",
+      "notes": "CDI 45 000 € (coût 417), mission 120 j, P1 650 sur 60 j, P2 700 sur 60 j : TJM pondéré 675 ; 108 produits pour 120 vendus : ratio 0,9, coût piloté 375,30, MC2/j 299,70, MC2 % 44,4 ; mode éteint 258,0 / 38,22.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 120,
+        "tjmPeriods": [
+          {
+            "days": 60,
+            "tjm": 700
+          }
+        ],
+        "rplsrRatio": 0.9
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 417.0,
+        "tjmFloor": 470,
+        "tjmTarget": 501,
+        "tjmIdeal": 537,
+        "tjmTop10": 591,
+        "mc2PerDay": 299.7,
+        "mc2PercentHuman": 44.4,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 417.0,
+        "mc2PerDayEurEquivalent": 299.7,
+        "tjmEurEquivalent": 675.0,
+        "feePonctuelsDivisorDays": 120.0,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [],
+        "rplsrRatio": 0.9,
+        "totalDailyCostPiloted": 375.3,
+        "mc2PerDayTheoretical": 258.0,
+        "mc2PercentTheoretical": 38.22,
+        "tjmWeighted": 675.0,
+        "tjmPeriods": [
+          {
+            "index": 1,
+            "days": 60.0,
+            "tjm": 650.0
+          },
+          {
+            "index": 2,
+            "days": 60.0,
+            "tjm": 700.0
+          }
+        ],
+        "tjmPeriodsExceedMission": false,
+        "tjmPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 265a — Régie 6 — mode éteint, plan présent : identique au cas sans plan",
+      "notes": "Le contexte porte un plan mais pas de ratio : calcul du mode éteint (coût 380, MC2/j 115,0, 23,23 %).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrPlan": [
+          {
+            "m": "2027-02",
+            "ouvres": 10,
+            "vendus": 9.09,
+            "produits": 9
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 475,
+        "tjmTarget": 507,
+        "tjmIdeal": 543,
+        "tjmTop10": 598,
+        "mc2PerDay": 115.0,
+        "mc2PercentHuman": 23.23,
+        "corridorSegment": "low_margin",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 115.0,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": null,
+        "totalDailyCostPiloted": null,
+        "mc2PerDayTheoretical": null,
+        "mc2PercentTheoretical": null
+      }
+    },
+    {
+      "name": "Session 265b — Régie 7 — plan actif, 0 jour produit : ratio 0 calculé, jamais le mode éteint",
+      "notes": "VIE CJM 380, TJM 495, RFA 0 ; ratio 0 (aucun jour produit) : coût piloté 0, seuils 0, MC2/j 495,0, MC2 % 100 ; mode éteint 115,0 / 23,23 (attendus : Python Decimal, HALF_UP, plafond pour les seuils).",
+      "context": {
+        "contractType": "VIE",
+        "cjmVie": 380,
+        "rplsrRatio": 0
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 495,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 380.0,
+        "feeOmPerDay": 0.0,
+        "feePonctuelsPerDay": 0.0,
+        "totalDailyCost": 380.0,
+        "tjmFloor": 0,
+        "tjmTarget": 0,
+        "tjmIdeal": 0,
+        "tjmTop10": 0,
+        "mc2PerDay": 495.0,
+        "mc2PercentHuman": 100.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1.0,
+        "totalDailyCostEurEquivalent": 380.0,
+        "mc2PerDayEurEquivalent": 495.0,
+        "tjmEurEquivalent": 495.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [],
+        "rplsrRatio": 0.0,
+        "totalDailyCostPiloted": 0.0,
+        "mc2PerDayTheoretical": 115.0,
+        "mc2PercentTheoretical": 23.23
+      }
+    },
+    {
+      "name": "Congés — CDI, mission 2027 France (254 j ouvrés), sans congés",
+      "notes": "Mission 01/01-31/12/2027 France : 261 jours de semaine - 7 fériés en semaine (1/1, 29/3, 6/5, 17/5, 14/7, 1/11, 11/11) = 254. CDI 43600, 218 j/an : cjm=43600*2.02/218=404. Formation 2540 par mission ÷ 254 jours facturables = 10. total=414. floor=ceil(414/0.8)=ceil(517.5)=518. target=ceil(552)=552. ideal=ceil(591.43)=592. top10=ceil(651.2)=652. TJM 600 : mc2=186 (31,00 %), superstar. Jours facturables = 254.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43600,
+        "workingDaysPerYear": 218,
+        "missionDays": 254,
+        "plannedLeaveDays": 0,
+        "feeTraining": 2540
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 404,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 10,
+        "totalDailyCost": 414,
+        "tjmFloor": 518,
+        "tjmTarget": 552,
+        "tjmIdeal": 592,
+        "tjmTop10": 652,
+        "mc2PerDay": 186.0,
+        "mc2PercentHuman": 31.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 414.0,
+        "mc2PerDayEurEquivalent": 186.0,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 254,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [
+          {
+            "key": "feeTraining",
+            "amount": 2540,
+            "unit": "mission",
+            "divisor": 254,
+            "divisorSource": "mission",
+            "perDay": 10
+          }
+        ],
+        "billableDays": 254
+      }
+    },
+    {
+      "name": "Congés — CDI, mission 2027 France (254 j ouvrés), 25 j de congés",
+      "notes": "Même mission, 25 j de congés prévus : jours facturables = 254-25 = 229, diviseur des frais par mission = 229. Formation 2540/229 = 11.0917030567686. total=415.0917030567686. floor=ceil(518.86)=519. target=ceil(553.46)=554. ideal=ceil(592.99)=593. top10=ceil(652.3)=653. TJM 600 : mc2=184.9083 -> 184.9 ; 184.9083/600 = 30.82 %, superstar.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43600,
+        "workingDaysPerYear": 218,
+        "missionDays": 254,
+        "plannedLeaveDays": 25,
+        "feeTraining": 2540
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 404,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 11.091703056768552,
+        "totalDailyCost": 415.09170305676855,
+        "tjmFloor": 519,
+        "tjmTarget": 554,
+        "tjmIdeal": 593,
+        "tjmTop10": 653,
+        "mc2PerDay": 184.9,
+        "mc2PercentHuman": 30.82,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 415.09,
+        "mc2PerDayEurEquivalent": 184.9,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 229,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [
+          {
+            "key": "feeTraining",
+            "amount": 2540,
+            "unit": "mission",
+            "divisor": 229,
+            "divisorSource": "mission",
+            "perDay": 11.091703056768559
+          }
+        ],
+        "billableDays": 229
+      }
+    },
+    {
+      "name": "Frais mensuels autres — 75 €/mois, 218 j/an",
+      "notes": "CDI 43600, 218 j/an, durée inconnue : cjm=404. Autres frais mensuels 75 €/mois -> 75*12/218 = 900/218 = 4.1284403669725. total=408.1284403669725. floor=ceil(510.16)=511. target=ceil(544.17)=545. ideal=ceil(583.04)=584. top10=ceil(642.4)=643. TJM 600 : mc2=191.8716 -> 191.9 ; 31.98 %, superstar.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43600,
+        "workingDaysPerYear": 218,
+        "feeMonthlyOther": 75
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 404,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 4.128440366972484,
+        "totalDailyCost": 408.1284403669725,
+        "tjmFloor": 511,
+        "tjmTarget": 545,
+        "tjmIdeal": 584,
+        "tjmTop10": 643,
+        "mc2PerDay": 191.9,
+        "mc2PercentHuman": 31.98,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 408.13,
+        "mc2PerDayEurEquivalent": 191.9,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback",
+        "feeBreakdown": [
+          {
+            "key": "feeMonthlyOther",
+            "amount": 75,
+            "unit": "month",
+            "divisor": 218,
+            "divisorSource": "working_days",
+            "perDay": 4.128440366972477
+          }
+        ],
+        "billableDays": 0
+      }
+    },
+    {
+      "name": "Congés — régie sans régule active : congés ignorés",
+      "notes": "254 jours vendus, 25 j de congés saisis, régie active (ratio 1) : les congés sont ignorés, jours facturables = 254, diviseur 254. Formation 2540/254=10, total=414, coût piloté=414*1=414. Mêmes seuils et MC2 que sans congés : 518/552/592/652, mc2=186 (31 %). Valeurs théoriques = pilotées (ratio 1).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 43600,
+        "workingDaysPerYear": 218,
+        "missionDays": 254,
+        "plannedLeaveDays": 25,
+        "feeTraining": 2540,
+        "rplsrRatio": 1
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 404,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 10,
+        "totalDailyCost": 414,
+        "tjmFloor": 518,
+        "tjmTarget": 552,
+        "tjmIdeal": 592,
+        "tjmTop10": 652,
+        "mc2PerDay": 186.0,
+        "mc2PercentHuman": 31.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 414.0,
+        "mc2PerDayEurEquivalent": 186.0,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 254,
+        "feePonctuelsDivisorSource": "mission",
+        "feeBreakdown": [
+          {
+            "key": "feeTraining",
+            "amount": 2540,
+            "unit": "mission",
+            "divisor": 254,
+            "divisorSource": "mission",
+            "perDay": 10
+          }
+        ],
+        "billableDays": 254,
+        "rplsrRatio": 1.0,
+        "totalDailyCostPiloted": 414.0,
+        "mc2PerDayTheoretical": 186.0,
+        "mc2PercentTheoretical": 31.0
+      }
+    },
+    {
+      "name": "Session 281 — CDI 45 000 € sur 100 j puis 50 000 € sur 118 j : CJM pondéré",
+      "notes": "P1 cjm=round(45000*2.02/218)=417 ; P2 cjm=round(50000*2.02/218)=463. Jours facturables 218, P1 = 218-118 = 100 j. CJM pondéré=(100*417+118*463)/218=96334/218=441.89908256880733. Sans frais : coût total = CJM pondéré. floor=ceil(w/0.8)=553, target=ceil(w/0.75)=590, ideal=ceil(w/0.7)=632, top10=ceil(ideal*1.1)=696. mc2=650-w=208.10091743119267 -> 208.1 ; mc2%=32.015525758645026 -> 32.02 : superstar.",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 218,
+        "salaryPeriods": [
+          {
+            "days": 118,
+            "salary": 50000
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 441.89908256880733,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 441.89908256880733,
+        "tjmFloor": 553,
+        "tjmTarget": 590,
+        "tjmIdeal": 632,
+        "tjmTop10": 696,
+        "mc2PerDay": 208.1,
+        "mc2PercentHuman": 32.02,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 441.9,
+        "mc2PerDayEurEquivalent": 208.1,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "mission",
+        "salaryPeriods": [
+          {
+            "index": 1,
+            "days": 100,
+            "salary": 45000,
+            "cjm": 417
+          },
+          {
+            "index": 2,
+            "days": 118,
+            "salary": 50000,
+            "cjm": 463
+          }
+        ],
+        "salaryPeriodsExceedMission": false,
+        "salaryPeriodsMissionUnknown": false
+      }
+    },
+    {
+      "name": "Session 281 — CDI sans période de salaire ajoutée : résultat identique au cas Session 121 (non-régression)",
+      "notes": "Copie du cas « Session 121 — CDI 60-day mission » avec salaryPeriods vide : mêmes attendus au centime (cjm 417, MC2 208,0).",
+      "context": {
+        "contractType": "CDI",
+        "annualSalary": 45000,
+        "workingDaysPerYear": 218,
+        "missionDays": 60,
+        "feeTraining": 1500,
+        "salaryPeriods": []
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 650,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 417,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 25.0,
+        "totalDailyCost": 442,
+        "tjmFloor": 553,
+        "tjmTarget": 590,
+        "tjmIdeal": 632,
+        "tjmTop10": 696,
+        "mc2PerDay": 208.0,
+        "mc2PercentHuman": 32.0,
+        "corridorSegment": "superstar",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.02,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 442.0,
+        "mc2PerDayEurEquivalent": 208.0,
+        "tjmEurEquivalent": 650.0,
+        "feePonctuelsDivisorDays": 60,
+        "feePonctuelsDivisorSource": "mission"
+      }
+    },
+    {
+      "name": "Session 281 — INDEP avec périodes de salaire présentes : ignorées, attendus du cas « INDEP, markup sous le plafond, pas d'écart »",
+      "notes": "Statut sans salaire : les périodes de salaire sont ignorées, CJM = CJM avant mark-up + mark-up, liste de périodes vide.",
+      "context": {
+        "contractType": "INDEP",
+        "cjmBeforeMarkup": 300,
+        "markupApplied": 54,
+        "salaryPeriods": [
+          {
+            "days": 50,
+            "salary": 90000
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 500,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 354,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 354,
+        "tjmFloor": 443,
+        "tjmTarget": 472,
+        "tjmIdeal": 506,
+        "tjmTop10": 557,
+        "mc2PerDay": 146.0,
+        "mc2PercentHuman": 29.2,
+        "corridorSegment": "recommended",
+        "markupCalcule": 54.0,
+        "markupMismatch": false,
+        "contractCoefficientApplied": null,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 354.0,
+        "mc2PerDayEurEquivalent": 146.0,
+        "tjmEurEquivalent": 500.0,
+        "feePonctuelsDivisorDays": 218,
+        "feePonctuelsDivisorSource": "year_fallback"
+      }
+    },
+    {
+      "name": "Session 281 — CDD coefficient 2,2 appliqué à chaque période de salaire",
+      "notes": "P1 cjm=round(40000*2.2/218)=404 ; P2 cjm=round(44000*2.2/218)=444. 200 j facturables, P1 = 100 j, P2 = 100 j : CJM pondéré=(404+444)/2=424.0. floor=ceil(424/0.8)=530, target=ceil(424/0.75)=566, ideal=ceil(424/0.7)=606, top10=ceil(606*1.1)=667. mc2=600-424=176 ; mc2%=29.33 : recommended.",
+      "context": {
+        "contractType": "CDD",
+        "annualSalary": 40000,
+        "contractCoefficient": 2.2,
+        "workingDaysPerYear": 218,
+        "missionDays": 200,
+        "salaryPeriods": [
+          {
+            "days": 100,
+            "salary": 44000
+          }
+        ]
+      },
+      "rfaPercent": 0,
+      "proposedTjm": 600,
+      "top10Comparables": 0,
+      "thresholdPercents": null,
+      "rateToEur": 1,
+      "expected": {
+        "cjm": 424.0,
+        "feeOmPerDay": 0,
+        "feePonctuelsPerDay": 0,
+        "totalDailyCost": 424.0,
+        "tjmFloor": 530,
+        "tjmTarget": 566,
+        "tjmIdeal": 606,
+        "tjmTop10": 667,
+        "mc2PerDay": 176.0,
+        "mc2PercentHuman": 29.33,
+        "corridorSegment": "recommended",
+        "markupCalcule": null,
+        "markupMismatch": false,
+        "contractCoefficientApplied": 2.2,
+        "workingDaysPerYearApplied": 218,
+        "currencyRateApplied": 1,
+        "totalDailyCostEurEquivalent": 424.0,
+        "mc2PerDayEurEquivalent": 176.0,
+        "tjmEurEquivalent": 600.0,
+        "feePonctuelsDivisorDays": 200,
+        "feePonctuelsDivisorSource": "mission",
+        "salaryPeriods": [
+          {
+            "index": 1,
+            "days": 100,
+            "salary": 40000,
+            "cjm": 404
+          },
+          {
+            "index": 2,
+            "days": 100,
+            "salary": 44000,
+            "cjm": 444
+          }
+        ],
+        "salaryPeriodsExceedMission": false,
+        "salaryPeriodsMissionUnknown": false
+      }
+    }
+  ]
+}

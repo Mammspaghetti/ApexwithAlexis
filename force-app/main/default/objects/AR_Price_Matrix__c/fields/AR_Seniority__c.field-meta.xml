@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Seniority__c</fullName>
+    <description>Palier de séniorité du consultant, saisi en zone 2 ou prérempli à partir du consultant sélectionné. Il peut être modifié et sert à affiner la sélection des comparables.</description>
+    <externalId>false</externalId>
+    <label>Palier de séniorité</label>
+    <length>100</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

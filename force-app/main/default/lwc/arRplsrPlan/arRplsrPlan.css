@@ -1,0 +1,581 @@
+/* Carte « Régie sans régule » : mêmes bordure, rayon et ombre que les cartes de zone du simulateur (zone-card).
+   overflow visible : l'infobulle déborde au-dessus du graphique. */
+.rplsr-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+  color: #111111;
+}
+
+.rplsr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+
+.rplsr-head_on {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rplsr-head-left {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+/* Interrupteur discret + titre au style des titres de zone */
+.rplsr-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #111111;
+}
+
+.rplsr-switch:disabled {
+  cursor: default;
+  color: #111111;
+}
+
+.rplsr-switch-track {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  border-radius: 999px;
+  background: #cfcfcf;
+  transition: background-color 0.3s;
+}
+
+.rplsr-switch-track_on {
+  background: #d31876;
+}
+
+.rplsr-switch-track_readonly {
+  background: #999999;
+}
+
+.rplsr-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: left 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.rplsr-switch-track_on .rplsr-switch-knob {
+  left: 15px;
+}
+
+.rplsr-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #444444;
+}
+
+.rplsr-base-input {
+  width: 80px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111111;
+  background: #ffffff;
+  text-align: center;
+}
+
+.rplsr-base-input:focus {
+  outline: none;
+  border-color: #d31876;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.15);
+}
+
+.rplsr-base-readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+}
+
+/* Équation PRODUITS − VENDUS = SOLDE */
+.rplsr-equation {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 1px;
+  align-items: center;
+  justify-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.rplsr-eq-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #8a94a3;
+}
+
+.rplsr-eq-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.rplsr-eq-value_sold {
+  color: #6b7785;
+}
+
+.rplsr-eq-sign {
+  font-size: 17px;
+  font-weight: 300;
+  color: #b6bec9;
+}
+
+.rplsr-eq-chip {
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 8px;
+  padding: 2px 10px;
+  color: #ffffff;
+}
+
+.rplsr-anim {
+  transition:
+    top 0.35s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.3s;
+}
+
+/* Infobulle : accrochée à la carte, toujours à la même hauteur au-dessus du graphique */
+.rplsr-tip {
+  position: absolute;
+  z-index: 6;
+  background: #0d2a45;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 24px rgba(13, 42, 69, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: rplsr-pop 0.16s ease-out;
+}
+
+@keyframes rplsr-pop {
+  from {
+    opacity: 0;
+    margin-top: 4px;
+  }
+  to {
+    opacity: 1;
+    margin-top: 0;
+  }
+}
+
+.rplsr-tip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.rplsr-tip-title {
+  font-size: 13px;
+}
+
+.rplsr-tip-chip {
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.rplsr-tip-body {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+}
+
+.rplsr-tip-key {
+  opacity: 0.7;
+}
+
+/* Pointe posée sur le bord de l'infobulle côté colonne (position donnée par le JS) */
+.rplsr-tip-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #0d2a45;
+  transform: rotate(45deg);
+}
+
+/* Graphique : défilement horizontal au glisser au-delà de 38 px par colonne */
+.rplsr-pan {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 8px 4px;
+  transition: padding-bottom 0.3s cubic-bezier(0.2, 0, 0, 1);
+  scrollbar-width: thin;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rplsr-inner {
+  position: relative;
+  padding-right: 60px;
+}
+
+/* Mois courts au-dessus du graphique, alignés sur leur colonne */
+.rplsr-months {
+  display: flex;
+  gap: 0;
+}
+
+.rplsr-month-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 4px;
+  border-radius: 7px 7px 0 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.rplsr-month-cell_focus {
+  background: #f5f6f8;
+}
+
+.rplsr-chart {
+  position: relative;
+  transition: height 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.rplsr-body {
+  position: relative;
+}
+
+/* Carte rétractée : la frise est un bouton posé sur tout le corps de la carte */
+.rplsr-strip {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 7px;
+}
+
+.rplsr-strip:focus-visible {
+  outline: 2px solid rgba(211, 24, 118, 0.45);
+  outline-offset: -2px;
+}
+
+.rplsr-sold-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed rgba(13, 42, 69, 0.45);
+  transition: top 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.rplsr-cols {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 0;
+}
+
+.rplsr-col {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  border-radius: 7px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.rplsr-col_focus {
+  background: #f5f6f8;
+}
+
+/* Plage possible du mois (0 → jours ouvrés), au survol seulement */
+.rplsr-cap {
+  position: absolute;
+  left: 50%;
+  width: 62%;
+  max-width: 34px;
+  transform: translateX(-50%);
+  border-radius: 7px 7px 4px 4px;
+  background: rgba(13, 42, 69, 0.06);
+  border: 1px dashed rgba(13, 42, 69, 0.28);
+  box-sizing: border-box;
+}
+
+.rplsr-bar {
+  position: absolute;
+  left: 50%;
+  width: 40%;
+  max-width: 20px;
+  transform: translateX(-50%);
+}
+
+.rplsr-handle,
+.rplsr-dot {
+  position: absolute;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.rplsr-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.rplsr-handle:active {
+  cursor: grabbing;
+}
+
+.rplsr-handle:focus-visible {
+  outline: none;
+}
+
+.rplsr-handle:focus-visible .rplsr-knob {
+  box-shadow: 0 0 0 4px rgba(211, 24, 118, 0.25);
+}
+
+.rplsr-knob {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #0d2a45;
+  box-shadow: 0 1px 4px rgba(13, 42, 69, 0.3);
+  transition: transform 0.15s;
+}
+
+.rplsr-handle:hover .rplsr-knob {
+  transform: scale(1.25);
+}
+
+.rplsr-curve {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rplsr-bubble {
+  position: absolute;
+  right: -60px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 5px 9px;
+  min-width: 44px;
+}
+
+.rplsr-bubble-key {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.rplsr-bubble-value {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* Valeurs entières juste sous le point le plus bas dessiné */
+.rplsr-values {
+  display: flex;
+  gap: 0;
+  margin-top: 4px;
+  transition: margin-top 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.rplsr-value-cell {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.rplsr-day-val {
+  width: 30px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: transparent;
+  padding: 0;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.3s,
+    height 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.rplsr-day-val:hover {
+  background: #f4f5f7;
+  border-color: #e3e6ea;
+}
+
+.rplsr-day-val:focus {
+  outline: none;
+  border-color: #d31876;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.15);
+}
+
+.rplsr-day-val_readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rplsr-day-val_readonly:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.rplsr-month {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #6b6b6b;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+}
+
+.rplsr-empty {
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+  color: #6b6b6b;
+}
+
+/* Rétractation : graphique réduit à la frise (repli 0,4 s, dépliage 0,3 s) */
+.rplsr-sold-line,
+.rplsr-curve,
+.rplsr-bubble,
+.rplsr-cap,
+.rplsr-knob {
+  opacity: 1;
+}
+
+.rplsr-card_collapsed .rplsr-chart {
+  transition-duration: 0.4s;
+}
+
+.rplsr-card_collapsed .rplsr-sold-line,
+.rplsr-card_collapsed .rplsr-curve,
+.rplsr-card_collapsed .rplsr-bubble,
+.rplsr-card_collapsed .rplsr-cap,
+.rplsr-card_collapsed .rplsr-knob {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
+}
+
+.rplsr-card_collapsed .rplsr-handle,
+.rplsr-card_collapsed .rplsr-dot {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.rplsr-card_collapsed .rplsr-day-val {
+  height: 18px;
+  line-height: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  pointer-events: none;
+  transition:
+    color 0.6s,
+    height 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Frise symétrique (269b) : écart trait → chiffres = écart mois → trait ; bas resserré */
+.rplsr-card_collapsed .rplsr-values {
+  margin-top: 0;
+  transition-duration: 0.4s;
+}
+
+.rplsr-card_collapsed .rplsr-pan {
+  padding-bottom: 6px;
+  transition-duration: 0.4s;
+}
+
+.rplsr-card_collapsed .rplsr-day-val:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.rplsr-card_collapsed .rplsr-col,
+.rplsr-card_collapsed .rplsr-month-cell {
+  cursor: pointer;
+}
+
+/* Même règle que le bloc des périodes de TJM : pas d'animation si l'utilisateur la refuse. */
+@media (prefers-reduced-motion: reduce) {
+  .rplsr-bar,
+  .rplsr-handle,
+  .rplsr-dot,
+  .rplsr-sold-line,
+  .rplsr-anim,
+  .rplsr-switch-track,
+  .rplsr-switch-knob,
+  .rplsr-knob {
+    transition: none !important;
+  }
+
+  .rplsr-tip {
+    animation: none;
+  }
+}

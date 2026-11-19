@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Was_Root__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>La matrice purgée était la première de sa lignée.</description>
+    <label>Racine de lignée</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

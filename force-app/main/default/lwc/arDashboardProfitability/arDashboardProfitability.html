@@ -1,0 +1,198 @@
+<template>
+  <div class="tab-body">
+    <div class="kpi-row">
+      <div class={mc2KpiClass} data-kpi="mc2">
+        <p class="kpi-label">{i18n.PfKpiMc2}</p>
+        <p class="kpi-value">{mc2Text}</p>
+      </div>
+      <div class="kpi-card kpi-tint-navy" data-kpi="costs">
+        <p class="kpi-label">{i18n.PfKpiCosts}</p>
+        <p class="kpi-value">{costsText}</p>
+      </div>
+      <div class="kpi-card kpi-tint-amber" data-kpi="topPost">
+        <p class="kpi-label">{i18n.PfKpiTopPost}</p>
+        <p class="kpi-value">{topPostText}</p>
+        <p class="kpi-detail">{topPostDetail}</p>
+      </div>
+      <div class="kpi-card kpi-tint-red" data-kpi="belowFloor">
+        <p class="kpi-label">{i18n.PfKpiBelowFloor}</p>
+        <p class="kpi-value">{belowFloorCount}</p>
+      </div>
+    </div>
+
+    <div class="section-card block-costs">
+      <div class="section-head">
+        <p class="section-title">{costsTitle}</p>
+        <div class="toggle-group" role="group" aria-label={i18n.PfToggleAria}>
+          <button
+            type="button"
+            class={percentButtonClass}
+            data-mode="percent"
+            aria-pressed={percentPressed}
+            onclick={handleModePercent}
+          >
+            {i18n.PfTogglePercent}
+          </button>
+          <button
+            type="button"
+            class={perDayButtonClass}
+            data-mode="perday"
+            aria-pressed={perDayPressed}
+            onclick={handleModePerDay}
+          >
+            {i18n.PfTogglePerDay}
+          </button>
+        </div>
+      </div>
+      <template if:true={hasCostRows}>
+        <template for:each={costRows} for:item="row">
+          <div key={row.key} class={row.className}>
+            <span class="segment-name">{row.label}</span>
+            <div class="cost-wrap">
+              <template if:true={row.hasBar}>
+                <div
+                  class="stack-track cost-bar"
+                  style={row.wrapStyle}
+                  role="img"
+                  aria-label={row.label}
+                >
+                  <template for:each={row.segments} for:item="seg">
+                    <div
+                      key={seg.key}
+                      class="stack-part"
+                      style={seg.style}
+                      title={seg.title}
+                    >
+                      {seg.text}
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+            <span class="cost-total">{row.totalText}</span>
+          </div>
+        </template>
+        <ul class="legend">
+          <template for:each={postLegend} for:item="item">
+            <li key={item.key} class="legend-item">
+              <span class="legend-dot" style={item.style}></span>
+              <span>{item.label}</span>
+            </li>
+          </template>
+        </ul>
+        <template if:true={excludedNote}>
+          <p class="note">{excludedNote}</p>
+        </template>
+      </template>
+      <template if:false={hasCostRows}>
+        <p class="empty-message">{i18n.NoData}</p>
+      </template>
+    </div>
+
+    <div class="grid-two">
+      <div class="section-card block-points">
+        <p class="section-title">{pointsTitle}</p>
+        <template if:true={pointRows.length}>
+          <template for:each={pointRows} for:item="row">
+            <div key={row.key} class="segment-row">
+              <span class="segment-name">{row.label}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style={row.barStyle}></div>
+              </div>
+              <span class="segment-count">{row.detail}</span>
+            </div>
+          </template>
+        </template>
+        <template if:false={pointRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+
+      <div class="section-card block-mc2-axis">
+        <p class="section-title">{mc2AxisTitle}</p>
+        <template if:true={mc2AxisRows.length}>
+          <template for:each={mc2AxisRows} for:item="row">
+            <div key={row.key} class="segment-row">
+              <span class="segment-name">{row.label}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style={row.barStyle}></div>
+              </div>
+              <span class="segment-count">{row.detail}</span>
+            </div>
+          </template>
+        </template>
+        <template if:false={mc2AxisRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="section-card block-low-clients">
+        <p class="section-title">{i18n.PfLowClientsTitle}</p>
+        <template if:true={lowClientRows.length}>
+          <div class="table-scroll">
+            <table class="rank-table low-clients-table">
+              <thead>
+                <tr>
+                  <th>{i18n.ColAccountName}</th>
+                  <th>{i18n.ColAxisValue}</th>
+                  <th class="num">{i18n.ColMatricesShort}</th>
+                  <th class="num">{i18n.ColMc2Short}</th>
+                  <th class="num">{i18n.ColGap}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={lowClientRows} for:item="row">
+                  <tr key={row.key}>
+                    <td>{row.accountName}</td>
+                    <td>{row.axisLabel}</td>
+                    <td class="num">{row.matrixCount}</td>
+                    <td class="num">{row.mc2}</td>
+                    <td class={row.mc2Class}>{row.gap}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={lowClientRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+
+      <div class="section-card block-thresholds-accounts">
+        <p class="section-title">{i18n.PfThresholdsTitle}</p>
+        <template if:true={thresholdRows.length}>
+          <div class="table-scroll">
+            <table class="rank-table thresholds-table">
+              <thead>
+                <tr>
+                  <th>{i18n.ColAccountName}</th>
+                  <th class="num">{i18n.ColFloor}</th>
+                  <th class="num">{i18n.ColTarget}</th>
+                  <th class="num">{i18n.ColIdeal}</th>
+                  <th>{i18n.ColSource}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={thresholdRows} for:item="row">
+                  <tr key={row.key}>
+                    <td>{row.accountName}</td>
+                    <td class="num">{row.floor}</td>
+                    <td class="num">{row.target}</td>
+                    <td class="num">{row.ideal}</td>
+                    <td>{row.source}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={thresholdRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

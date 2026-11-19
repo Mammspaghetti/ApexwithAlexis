@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_User__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Utilisateur valideur pour l&apos;entité. Toujours renseigné par le service (un lookup vers User ne peut pas être obligatoire au niveau champ : la plateforme refuse la restriction de suppression sur User).</description>
+    <label>Utilisateur</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Valideurs d&apos;entité PTF</relationshipLabel>
+    <relationshipName>AR_PTF_Entity_Validator_Rows</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Markup_Applied__c</fullName>
+    <description>Markup appliqué au CJM (statut Indépendant) ; alerte si différent du markup calculé (MIN(CJM avant markup × 18 %, 60 €)).</description>
+    <externalId>false</externalId>
+    <label>Markup appliqué</label>
+    <precision>16</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,36 @@
+<aura:component >
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+    
+    <aura:handler name="childCheckboxChanged" event="c:EVT_HierarchyNodeEvent" action="{!c.handleChildCheckboxChanged}" />
+    <aura:registerEvent name="childCheckboxChanged" type="c:EVT_HierarchyNodeEvent"/>
+    <aura:registerEvent name="refreshSelectedValues" type="c:EVT_HierarchyNodeEvent"/>
+    
+
+    <aura:attribute name="node" type="Map" required="true"/>
+    <aura:attribute name="toggleNodesRecursively" type="Boolean" default="true"/>
+    <aura:attribute name="startExpended" type="Boolean" default="false"/>
+	<aura:attribute name="level" type="Integer" default="0"/>
+    
+    <aura:attribute name="_isTopLevel" type="Boolean" default="true"/>
+    <aura:attribute name="_hasCheckedChildren" type="Boolean" default="false"/>
+    
+    <aura:attribute name="_collapse" type="Boolean" default="true"/>
+
+    
+    <li class="hierarchieNode">
+        <aura:if isTrue="{!v.node.children.length > 0}">
+        	<lightning:buttonIcon iconName="{!v._collapse ? 'utility:chevronright' : 'utility:chevrondown'}" size="small" variant="bare" onclick="{!c.toggleChildrenVisibility}"/>
+        </aura:if>
+
+
+        <lightning:input type="checkbox" label="{!v.node.label}" onchange="{!c.checkNode}" checked="{!v.node.checked}" class="{!(v.node.hasCheckedChildren ? 'hasCheckedChildren' : '') + ' hierarchieCheckbox'}"/>
+        
+        <!--<aura:if isTrue="{!and(!v._collapse, v.node.children.length > 0)}">-->
+            <ul class="{!v._collapse ? 'collapse' : ''}">
+            	<aura:iteration items="{!v.node.children}" var="child">
+                    <c:HierarchyNode node="{!child}" toggleNodesRecursively="{!v.toggleNodesRecursively}" _isTopLevel="false" startExpended="{!v.startExpended}" level="{!v.level + 1}"/>
+                </aura:iteration>
+            </ul>
+        <!--</aura:if>-->
+    </li>
+</aura:component>

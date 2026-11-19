@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Template_Code__c</fullName>
+    <description>Code du gabarit PTF utilisé pour cette entité lorsque le compte ne définit pas de gabarit spécifique et qu&apos;aucune valeur n&apos;est saisie manuellement. Si le champ est vide, le gabarit générique est utilisé.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Code gabarit PTF par défaut</label>
+    <length>40</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

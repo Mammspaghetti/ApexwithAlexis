@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AB_Trial_period__c</fullName>
+    <label>Trial period</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>2 mois</fullName>
+                <default>false</default>
+                <label>2 mois</label>
+            </value>
+            <value>
+                <fullName>3 mois</fullName>
+                <default>false</default>
+                <label>3 mois</label>
+            </value>
+            <value>
+                <fullName>4 mois</fullName>
+                <default>false</default>
+                <label>4 mois</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

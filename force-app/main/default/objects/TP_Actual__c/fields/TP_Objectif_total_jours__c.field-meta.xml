@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TP_Objectif_total_jours__c</fullName>
+    <externalId>false</externalId>
+    <formula>TP_Objectif_total__c * (TP_Jours_par_semaine__c/ TP_Scope__r.TP_Jours_par_semaine__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Objectif total/jours</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

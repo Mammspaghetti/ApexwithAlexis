@@ -1,0 +1,240 @@
+.baby-container {
+    text-align: center;
+    padding: 15px;
+    font-family: Arial, sans-serif;
+}
+.minibaby{
+    position: relative;
+
+        width: 80px;
+    height: 90px;
+       margin: auto;
+    animation: babyFloat 2.5s ease-in-out infinite;
+}
+/* Bébé */
+.baby {
+    position: relative;
+    width: 180px;
+    height: 190px;
+    margin: auto;
+    animation: babyFloat 2.5s ease-in-out infinite;
+}
+
+/* Nuage */
+.cloud {
+    position: absolute;
+    width: 145px;
+    height: 95px;
+    background: #1798d4;
+    border-radius: 60px;
+    top: 45px;
+    left: 17px;
+    box-shadow: 0 7px 0 #087bb5;
+}
+
+.cloud::before,
+.cloud::after {
+    content: "";
+    position: absolute;
+    background: #1798d4;
+    border-radius: 50%;
+}
+
+.cloud::before {
+    width: 75px;
+    height: 75px;
+    top: -30px;
+    left: 30px;
+}
+
+.cloud::after {
+    width: 65px;
+    height: 65px;
+    top: -20px;
+    right: 10px;
+}
+
+/* Visage */
+.face {
+    position: absolute;
+    z-index: 2;
+    top: 68px;
+    left: 40px;
+    width: 100px;
+}
+
+.eyes {
+    display: flex;
+    justify-content: space-around;
+}
+
+.eye {
+    width: 13px;
+    height: 17px;
+    background: white;
+    border-radius: 50%;
+    animation: babyBlink 4s infinite;
+}
+
+.cheeks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 9px;
+}
+
+.cheek {
+    width: 17px;
+    height: 10px;
+    background: #ff9caf;
+    border-radius: 50%;
+}
+
+/* Tétine */
+.pacifier {
+    position: absolute;
+    top: 28px;
+    left: 39px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pacifier-top {
+    width: 19px;
+    height: 15px;
+    background: #ffcf57;
+    border-radius: 50%;
+}
+
+.pacifier-bottom {
+    width: 25px;
+    height: 5px;
+    background: white;
+    border-radius: 10px;
+}
+
+/* Bras */
+.arm {
+    position: absolute;
+    z-index: -1;
+    width: 10px;
+    height: 42px;
+    background: #087bb5;
+    border-radius: 20px;
+    top: 105px;
+}
+
+.arm-left {
+    left: 8px;
+    transform: rotate(35deg);
+}
+
+.arm-right {
+    right: 8px;
+    transform: rotate(-35deg);
+    animation: babyWave 1s infinite alternate;
+}
+
+/* Jambes */
+.legs {
+    position: absolute;
+    top: 130px;
+    left: 65px;
+    display: flex;
+    gap: 25px;
+}
+
+.leg {
+    width: 10px;
+    height: 35px;
+    background: #087bb5;
+    border-radius: 20px;
+}
+
+/* Emojis */
+.emoji {
+    position: absolute;
+    z-index: 3;
+    font-size: 20px;
+}
+
+.star {
+    top: 15px;
+    left: 5px;
+    animation: babyBounce 1.5s infinite;
+}
+
+.heart {
+    top: 5px;
+    right: 5px;
+    animation: babyPulse 1s infinite;
+}
+
+.baby-emoji {
+    bottom: 10px;
+    right: -5px;
+    animation: babyBounce 2s infinite;
+}
+
+/* Texte */
+.baby-name {
+    color: #1798d4;
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.baby-message {
+    margin: 10px auto;
+    padding: 10px;
+    background: #eaf8ff;
+    border-radius: 15px;
+    color: #087bb5;
+    font-size: 13px;
+    max-width: 260px;
+}
+
+/* Animations */
+@keyframes babyFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes babyBlink {
+    0%, 45%, 50%, 100% {
+        transform: scaleY(1);
+    }
+    47%, 49% {
+        transform: scaleY(.1);
+    }
+}
+
+@keyframes babyWave {
+    from {
+        transform: rotate(-35deg);
+    }
+    to {
+        transform: rotate(-70deg);
+    }
+}
+
+@keyframes babyBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes babyPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}

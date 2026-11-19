@@ -1,0 +1,286 @@
+<template>
+  <div
+    class={cardClass}
+    onmouseenter={handleCardEnter}
+    onmouseleave={handleCardLeave}
+    onclick={handleCardClick}
+    onpointerdown={handleCardPointerDown}
+    onfocusin={handleCardFocusIn}
+    onfocusout={handleCardFocusOut}
+    onkeydown={handleCardKeydown}
+  >
+    <div class={headerClass}>
+      <div class="rplsr-head-left">
+        <button
+          class="rplsr-switch"
+          type="button"
+          aria-pressed={ariaPressed}
+          aria-expanded={ariaPressed}
+          disabled={readOnly}
+          onclick={handleToggle}
+          data-id="toggle"
+        >
+          <span class={switchTrackClass}
+            ><span class="rplsr-switch-knob"></span
+          ></span>
+          {labels.title}
+        </button>
+        <template lwc:if={enabled}>
+          <label class="rplsr-base">
+            {labels.daysPerMonth}
+            <template lwc:if={readOnly}>
+              <span class="rplsr-base-input rplsr-base-readonly" data-id="base"
+                >{baseDisplay}</span
+              >
+            </template>
+            <template lwc:else>
+              <input
+                class="rplsr-base-input"
+                type="text"
+                inputmode="decimal"
+                value={baseInputValue}
+                oninput={handleBaseInput}
+                onchange={handleBaseChange}
+                onblur={handleBaseChange}
+                onkeydown={handleBaseKey}
+                data-id="base"
+              />
+            </template>
+          </label>
+        </template>
+      </div>
+      <template lwc:if={enabled}>
+        <template lwc:if={hasPlan}>
+          <div
+            class="rplsr-equation"
+            role="group"
+            aria-label={labels.equationAria}
+          >
+            <span class="rplsr-eq-title">{labels.produced}</span>
+            <span></span>
+            <span class="rplsr-eq-title">{labels.sold}</span>
+            <span></span>
+            <span class="rplsr-eq-title" style={balanceTitleStyle}
+              >{labels.balance}</span
+            >
+            <b class="rplsr-eq-value" data-id="total-produced"
+              >{totalProducedLabel}</b
+            >
+            <span class="rplsr-eq-sign" aria-hidden="true">−</span>
+            <b class="rplsr-eq-value rplsr-eq-value_sold" data-id="total-sold"
+              >{totalSoldLabel}</b
+            >
+            <span class="rplsr-eq-sign" aria-hidden="true">=</span>
+            <b
+              class="rplsr-eq-chip rplsr-anim"
+              style={balanceChipStyle}
+              data-id="balance"
+              >{balanceLabel}</b
+            >
+          </div>
+        </template>
+      </template>
+    </div>
+
+    <template lwc:if={enabled}>
+      <template lwc:if={hasPlan}>
+        <template lwc:if={showTip}>
+          <div class="rplsr-tip" style={tip.style} data-id="tip">
+            <div class="rplsr-tip-head">
+              <b class="rplsr-tip-title">{tip.title}</b>
+              <span class="rplsr-tip-chip" style={tip.ecartStyle}
+                >{tip.ecart}</span
+              >
+            </div>
+            <div class="rplsr-tip-body">
+              <span
+                ><span class="rplsr-tip-key">{labels.working}</span>
+                <b>{tip.ouvres}</b></span
+              >
+              <template lwc:if={tip.showSold}>
+                <span data-id="tip-sold"
+                  ><span class="rplsr-tip-key">{labels.sold}</span>
+                  <b>{tip.vendus}</b></span
+                >
+              </template>
+            </div>
+            <span class="rplsr-tip-arrow" style={tip.arrowStyle}></span>
+          </div>
+        </template>
+        <div class="rplsr-body">
+          <template lwc:if={collapsed}>
+            <button
+              class="rplsr-strip"
+              type="button"
+              aria-expanded="false"
+              aria-label={labels.expandAria}
+              onmouseenter={handleStripEnter}
+              onmouseleave={handleStripLeave}
+              onclick={handleStripClick}
+              data-id="strip"
+            ></button>
+          </template>
+          <div
+            class="rplsr-pan"
+            style={panStyle}
+            onmouseenter={handlePanEnter}
+            onpointerdown={handlePanDown}
+            onpointermove={handlePanMove}
+            onpointerup={handlePanUp}
+            onpointercancel={handlePanUp}
+            onscroll={handleScroll}
+            data-id="pan"
+          >
+            <div class="rplsr-inner" style={innerStyle}>
+              <div class="rplsr-months">
+                <template for:each={viewItems} for:item="item">
+                  <div
+                    key={item.key}
+                    class={item.monthClass}
+                    data-index={item.index}
+                    onmouseenter={handleColumnEnter}
+                    onclick={handleColumnClick}
+                  >
+                    <span class="rplsr-month" data-id="month"
+                      >{item.label}</span
+                    >
+                  </div>
+                </template>
+              </div>
+              <div
+                class="rplsr-chart"
+                style={chartStyle}
+                onmouseleave={handleChartLeave}
+                data-id="chart"
+              >
+                <div
+                  class="rplsr-sold-line"
+                  style={soldLineStyle}
+                  title={labels.soldLine}
+                  data-id="sold-line"
+                ></div>
+                <div class="rplsr-cols">
+                  <template for:each={viewItems} for:item="item">
+                    <div
+                      key={item.key}
+                      class={item.colClass}
+                      data-index={item.index}
+                      onmouseenter={handleColumnEnter}
+                      onclick={handleColumnClick}
+                    >
+                      <template lwc:if={item.focused}>
+                        <div class="rplsr-cap" style={item.capStyle}></div>
+                      </template>
+                      <div
+                        class="rplsr-bar"
+                        style={item.barStyle}
+                        data-id="bar"
+                      ></div>
+                      <template lwc:if={readOnly}>
+                        <span
+                          class="rplsr-dot"
+                          style={item.handleStyle}
+                          data-id="handle"
+                          ><span
+                            class="rplsr-knob"
+                            style={item.knobStyle}
+                          ></span
+                        ></span>
+                      </template>
+                      <template lwc:else>
+                        <button
+                          class="rplsr-handle"
+                          type="button"
+                          style={item.handleStyle}
+                          aria-label={item.handleAria}
+                          data-index={item.index}
+                          data-id="handle"
+                          onpointerdown={handleHandleDown}
+                          onkeydown={handleHandleKey}
+                          onfocus={handleHandleFocus}
+                        >
+                          <span
+                            class="rplsr-knob"
+                            style={item.knobStyle}
+                          ></span>
+                        </button>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+                <svg
+                  class="rplsr-curve"
+                  aria-hidden="true"
+                  width="100%"
+                  height="180"
+                  viewBox="0 0 1000 180"
+                  preserveAspectRatio="none"
+                >
+                  <polyline
+                    points={soldePoints}
+                    fill="none"
+                    stroke="#f59e0b"
+                    stroke-width="2.5"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                    vector-effect="non-scaling-stroke"
+                    data-id="curve"
+                  ></polyline>
+                </svg>
+                <div
+                  class="rplsr-bubble rplsr-anim"
+                  style={endBubbleStyle}
+                  data-id="bubble"
+                >
+                  <span class="rplsr-bubble-key">{labels.balance}</span>
+                  <span class="rplsr-bubble-value">{balanceLabel}</span>
+                </div>
+              </div>
+              <div class="rplsr-values">
+                <template for:each={viewItems} for:item="item">
+                  <div
+                    key={item.key}
+                    class="rplsr-value-cell"
+                    data-index={item.index}
+                    onmouseenter={handleColumnEnter}
+                  >
+                    <template lwc:if={readOnly}>
+                      <span
+                        class="rplsr-day-val rplsr-day-val_readonly"
+                        style={item.valueStyle}
+                        data-id="value"
+                        >{item.produced}</span
+                      >
+                    </template>
+                    <template lwc:else>
+                      <input
+                        class="rplsr-day-val"
+                        type="text"
+                        inputmode="numeric"
+                        readonly={item.valueReadonly}
+                        tabindex={item.valueTabindex}
+                        aria-label={item.valueAria}
+                        value={item.inputValue}
+                        style={item.valueStyle}
+                        data-index={item.index}
+                        data-id="value"
+                        oninput={handleValueInput}
+                        onchange={handleValueChange}
+                        onblur={handleValueChange}
+                        onkeydown={handleValueKey}
+                        onfocus={handleHandleFocus}
+                      />
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template lwc:else>
+        <p class="rplsr-empty" data-id="dates-missing">{labels.datesMissing}</p>
+      </template>
+    </template>
+  </div>
+</template>

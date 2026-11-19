@@ -1,0 +1,25 @@
+<template>
+  <template if:true={hasData}>
+    <svg
+      class="bar"
+      viewBox="0 0 100 10"
+      preserveAspectRatio="none"
+      role="img"
+      aria-label={ariaLabel}
+    >
+      <template for:each={parts} for:item="part">
+        <rect
+          key={part.key}
+          class="part"
+          x={part.x}
+          y="0"
+          width={part.width}
+          height="10"
+          fill={part.color}
+        >
+          <title>{part.tooltip}</title>
+        </rect>
+      </template>
+    </svg>
+  </template>
+</template>

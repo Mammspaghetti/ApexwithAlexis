@@ -1,0 +1,292 @@
+<template>
+  <div class="list-header">
+    <div>
+      <h1 class="list-title">{i18n.AR_App_BreadcrumbMatrices}</h1>
+      <p class="list-subtitle">{matrixCountLabel}</p>
+    </div>
+    <button class="btn btn-primary" onclick={handleNewMatrix} type="button">
+      <lightning-icon
+        icon-name="utility:add"
+        size="xx-small"
+        variant="inverse"
+      ></lightning-icon>
+      {i18n.AR_ML_NewMatrix}
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <lightning-input
+      type="search"
+      label={i18n.AR_ML_Search}
+      variant="label-hidden"
+      placeholder={i18n.AR_ML_SearchPlaceholder}
+      value={searchText}
+      onchange={handleSearchChange}
+      class="search-input"
+    ></lightning-input>
+    <!-- Session 115 : filtre de statut multi-sélection (toutes les cases cochées par défaut). -->
+    <div class="status-select" onkeydown={handleStatusMenuKeydown}>
+      <button
+        class={statusTriggerClass}
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={statusMenuOpen}
+        onclick={handleStatusMenuToggle}
+      >
+        <span class="status-trigger-label">{statusFilterLabel}</span>
+        <lightning-icon
+          icon-name="utility:chevrondown"
+          size="xx-small"
+        ></lightning-icon>
+      </button>
+      <template if:true={statusMenuOpen}>
+        <div class="status-backdrop" onclick={handleStatusMenuClose}></div>
+        <div
+          class="status-menu"
+          role="group"
+          aria-label={i18n.AR_ML_FilterByStatus}
+        >
+          <template for:each={statusChoices} for:item="choice">
+            <label key={choice.value} class="status-option">
+              <input
+                type="checkbox"
+                value={choice.value}
+                checked={choice.checked}
+                onchange={handleStatusToggle}
+              />
+              <span class={choice.badgeClass}>{choice.label}</span>
+            </label>
+          </template>
+          <button
+            class="status-reset"
+            type="button"
+            disabled={allStatusesSelected}
+            onclick={handleStatusReset}
+          >
+            {i18n.AR_ML_CheckAll}
+          </button>
+        </div>
+      </template>
+    </div>
+    <lightning-combobox
+      label={i18n.AR_Common_BM}
+      variant="label-hidden"
+      value={ownerFilter}
+      options={ownerOptions}
+      onchange={handleOwnerFilterChange}
+      class="owner-filter"
+    ></lightning-combobox>
+    <span class="shown-count">{shownCountLabel}</span>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">
+      <lightning-icon icon-name="utility:table" size="medium"></lightning-icon>
+      <template if:true={hasNoMatricesAtAll}>
+        <p class="empty-state-title">{i18n.AR_ML_NoMatrixYet}</p>
+        <p class="empty-state-text">{i18n.AR_ML_NoMatrixYetHelp}</p>
+      </template>
+      <template if:false={hasNoMatricesAtAll}>
+        <p class="empty-state-title">{i18n.AR_ML_NoMatrixFound}</p>
+        <p class="empty-state-text">{i18n.AR_ML_NoMatrixFoundHelp}</p>
+      </template>
+    </div>
+  </template>
+
+  <template if:false={isLoading}>
+    <template if:false={isEmpty}>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="matrix-table">
+            <colgroup>
+              <col class="col-flex col-flex-account" />
+              <col class="col-flex col-flex-profile" />
+              <col class="col-owner" />
+              <col class="col-tjm" />
+              <col class="col-num" />
+              <col class="col-segment" />
+              <col class="col-status" />
+              <col class="col-date" />
+              <col class="col-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <!-- Session 115 : chaque en-tête trie (1er clic décroissant, 2e croissant). -->
+                <template for:each={sortColumns} for:item="col">
+                  <th
+                    key={col.key}
+                    class={col.thClass}
+                    aria-sort={col.ariaSort}
+                  >
+                    <button
+                      class={col.buttonClass}
+                      data-key={col.key}
+                      title={col.title}
+                      type="button"
+                      onclick={handleSortClick}
+                    >
+                      <span>{col.label}</span>
+                      <template if:true={col.active}>
+                        <lightning-icon
+                          class="sort-icon"
+                          icon-name={col.iconName}
+                          size="xx-small"
+                        ></lightning-icon>
+                      </template>
+                    </button>
+                  </th>
+                </template>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={matrices} for:item="row">
+                <tr
+                  key={row.matrixId}
+                  class="matrix-row"
+                  data-id={row.matrixId}
+                  onclick={handleRowClick}
+                >
+                  <td>
+                    <div class="cell-primary">{row.accountName}</div>
+                    <div class="cell-secondary" title={row.positionName}>
+                      {row.positionName}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-profile">{row.positionName}</div>
+                    <template if:true={row.consultantName}>
+                      <div class="cell-secondary">{row.consultantName}</div>
+                    </template>
+                    <template if:false={row.consultantName}>
+                      <div class="cell-secondary">{row.accountCountry}</div>
+                    </template>
+                  </td>
+                  <td class="cell-owner" title={row.ownerName}>
+                    {row.ownerName}
+                  </td>
+                  <td class="col-num cell-tjm">
+                    <span class="cell-nowrap">{row.formattedTjm}</span>
+                    <span if:true={row.rplsrBadge} class="rplsr-pill"
+                      >{row.rplsrBadge}</span
+                    >
+                    <div
+                      if:true={row.tjmPeriodsDetail}
+                      class="cell-tjm-periods"
+                      title={row.tjmPeriodsDetail}
+                    >
+                      {row.tjmPeriodsDetail}
+                    </div>
+                  </td>
+                  <td class="col-num cell-nowrap">
+                    <span class={row.marginClass}>{row.formattedMc2}</span>
+                  </td>
+                  <td class="cell-nowrap">
+                    <span class={row.segmentClass}>{row.segmentLabel}</span>
+                  </td>
+                  <td class="cell-nowrap">
+                    <span class={row.statusClass}>{row.statusLabel}</span>
+                    <button
+                      if:true={row.wonBadge}
+                      class="won-badge"
+                      data-id={row.matrixId}
+                      onclick={handleWonClick}
+                      type="button"
+                    >
+                      {row.wonBadge}
+                    </button>
+                  </td>
+                  <td class="cell-date">{row.formattedDate}</td>
+                  <td class="cell-actions">
+                    <div class="actions-row">
+                      <button
+                        class="action-btn action-ptf"
+                        data-id={row.matrixId}
+                        disabled={row.ptfDisabled}
+                        title={row.ptfTitle}
+                        onclick={handlePtfClick}
+                        type="button"
+                      >
+                        <lightning-icon
+                          icon-name="utility:file"
+                          size="xx-small"
+                          variant="inverse"
+                        ></lightning-icon>
+                        {i18n.AR_Common_PTF}
+                      </button>
+                      <button
+                        if:true={row.showWonAction}
+                        class="action-btn action-won"
+                        data-id={row.matrixId}
+                        onclick={handleWonClick}
+                        type="button"
+                      >
+                        <lightning-icon
+                          icon-name="utility:success"
+                          size="xx-small"
+                        ></lightning-icon>
+                        {i18n.AR_Won_Action}
+                      </button>
+                      <button
+                        class="action-btn action-duplicate"
+                        data-id={row.matrixId}
+                        onclick={handleDuplicateClick}
+                        type="button"
+                      >
+                        <lightning-icon
+                          icon-name="utility:copy"
+                          size="xx-small"
+                        ></lightning-icon>
+                        {i18n.AR_Common_Duplicate}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <div class="list-sentinel" lwc:if={hasMoreRows}></div>
+        </div>
+      </div>
+    </template>
+  </template>
+
+  <!-- Duplication depuis la liste (session 28, prompt §5) : même modale que le simulateur. Montée
+       dans un `if:true` (contrairement à l'usage dans arPriceMatrixSimulator, où le composant entier
+       reste caché tant que `isLoading`, donc `positionContext` déjà chargé au premier montage) : ici
+       la ligne source change à chaque clic sur une ligne différente de la liste, et
+       arMatrixDuplicateModal ne capture `sourcePositionLabel` qu'une fois, dans son propre
+       connectedCallback (pas de setter réactif) — sans ce `if:true` pour forcer un remontage à
+       chaque ouverture, le libellé resterait celui du tout premier rendu (vide). -->
+  <template if:true={showWonDialog}>
+    <c-ar-won-deal-dialog
+      position-id={wonPositionId}
+      preferred-matrix-id={wonMatrixId}
+      onclose={handleWonClose}
+      onconfirmed={handleWonConfirmed}
+    ></c-ar-won-deal-dialog>
+  </template>
+
+  <template if:true={showDuplicateModal}>
+    <c-ar-matrix-duplicate-modal
+      open={showDuplicateModal}
+      source-matrix-id={duplicateSourceMatrixId}
+      source-position-id={duplicateSourcePositionId}
+      source-position-label={duplicateSourcePositionLabel}
+      is-chain-duplication={duplicateIsChain}
+      oncancel={handleCloseDuplicateModal}
+      onduplicated={handleMatrixDuplicated}
+    ></c-ar-matrix-duplicate-modal>
+  </template>
+</template>

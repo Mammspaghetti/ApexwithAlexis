@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Ofii_Tax_Amount__c</fullName>
+    <defaultValue>1650</defaultValue>
+    <description>Ancien montant fixe de la taxe OFII, en euros. Plus lu ni affiché : remplacé par le taux et le plafond. À supprimer lors d&apos;un prochain déploiement destructif.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Montant en euros de la taxe OFII proposé dans la matrice (1 650 par défaut). Taxe annuelle répartie sur les jours travaillés d&apos;une année.</inlineHelpText>
+    <label>Montant taxe OFII (€)</label>
+    <precision>10</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

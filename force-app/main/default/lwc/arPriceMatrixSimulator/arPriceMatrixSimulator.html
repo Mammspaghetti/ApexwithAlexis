@@ -1,0 +1,3339 @@
+<template>
+  <div class="sim-card">
+    <template if:true={isLoading}>
+      <lightning-spinner
+        alternative-text={labels.loading}
+        size="medium"
+      ></lightning-spinner>
+    </template>
+
+    <template if:false={isLoading}>
+      <div class="sim-body">
+        <!-- Session 167 : besoin lié non visible de l'utilisateur — avertissement (pas une erreur) ;
+             le calcul reste affiché, les écritures sont bloquées. -->
+        <template if:true={positionAccessDenied}>
+          <div
+            class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small"
+            role="alert"
+          >
+            <span>{labels.positionAccessDeniedBanner}</span>
+          </div>
+        </template>
+        <!-- Session 282 : matrice vue par partage (agence du propriétaire) — bandeau discret. -->
+        <template if:true={readOnlyBannerMessage}>
+          <div
+            class="read-only-banner slds-m-bottom_small"
+            data-id="read-only-banner"
+            role="status"
+          >
+            <lightning-icon
+              icon-name="utility:lock"
+              size="xx-small"
+            ></lightning-icon>
+            <span>{readOnlyBannerMessage}</span>
+          </div>
+        </template>
+        <template if:true={errorMessage}>
+          <div class="slds-text-color_error slds-m-bottom_small">
+            {errorMessage}
+          </div>
+        </template>
+        <!-- Conditions bloquantes (taux de change absent, référentiel VIE/Nearshore incomplet,
+             session 24 généralisé en session 28) : mêmes classes que le bandeau de statut "Refusée",
+             pour un rendu bloquant cohérent sans dépendre d'un nouveau style dédié. Une par
+             condition active, jamais fusionnées dans un seul texte — chacune nomme sa propre cause. -->
+        <template for:each={blockingConditions} for:item="condition">
+          <div
+            key={condition.key}
+            class="status-banner status-banner-rejected"
+            role="alert"
+          >
+            <span>{condition.message}</span>
+          </div>
+        </template>
+        <template if:true={statusBannerMessage}>
+          <div class={statusBannerClass} role="alert">
+            <span>{statusBannerMessage}</span>
+            <span if:true={wonBadgeText} class="won-header-badge"
+              >{wonBadgeText}</span
+            >
+          </div>
+        </template>
+
+        <!-- Notification « dérogation à traiter » (session 112, refonte UX 24/09) : carte flottante
+             en bas à droite (position fixed, reste visible au défilement), entrée animée en CSS
+             500 ms après l'affichage — aucun minuteur JS. Toute la carte est cliquable ; la croix
+             la masque pour la durée de la visite (sans rien changer côté serveur). -->
+        <template if:true={showDerogationToast}>
+          <div
+            class="derogation-panel derogation-toast"
+            role="status"
+            aria-live="polite"
+          >
+            <button
+              class="derogation-toast-main"
+              type="button"
+              onclick={handleOpenDerogationDecision}
+              aria-label={i18n.AR_PMS_DerogationPendingOpenQueue}
+            >
+              <span class="derogation-toast-title"
+                >{i18n.AR_PMS_DerogationPending}</span
+              >
+              <span class="derogation-toast-go" aria-hidden="true">
+                <lightning-icon
+                  icon-name="utility:forward"
+                  size="xx-small"
+                ></lightning-icon>
+              </span>
+            </button>
+            <button
+              class="derogation-toast-close"
+              type="button"
+              onclick={handleDismissDerogationToast}
+              aria-label={i18n.AR_PMS_HideNotification}
+            >
+              ×
+            </button>
+          </div>
+        </template>
+
+        <!-- Duplication et chaîne de négociation (session 22) -->
+        <template if:true={hasMatrixId}>
+          <!-- Session 282 : actions masquées en lecture seule, la chaîne de négociation reste consultable. -->
+          <template if:true={canDuplicate}>
+            <div class="duplicate-action slds-m-bottom_small">
+              <button
+                class="btn btn-secondary"
+                type="button"
+                disabled={positionAccessDenied}
+                onclick={handleOpenDuplicateModal}
+              >
+                {labels.duplicate}
+              </button>
+              <!-- Session 180c : avenant piloté par la matrice (docs/180-avenant-depuis-la-matrice.md). -->
+              <template if:true={isValidatedStatus}>
+                <button
+                  class="btn btn-secondary slds-m-left_small"
+                  type="button"
+                  data-id="create-avenant"
+                  disabled={positionAccessDenied}
+                  onclick={handleOpenAvenantModal}
+                >
+                  {i18n.AR_PTF_CreateAvenant}
+                </button>
+              </template>
+            </div>
+          </template>
+          <c-ar-matrix-chain-panel
+            record-id={matrixId}
+          ></c-ar-matrix-chain-panel>
+        </template>
+
+        <!-- Avertissement « ce besoin a déjà des matrices » (session 184a2) : persistant jusqu'à fermeture -->
+        <template if:true={existingMatricesMessage}>
+          <div
+            class="draft-resume-banner existing-matrices-banner"
+            role="alert"
+          >
+            <span>
+              <strong>{i18n.AR_PMS_NeedAlreadyHasMatrix}</strong>
+              {existingMatricesMessage}
+            </span>
+            <div class="draft-resume-actions">
+              <button
+                class="btn btn-text"
+                onclick={handleDismissExistingMatrices}
+                type="button"
+              >
+                {i18n.AR_Common_Close}
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- Bandeau de reprise de brouillon (session 13) : arrivée sans contexte, brouillon < 24h -->
+        <template if:true={showDraftBanner}>
+          <div class="draft-resume-banner">
+            <span>{draftBannerLabel}</span>
+            <div class="draft-resume-actions">
+              <button
+                class="btn btn-primary"
+                onclick={handleResumeDraft}
+                type="button"
+              >
+                {labels.resume}
+              </button>
+              <button
+                class="btn btn-text"
+                onclick={handleDismissDraftBanner}
+                type="button"
+              >
+                {labels.dismiss}
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- Indicateur discret d'autosauvegarde (session 13, trois états session 39) : jamais de toast -->
+        <template if:true={showAutosaveIndicator}>
+          <p class={autosaveIndicatorStateClass}>
+            <span class="autosave-indicator-dot"></span>
+            <span>{autosaveIndicatorLabel}</span>
+          </p>
+        </template>
+
+        <!-- Sélecteur de besoin (session 82, refonte UX ; session 83 harmonisation) : uniquement
+             quand la matrice AT s'ouvre sans contexte (pas de quick action, pas de matrice existante).
+             Deux colonnes fixes plutôt que la recherche remplacée par l'aperçu (session 81) : la
+             recherche reste visible et active en permanence à gauche — on peut changer d'avis et
+             rechercher un autre besoin sans jamais perdre le champ de recherche — et l'aperçu du
+             besoin choisi s'affiche à droite. Session 83 : liste persistante, surbrillance du
+             sélectionné, seuil 1 caractère. -->
+        <template if:true={showPositionSelector}>
+          <div class="zone-card position-selector-card">
+            <div class="zone-card-header">
+              <div class="position-selector-header-left">
+                <div class="position-selector-icon">
+                  <lightning-icon
+                    icon-name="utility:search"
+                    size="small"
+                  ></lightning-icon>
+                </div>
+                <div>
+                  <span class="position-selector-title"
+                    >{labels.positionSelectorTitle}</span
+                  >
+                  <p class="position-selector-subtitle">
+                    {labels.positionSelectorSubtitle}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="zone-card-body">
+              <div class="position-selector-row">
+                <div class="position-search-col">
+                  <div class="position-search">
+                    <div
+                      class="position-search-bar"
+                      id="position-search-input-wrapper"
+                    >
+                      <lightning-icon
+                        icon-name="utility:search"
+                        size="x-small"
+                        class="position-search-icon"
+                      ></lightning-icon>
+                      <input
+                        type="search"
+                        class="slds-input position-search-input"
+                        placeholder={labels.searchPositionPlaceholder}
+                        aria-label={labels.searchPositionLabel}
+                        value={positionSearchTerm}
+                        oninput={handlePositionSearchChange}
+                      />
+                    </div>
+                    <template if:true={showPositionDropdown}>
+                      <ul class="besoin-results-list" role="list">
+                        <template
+                          for:each={enrichedPositionSearchResults}
+                          for:item="opt"
+                        >
+                          <li key={opt.positionId} role="listitem">
+                            <button
+                              type="button"
+                              class={opt.rowClass}
+                              data-id={opt.positionId}
+                              onclick={handleSelectPosition}
+                            >
+                              <div class="besoin-result-item-left">
+                                <span class="besoin-result-position-name"
+                                  >{opt.positionName}</span
+                                >
+                                <span class="besoin-result-account-name"
+                                  >{opt.accountName}</span
+                                >
+                              </div>
+                              <template if:true={opt.isSelected}>
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  class="besoin-result-check"
+                                  aria-hidden="true"
+                                >
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    fill="#d31876"
+                                  ></circle>
+                                  <path
+                                    d="M8 12.5l2.5 2.5L16 9.5"
+                                    fill="none"
+                                    stroke="#ffffff"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ></path>
+                                </svg>
+                              </template>
+                            </button>
+                          </li>
+                        </template>
+                        <template if:true={showNoPositionResults}>
+                          <li class="besoin-results-empty" role="listitem">
+                            {labels.noPositionResults}
+                          </li>
+                        </template>
+                      </ul>
+                    </template>
+                  </div>
+                </div>
+                <div class="position-preview-col">
+                  <template if:true={isLoadingPositionPreview}>
+                    <div class="position-preview-loading">
+                      <lightning-spinner
+                        alternative-text={labels.loadingPreview}
+                        size="x-small"
+                      ></lightning-spinner>
+                    </div>
+                  </template>
+                  <template if:true={hasPositionPreview}>
+                    <div class="position-preview-panel">
+                      <div class="position-preview-header">
+                        <div class="position-preview-header-left">
+                          <h3 class="position-preview-title">
+                            {selectedPositionPreview.positionName}
+                          </h3>
+                          <div class="position-preview-account-row">
+                            <lightning-icon
+                              icon-name="utility:company"
+                              size="x-small"
+                              class="position-preview-account-icon"
+                            ></lightning-icon>
+                            <template if:true={hasPreviewAccount}>
+                              <button
+                                type="button"
+                                class="position-preview-account-link"
+                                onclick={handleViewAccount}
+                                aria-label={openAccountRecordAriaLabel}
+                              >
+                                {selectedPositionPreview.accountName}
+                              </button>
+                            </template>
+                            <template if:false={hasPreviewAccount}>
+                              <span class="position-preview-account-text"
+                                >{selectedPositionPreview.accountName}</span
+                              >
+                            </template>
+                          </div>
+                        </div>
+                        <div class="position-preview-header-right">
+                          <template if:true={selectedPositionPreviewHasStatus}>
+                            <span class={positionStatusBadgeClass}
+                              >{selectedPositionPreview.status}</span
+                            >
+                          </template>
+                        </div>
+                      </div>
+                      <hr class="position-preview-separator" />
+                      <div class="position-preview-body">
+                        <div class="preview-field">
+                          <span class="preview-label">{labels.country}</span>
+                          <span class="preview-value"
+                            >{selectedPositionPreview.accountCountry}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label"
+                            >{labels.businessSector}</span
+                          >
+                          <span class="preview-value"
+                            >{selectedPositionPreview.businessLine}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label">{labels.perimeter}</span>
+                          <span class="preview-value"
+                            >{selectedPositionPreview.perimetre}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label"
+                            >{labels.contractTypeField}</span
+                          >
+                          <span class="preview-value"
+                            >{selectedPositionPreview.contractType}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label">{labels.contact}</span>
+                          <span class="preview-value"
+                            >{selectedPositionPreview.contactName}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label"
+                            >{labels.positionPreviewStartDate}</span
+                          >
+                          <span class="preview-value"
+                            >{positionPreviewStartDateFormatted}</span
+                          >
+                        </div>
+                        <div class="preview-field">
+                          <span class="preview-label">{labels.createdOn}</span>
+                          <span class="preview-value"
+                            >{positionPreviewCreatedDateFormatted}</span
+                          >
+                        </div>
+                      </div>
+                      <div class="position-preview-footer">
+                        <button
+                          class="btn btn-secondary"
+                          type="button"
+                          onclick={handleViewPosition}
+                        >
+                          <lightning-icon
+                            icon-name="utility:new_window"
+                            size="xx-small"
+                          ></lightning-icon>
+                          {labels.view}
+                        </button>
+                        <button
+                          class="btn btn-primary"
+                          type="button"
+                          onclick={handleConfirmPositionSelection}
+                        >
+                          {labels.createMatrixFromPosition}
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                  <template if:false={hasPositionPreview}>
+                    <div class="position-preview-placeholder">
+                      <div class="position-preview-placeholder-icon-circle">
+                        <lightning-icon
+                          icon-name="utility:search"
+                          size="large"
+                          class="position-preview-placeholder-icon"
+                        ></lightning-icon>
+                      </div>
+                      <p class="position-preview-placeholder-title">
+                        {labels.noPositionSelectedTitle}
+                      </p>
+                      <p class="position-preview-placeholder-help">
+                        {labels.noPositionSelectedHelp}
+                      </p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Zone 1 : contexte affaire (lecture seule) — card maquette (pricing-tool.html:1828-1836) -->
+        <template if:true={hasPosition}>
+          <div class="zone-card slds-m-bottom_medium">
+            <div class="zone-card-header">
+              <div class="zone-card-header-left">
+                <span class="zone-badge">1</span>
+                <div>
+                  <p class="zone-header-title">{labels.zoneContextTitle}</p>
+                  <p class="zone-header-subtitle">
+                    {labels.zoneContextSubtitle}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="zone-card-body">
+              <!-- Grille 2 colonnes fidèle à la maquette (pricing-tool.html:1836-1881) : 5 champs
+                   éditables (session 17) entrelacés avec les 5 équivalents lecture seule déjà
+                   présents dans l'org — pas de doublon du sélecteur de besoin (déjà choisi en amont). -->
+              <div class="slds-grid slds-wrap slds-gutters_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <!-- Verrouillé (session 17b) : plus de placeholder "Sélectionner une entité"
+                       invitant à saisir sur un champ qu'on ne peut plus modifier. -->
+                  <template if:true={isEditable}>
+                    <lightning-combobox
+                      name="entity"
+                      label={labels.entityLabel}
+                      value={entity}
+                      options={entityOptions}
+                      dropdown-alignment="auto"
+                      placeholder={labels.selectEntityPlaceholder}
+                      onchange={handleEntityChange}
+                    ></lightning-combobox>
+                  </template>
+                  <template if:false={isEditable}>
+                    <template if:true={isEntityChangeableOnly}>
+                      <lightning-combobox
+                        name="entity"
+                        label={labels.entityLabel}
+                        value={entity}
+                        options={entityOptions}
+                        dropdown-alignment="auto"
+                        disabled={isChangingEntity}
+                        onchange={handleValidatedEntityChange}
+                      ></lightning-combobox>
+                    </template>
+                    <template if:false={isEntityChangeableOnly}>
+                      <lightning-input
+                        type="text"
+                        label={labels.entityLabel}
+                        value={displayEntity}
+                        disabled
+                        class="readonly-input"
+                      ></lightning-input>
+                    </template>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <!-- Session 54 : lookup consultant (remplace la saisie libre AR_Consultant_Name__c) -->
+                  <template if:true={isEditable}>
+                    <template if:true={consultantId}>
+                      <div class="zone1-field-with-link">
+                        <lightning-input
+                          type="text"
+                          label={labels.consultant}
+                          value={consultantLabel}
+                          disabled
+                          class="readonly-input"
+                        ></lightning-input>
+                        <template if:true={consultantUrl}>
+                          <a
+                            href={consultantUrl}
+                            target="_blank"
+                            rel="noopener"
+                            class="zone1-link-icon"
+                            title={labels.openRecord}
+                            aria-label={labels.openRecord}
+                          >
+                            <lightning-icon
+                              icon-name="utility:new_window"
+                              size="x-small"
+                            ></lightning-icon>
+                          </a>
+                        </template>
+                      </div>
+                      <button
+                        type="button"
+                        class="consultant-clear-link"
+                        onclick={handleClearConsultant}
+                      >
+                        {labels.changeConsultant}
+                      </button>
+                    </template>
+                    <template if:false={consultantId}>
+                      <div class="consultant-search">
+                        <lightning-input
+                          type="search"
+                          label={labels.consultant}
+                          placeholder={labels.searchConsultantPlaceholder}
+                          value={consultantSearchTerm}
+                          onchange={handleConsultantSearchChange}
+                        ></lightning-input>
+                        <template if:true={showConsultantDropdown}>
+                          <ul class="position-dropdown">
+                            <template
+                              for:each={consultantSearchResults}
+                              for:item="opt"
+                            >
+                              <li
+                                key={opt.consultantId}
+                                data-id={opt.consultantId}
+                                onclick={handleSelectConsultant}
+                              >
+                                {opt.label}
+                              </li>
+                            </template>
+                            <template if:true={showNoConsultantResults}>
+                              <li class="position-dropdown-empty">
+                                {labels.noConsultantResults}
+                              </li>
+                            </template>
+                          </ul>
+                        </template>
+                      </div>
+                      <template if:true={showConsultantSuggestion}>
+                        <p class="consultant-suggestion">
+                          {labels.suggestedFromApplication}
+                          {suggestedConsultantLabel} —
+                          <button
+                            type="button"
+                            class="consultant-clear-link"
+                            onclick={handleUseSuggestedConsultant}
+                          >
+                            {labels.use}
+                          </button>
+                        </p>
+                      </template>
+                      <template if:true={showLegacyConsultantName}>
+                        <p class="consultant-legacy-note">
+                          {labels.legacyTextPrefix} {consultantName}
+                        </p>
+                      </template>
+                    </template>
+                  </template>
+                  <!-- Session 65 : badge discret de succès du pré-remplissage (cliquable pour voir détails) -->
+                  <template if:true={showPrefillBanner}>
+                    <!-- Badge discret par défaut (non-intrusive) -->
+                    <template if:false={showPrefillDetails}>
+                      <button
+                        type="button"
+                        class="prefill-success-badge"
+                        onclick={handleShowPrefillDetails}
+                        title={labels.clickForDetails}
+                      >
+                        {labels.prefillSuccess} {prefillBannerItems.length}
+                        {prefillBannerCount}
+                      </button>
+                    </template>
+                    <!-- Boîte détaillée (ouverte au clic) -->
+                    <template if:true={showPrefillDetails}>
+                      <div class="prefill-banner slds-m-top_small">
+                        <div class="prefill-banner-header">
+                          <span class="prefill-banner-count">
+                            {prefillBannerItems.length} {prefillBannerCount}
+                          </span>
+                          <span>{prefillFromRecordLabel}</span>
+                          <button
+                            type="button"
+                            class="prefill-close-btn"
+                            onclick={handleClosePrefillDetails}
+                            title={labels.close}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <ul class="prefill-banner-list">
+                          <template
+                            for:each={prefillBannerItems}
+                            for:item="item"
+                          >
+                            <li key={item.field}>
+                              <span class="field-name">{item.field}</span>
+                              <span class="field-change">
+                                {item.oldValue} → {item.newValue}
+                              </span>
+                            </li>
+                          </template>
+                        </ul>
+                        <button
+                          type="button"
+                          class="prefill-banner-undo"
+                          onclick={handleUndoPrefill}
+                        >
+                          {labels.undoPrefill}
+                        </button>
+                      </div>
+                    </template>
+                  </template>
+                  <template if:false={isEditable}>
+                    <template if:true={consultantUrl}>
+                      <div class="zone1-field-label">
+                        <span class="zone1-field-label-text"
+                          >{labels.consultant}</span
+                        >
+                      </div>
+                      <a
+                        href={consultantUrl}
+                        target="_blank"
+                        rel="noopener"
+                        class="zone1-link-field"
+                        title={labels.openRecord}
+                      >
+                        {displayConsultantName}
+                      </a>
+                    </template>
+                    <template if:false={consultantUrl}>
+                      <lightning-input
+                        type="text"
+                        label={labels.consultant}
+                        value={displayConsultantName}
+                        disabled
+                        class="readonly-input"
+                      ></lightning-input>
+                    </template>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <template if:true={managerUrl}>
+                    <div class="zone1-field-label">
+                      <span class="zone1-field-label-text"
+                        >{labels.managerName}</span
+                      >
+                    </div>
+                    <a
+                      href={managerUrl}
+                      target="_blank"
+                      rel="noopener"
+                      class="zone1-link-field"
+                      title={labels.openRecord}
+                    >
+                      {positionContext.managerName}
+                    </a>
+                  </template>
+                  <template if:false={managerUrl}>
+                    <lightning-input
+                      type="text"
+                      label={labels.managerName}
+                      value={positionContext.managerName}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <template if:true={isEditable}>
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="clientSite">
+                        {labels.clientSite}
+                        <abbr class="slds-required" title="required">*</abbr>
+                      </label>
+                      <lightning-input
+                        type="text"
+                        name="clientSite"
+                        label={labels.clientSite}
+                        variant="label-hidden"
+                        placeholder={labels.clientSitePlaceholder}
+                        value={clientSite}
+                        onchange={handleMissionTextChange}
+                      ></lightning-input>
+                    </div>
+                  </template>
+                  <template if:false={isEditable}>
+                    <lightning-input
+                      type="text"
+                      label={labels.clientSite}
+                      value={displayClientSite}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <template if:true={clientUrl}>
+                    <div class="zone1-field-label">
+                      <span class="zone1-field-label-text"
+                        >{labels.accountName}</span
+                      >
+                    </div>
+                    <a
+                      href={clientUrl}
+                      target="_blank"
+                      rel="noopener"
+                      class="zone1-link-field"
+                      title={labels.openRecord}
+                    >
+                      {positionContext.accountName}
+                    </a>
+                  </template>
+                  <template if:false={clientUrl}>
+                    <lightning-input
+                      type="text"
+                      label={labels.accountName}
+                      value={positionContext.accountName}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <template if:true={besoinUrl}>
+                    <div class="zone1-field-label">
+                      <span class="zone1-field-label-text"
+                        >{labels.position}</span
+                      >
+                    </div>
+                    <a
+                      href={besoinUrl}
+                      target="_blank"
+                      rel="noopener"
+                      class="zone1-link-field"
+                      title={labels.openRecord}
+                    >
+                      {positionContext.positionName}
+                    </a>
+                  </template>
+                  <template if:false={besoinUrl}>
+                    <lightning-input
+                      type="text"
+                      label={labels.position}
+                      value={positionContext.positionName}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <!-- Verrouillé (session 17b) : un sélecteur de date grisé n'affiche pas la valeur
+                       de façon lisible — un texte formaté FR la remplace. -->
+                  <template if:true={isEditable}>
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="startDate">
+                        {labels.startDate}
+                        <abbr class="slds-required" title="required">*</abbr>
+                      </label>
+                      <lightning-input
+                        type="date"
+                        name="startDate"
+                        data-date-field="startDate"
+                        label={labels.startDate}
+                        variant="label-hidden"
+                        value={startDate}
+                        onchange={handleStartDateChange}
+                      ></lightning-input>
+                    </div>
+                  </template>
+                  <template if:false={isEditable}>
+                    <lightning-input
+                      type="text"
+                      label={labels.startDate}
+                      value={displayStartDate}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <template if:true={isEditable}>
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="endDate">
+                        {labels.expectedEndDate}
+                        <abbr class="slds-required" title="required">*</abbr>
+                      </label>
+                      <lightning-input
+                        type="date"
+                        name="endDate"
+                        data-date-field="endDate"
+                        label={labels.expectedEndDate}
+                        variant="label-hidden"
+                        value={endDate}
+                        onchange={handleEndDateChange}
+                      ></lightning-input>
+                    </div>
+                  </template>
+                  <template if:false={isEditable}>
+                    <lightning-input
+                      type="text"
+                      label={labels.expectedEndDate}
+                      value={displayEndDate}
+                      disabled
+                      class="readonly-input"
+                    ></lightning-input>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <lightning-input
+                    type="text"
+                    label={labels.country}
+                    value={displayCountry}
+                    disabled
+                    class="readonly-input"
+                  ></lightning-input>
+                  <template if:true={showEntityCountryHelp}>
+                    <p
+                      class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small entity-country-help"
+                    >
+                      {labels.entityCountryMissingHelp}
+                    </p>
+                  </template>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                  <lightning-input
+                    type="text"
+                    label={labels.owner}
+                    value={creatorName}
+                    disabled
+                    class="readonly-input"
+                  ></lightning-input>
+                </div>
+              </div>
+              <template if:true={hasMissionDateError}>
+                <p
+                  class="slds-text-color_error slds-text-body_small slds-m-top_x-small"
+                >
+                  {missionDateErrorText}
+                </p>
+              </template>
+
+              <!-- Bandeau récapitulatif "{profil} — {région} — {secteur}" (pricing-tool.html:1877-1880) -->
+              <template if:true={showRecapBanner}>
+                <div class="recap-banner slds-m-top_medium">
+                  <lightning-icon
+                    icon-name="utility:pin"
+                    size="xx-small"
+                    class="recap-banner-icon"
+                  ></lightning-icon>
+                  <span>{recapBannerLabel}</span>
+                </div>
+              </template>
+
+              <!-- Bandeau Grand Compte (session 14 en Zone 2, dupliqué ici en session 17) -->
+              <template if:true={hasGrandCompteCorridor}>
+                <div class="grand-compte-banner slds-m-top_medium">
+                  <lightning-icon
+                    icon-name="utility:favorite"
+                    size="xx-small"
+                    class="grand-compte-icon"
+                  ></lightning-icon>
+                  <span class="grand-compte-label"
+                    >{thresholdsOriginLabel}
+                  </span>
+                  <span class="grand-compte-values"
+                    >{grandCompteBannerLabel}
+                    <span class="grand-compte-standard">
+                      {i18n.AR_PMS_StandardCorridor}</span
+                    ></span
+                  >
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Repères marché : comparables réels sur l'historique gagné (session 9) -->
+          <div class="market-card">
+            <div class="market-header">
+              <p class="market-title">{labels.marketReferenceTitle}</p>
+              <div class="market-header-right">
+                <button
+                  class="info-trigger"
+                  type="button"
+                  onclick={handleToggleMarketInfo}
+                  aria-expanded={showMarketInfoPopover}
+                  aria-describedby="market-info-popover"
+                  aria-label={labels.marketInfoAriaLabel}
+                >
+                  <lightning-icon
+                    icon-name="utility:info"
+                    size="xx-small"
+                    class="info-icon"
+                  ></lightning-icon>
+                </button>
+                <template if:true={hasMarketReference}>
+                  <span class={marketConfidenceClass}
+                    >{marketConfidenceLabel}</span
+                  >
+                </template>
+              </div>
+              <template if:true={showMarketInfoPopover}>
+                <div
+                  class="market-info-modal-root"
+                  data-owner={uniqueComponentId}
+                >
+                  <div
+                    class="market-info-modal-scrim"
+                    onclick={handleToggleMarketInfo}
+                  ></div>
+                  <div
+                    id="market-info-popover"
+                    data-popover-panel="market"
+                    class="info-popover market-info-modal"
+                    role="dialog"
+                    aria-label={labels.marketInfoModalAriaLabel}
+                    tabindex="-1"
+                    onclick={stopPopoverClick}
+                  >
+                    <div class="market-info-modal-header">
+                      <p class="info-popover-title">
+                        {labels.marketInfoModalTitle}
+                      </p>
+                      <button
+                        class="market-info-modal-close"
+                        type="button"
+                        onclick={handleToggleMarketInfo}
+                        aria-label={labels.close}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <!-- Stats compactes : pool, effectif pondéré, confiance -->
+                    <div class="market-stats">
+                      <div class="market-stat">
+                        <p class="market-stat-label">{labels.pool}</p>
+                        <p class="market-stat-value">
+                          {marketReference.comparableCount}
+                        </p>
+                        <p class="market-stat-subtitle">
+                          {marketCountryLabel} {labels.last12Months}
+                        </p>
+                      </div>
+                      <div class="market-stat">
+                        <p class="market-stat-label">
+                          {labels.weightedEffective}
+                        </p>
+                        <p class="market-stat-value">
+                          {marketWeightedEffectiveLabel}
+                        </p>
+                      </div>
+                      <div class="market-stat">
+                        <p class="market-stat-label">{labels.confidence}</p>
+                        <p class={marketConfidenceValueClass}>
+                          {marketConfidenceShortLabel}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="market-pipeline">
+                      <div class="pipeline-stage">
+                        <div class="pipeline-num">
+                          1
+                          <span class="pipeline-connector"></span>
+                        </div>
+                        <div class="pipeline-content">
+                          <p class="pipeline-title">
+                            {labels.pipelineHistoryTitle}
+                          </p>
+                          <p class="pipeline-text">
+                            {labels.pipelineHistoryPrefix}
+                            <span style="font-weight: bold">{labels.won}</span>
+                            {labels.pipelineHistorySuffix}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="pipeline-stage">
+                        <div class="pipeline-num">
+                          2
+                          <span class="pipeline-connector"></span>
+                        </div>
+                        <div class="pipeline-content">
+                          <p class="pipeline-title">
+                            {labels.pipelineFiltersTitle}
+                          </p>
+                          <template if:true={hasResolvedCountry}>
+                            <div class="pipeline-tags-row">
+                              <span class="pipeline-tag-pill"
+                                >📍 {marketCountryLabel}</span
+                              >
+                              <template if:true={hasContractTypeLabel}>
+                                <span class="pipeline-tag-pill"
+                                  >📄 {contractTypeLabel}
+                                  <span class="pipeline-tag-count"
+                                    >· {marketReference.comparableCount}</span
+                                  ></span
+                                >
+                              </template>
+                            </div>
+                          </template>
+                          <template if:false={hasResolvedCountry}>
+                            <p class="pipeline-text">
+                              {labels.noCountryNoComparables}
+                            </p>
+                          </template>
+                        </div>
+                      </div>
+                      <div class="pipeline-stage">
+                        <div class="pipeline-num">
+                          3
+                          <span class="pipeline-connector"></span>
+                        </div>
+                        <div class="pipeline-content">
+                          <p class="pipeline-title">
+                            {labels.pipelineAlgorithmTitle}
+                          </p>
+                          <div class="weight-bar-container">
+                            <div class="weight-bar-label">
+                              <span>{labels.metier}</span>
+                              <span>{metierPercentLabel}</span>
+                            </div>
+                            <div class="weight-bar-track">
+                              <div
+                                class="weight-bar-fill"
+                                style={metierBarStyle}
+                              ></div>
+                            </div>
+                            <p class="weight-bar-realized">
+                              {marketMetierRealizedLabel}
+                            </p>
+                          </div>
+                          <div class="weight-bar-container">
+                            <div class="weight-bar-label">
+                              <span>{labels.secteur}</span>
+                              <span>{secteurPercentLabel}</span>
+                            </div>
+                            <div class="weight-bar-track">
+                              <div
+                                class="weight-bar-fill"
+                                style={secteurBarStyle}
+                              ></div>
+                            </div>
+                            <p class="weight-bar-realized">
+                              {marketSecteurRealizedLabel}
+                            </p>
+                          </div>
+                          <div class="weight-bar-container">
+                            <div class="weight-bar-label">
+                              <span>{labels.client}</span>
+                              <span>{clientPercentLabel}</span>
+                            </div>
+                            <div class="weight-bar-track">
+                              <div
+                                class="weight-bar-fill"
+                                style={clientBarStyle}
+                              ></div>
+                            </div>
+                            <p class="weight-bar-realized">
+                              {marketClientRealizedLabel}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="pipeline-stage">
+                        <div class="pipeline-num">
+                          4
+                          <span class="pipeline-connector"></span>
+                        </div>
+                        <div class="pipeline-content">
+                          <p class="pipeline-title">
+                            {labels.pipelineThresholdTitle}
+                          </p>
+                          <div class="confidence-chips-row">
+                            <span class={highConfidenceChipClass}
+                              ><template if:true={isHighConfidenceActive}
+                                >✓ </template
+                              >≥{marketReference.highConfidenceMin}
+                              {labels.highConfidenceSuffix}</span
+                            >
+                            <span class={mediumConfidenceChipClass}
+                              ><template if:true={isMediumConfidenceActive}
+                                >✓ </template
+                              >≥{marketReference.mediumConfidenceMin}
+                              {labels.mediumConfidenceSuffix}</span
+                            >
+                            <span class={lowConfidenceChipClass}
+                              ><template if:true={isLowConfidenceActive}
+                                >✓ </template
+                              >{labels.lowConfidenceSuffix}</span
+                            >
+                          </div>
+                          <p class="pipeline-effective-line">
+                            {labels.effectiveWeightedLine}
+                            <strong>{marketWeightedEffectiveLabel}</strong> →
+                            {marketConfidenceShortLabel}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="pipeline-stage">
+                        <div class="pipeline-num">5</div>
+                        <div class="pipeline-content">
+                          <p class="pipeline-title">
+                            {labels.pipelineFinalCalcTitle}
+                          </p>
+                          <p class="pipeline-text">
+                            {labels.pipelineFinalCalcText}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="seniority-compact-label">
+                      {labels.seniorityNote}
+                    </p>
+                    <template if:true={showMarketConversionNote}>
+                      <p class="market-conversion-note">
+                        {marketConversionNote}
+                      </p>
+                    </template>
+                    <template if:true={showMarketNoRateNote}>
+                      <p class="market-no-rate-note">{marketNoRateNote}</p>
+                    </template>
+                    <p class="modal-footer-note">{modalFooterNote}</p>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <template if:true={isLoadingMarketReference}>
+              <lightning-spinner
+                alternative-text={labels.loadingMarketRefs}
+                size="x-small"
+              ></lightning-spinner>
+            </template>
+            <template if:true={showMarketStats}>
+              <div class="market-stats">
+                <div class="market-stat">
+                  <p class="market-stat-label">{labels.comparables}</p>
+                  <p class="market-stat-value">
+                    {marketReference.comparableCount}
+                  </p>
+                </div>
+                <div class="market-stat">
+                  <p class="market-stat-label">{labels.medianTjm}</p>
+                  <p class="market-stat-value">{formattedMarketMedian}</p>
+                </div>
+                <div class="market-stat">
+                  <p class="market-stat-label">{labels.top10Percent}</p>
+                  <p class="market-stat-value">{formattedMarketP90}</p>
+                </div>
+              </div>
+              <p class="market-circle-label">{marketReference.circleLabel}</p>
+              <template if:true={showMarketConversionNote}>
+                <p class="market-conversion-note">{marketConversionNote}</p>
+              </template>
+              <template if:true={showMarketNoRateNote}>
+                <p class="market-no-rate-note">{marketNoRateNote}</p>
+              </template>
+            </template>
+            <template if:true={showMarketLowConfidence}>
+              <p class="market-low-confidence">{marketLowConfidenceMessage}</p>
+            </template>
+          </div>
+        </template>
+
+        <template if:true={hasPosition}>
+          <div class="slds-grid slds-wrap slds-gutters">
+            <!-- Zone 2 : contexte financier — card maquette (pricing-tool.html:1886-1889) -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+              <div class="zone-card">
+                <div class="zone-card-header">
+                  <div class="zone-card-header-left">
+                    <span class="zone-badge">2</span>
+                    <p class="zone-header-title">
+                      {labels.zoneFinancialContextTitle}
+                    </p>
+                  </div>
+                  <button
+                    class="info-trigger"
+                    type="button"
+                    onclick={handleToggleThresholdsInfo}
+                    aria-expanded={showThresholdsInfoPopover}
+                    aria-describedby="thresholds-info-popover"
+                    aria-label={labels.thresholdsInfoAriaLabel}
+                  >
+                    <lightning-icon
+                      icon-name="utility:info"
+                      size="xx-small"
+                      class="info-icon"
+                    ></lightning-icon>
+                  </button>
+                  <template if:true={showThresholdsInfoPopover}>
+                    <div
+                      id="thresholds-info-popover"
+                      data-popover-panel="thresholds"
+                      class="info-popover"
+                      role="dialog"
+                      aria-label={labels.thresholdsInfoAriaLabel}
+                      tabindex="-1"
+                      onclick={stopPopoverClick}
+                    >
+                      <p class="info-popover-title">
+                        {labels.thresholdsInfoAriaLabel}
+                      </p>
+                      <dl class="info-popover-list">
+                        <dt>{labels.costPerDayTerm}</dt>
+                        <dd>{thresholdsFormulaCjmLine}</dd>
+                        <dt>{labels.totalDailyCost}</dt>
+                        <dd>{thresholdsFormulaCostLine}</dd>
+                        <dt>{labels.tjmThresholdsTerm}</dt>
+                        <dd>{thresholdsFormulaCorridorLine}</dd>
+                        <dt>{labels.rfaAndFreeTerm}</dt>
+                        <dd>{thresholdsFormulaRfaLine}</dd>
+                      </dl>
+                      <p class="info-popover-note">{thresholdsFormulaNote}</p>
+                    </div>
+                  </template>
+                </div>
+                <div class="zone-card-body">
+                  <div class="slds-grid slds-gutters_small">
+                    <div class="slds-col">
+                      <lightning-combobox
+                        name="currencyCode"
+                        label={labels.currency}
+                        value={currencyCode}
+                        options={currencyOptions}
+                        dropdown-alignment="auto"
+                        disabled={isNotEditable}
+                        onchange={handleCurrencyChange}
+                      ></lightning-combobox>
+                      <template if:true={currencyRateHelpText}>
+                        <p class="field-helper-text">{currencyRateHelpText}</p>
+                      </template>
+                    </div>
+                    <div class="slds-col">
+                      <lightning-combobox
+                        name="contractType"
+                        label={labels.contractStatus}
+                        value={contractType}
+                        options={contractTypeOptions}
+                        dropdown-alignment="auto"
+                        disabled={isNotEditable}
+                        onchange={handleContractTypeChange}
+                      ></lightning-combobox>
+                    </div>
+                    <div class="slds-col">
+                      <!-- Palier de séniorité (session 28) : obligatoire à la validation depuis 119,
+                           référentiel provisoire (peut être vide) — resserre les repères marché,
+                           cf. loadMarketReference. -->
+                      <div class="slds-form-element">
+                        <label
+                          class="slds-form-element__label"
+                          for="seniorityLevel"
+                        >
+                          {labels.seniorityLevel}
+                          <abbr class="slds-required" title="required">*</abbr>
+                        </label>
+                        <lightning-combobox
+                          name="seniorityLevel"
+                          label={labels.seniorityLevel}
+                          variant="label-hidden"
+                          value={seniorityLevel}
+                          options={seniorityLevelOptions}
+                          dropdown-alignment="auto"
+                          disabled={isNotEditable}
+                          onchange={handleSeniorityLevelChange}
+                        ></lightning-combobox>
+                      </div>
+                    </div>
+                  </div>
+
+                  <template if:true={isSalaryBased}>
+                    <lightning-input
+                      type="number"
+                      name="annualSalary"
+                      label={unitLabels.annualSalary}
+                      value={annualSalary}
+                      min="0"
+                      step="0.01"
+                      message-when-step-mismatch={labels.decimalStepError}
+                      disabled={isNotEditable}
+                      onchange={handleFieldChange}
+                      class="slds-m-top_small"
+                    ></lightning-input>
+                    <template if:true={showCjmHelper}>
+                      <p class="field-helper-text">{cjmHelperText}</p>
+                    </template>
+
+                    <!-- Périodes de salaire ajoutées : la période 1 reste le salaire annuel ci-dessus. -->
+                    <template if:true={salaryPeriodFirstLabel}>
+                      <div
+                        class="salary-period-first slds-m-top_x-small slds-text-body_small"
+                      >
+                        <span>{salaryPeriodFirstLabel}</span>
+                      </div>
+                    </template>
+                    <template for:each={salaryPeriodRows} for:item="row">
+                      <div
+                        key={row.key}
+                        class="salary-period-row slds-m-top_small"
+                      >
+                        <div
+                          class="slds-grid slds-grid_vertical-align-end slds-gutters_small"
+                        >
+                          <div class="slds-col slds-no-flex fee-period-title">
+                            <span>{row.title}</span>
+                          </div>
+                          <div class="slds-col slds-size_1-of-4">
+                            <lightning-input
+                              type="number"
+                              name="salaryPeriodDays"
+                              label={labels.feePeriodDays}
+                              value={row.days}
+                              min="0"
+                              step="1"
+                              data-key={row.periodKey}
+                              data-field="days"
+                              disabled={isNotEditable}
+                              onchange={handleSalaryPeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-grow">
+                            <lightning-input
+                              type="number"
+                              name="salaryPeriodSalary"
+                              label={labels.salaryPeriodSalary}
+                              value={row.salary}
+                              min="0"
+                              step="0.01"
+                              message-when-step-mismatch={labels.decimalStepError}
+                              data-key={row.periodKey}
+                              data-field="salary"
+                              disabled={isNotEditable}
+                              onchange={handleSalaryPeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-no-flex">
+                            <lightning-button-icon
+                              icon-name="utility:close"
+                              variant="bare"
+                              size="small"
+                              alternative-text={row.removeLabel}
+                              title={row.removeLabel}
+                              data-key={row.periodKey}
+                              disabled={isNotEditable}
+                              onclick={handleRemoveSalaryPeriod}
+                            ></lightning-button-icon>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template if:true={salaryPeriodExceedLabel}>
+                      <div
+                        class="salary-period-exceed slds-m-top_x-small slds-text-color_error"
+                        role="alert"
+                      >
+                        <span>{salaryPeriodExceedLabel}</span>
+                      </div>
+                    </template>
+                    <template if:true={showSalaryPeriodAddLink}>
+                      <div class="slds-m-top_x-small">
+                        <lightning-button
+                          variant="base"
+                          label={labels.salaryPeriodAdd}
+                          class="salary-period-add"
+                          onclick={handleAddSalaryPeriod}
+                        ></lightning-button>
+                      </div>
+                    </template>
+                  </template>
+
+                  <!-- INDEP (session 18, maquette pricing-tool.html:1971-1989 ; règle de lecture
+                   seule posée en 18b sur `isEditable`, cf. le getter du même nom). Mark-up calculé
+                   toujours affiché (jamais éditable, calculé) ; sa légende et l'alerte d'écart sont
+                   des aides à la saisie, verrouillées avec le reste. -->
+                  <template if:true={isINDEP}>
+                    <template if:true={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-input
+                            type="number"
+                            name="cjmBeforeMarkup"
+                            label={unitLabels.cjmBeforeMarkup}
+                            value={cjmBeforeMarkup}
+                            min="0"
+                            step="0.01"
+                            message-when-step-mismatch={labels.decimalStepError}
+                            onchange={handleFieldChange}
+                          ></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={unitLabels.markupCalculated}
+                            value={formattedMarkupCalcule}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                          <p class="field-helper-text">{markupFormulaLegend}</p>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="number"
+                            name="markupApplied"
+                            label={unitLabels.markupApplied}
+                            value={markupApplied}
+                            min="0"
+                            step="0.01"
+                            message-when-step-mismatch={labels.decimalStepError}
+                            onchange={handleFieldChange}
+                          ></lightning-input>
+                          <template if:true={calc.markupMismatch}>
+                            <p class="markup-mismatch-note">
+                              ⚠ {markupMismatchMessage}
+                            </p>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                    <template if:false={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={unitLabels.cjmBeforeMarkup}
+                            value={displayCjmBeforeMarkup}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={unitLabels.markupCalculated}
+                            value={formattedMarkupCalcule}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={unitLabels.markupApplied}
+                            value={displayMarkupApplied}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                      </div>
+                    </template>
+                    <p class="field-helper-text slds-m-top_x-small">
+                      {i18n.AR_PMS_IndepTotalCostPrefix}
+                      <strong
+                        >{formattedCjmTotalIndep}{labels.perDayLong}</strong
+                      >
+                      {i18n.AR_PMS_IndepTotalCostHelp}
+                    </p>
+                  </template>
+
+                  <!-- VIE (session 18, maquette pricing-tool.html:1913-1941 ; règle de lecture seule
+                   posée en 18b) : sélecteur pays, pré-remplissage, encart d'avertissement, note
+                   d'écart — tout regroupé dans le bloc `isEditable`, verrouillé d'un bloc avec lui. -->
+                  <template if:true={isVIE}>
+                    <template if:true={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-combobox
+                            name="vieCountryId"
+                            label={labels.vieCountry}
+                            value={vieCountryId}
+                            options={vieCountryOptions}
+                            dropdown-alignment="auto"
+                            placeholder={labels.selectCountryPlaceholder}
+                            onchange={handleVieCountryChange}
+                          ></lightning-combobox>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="number"
+                            name="cjmVie"
+                            label={vieCjmEditableLabel}
+                            value={cjmVie}
+                            min="0"
+                            step="0.01"
+                            message-when-step-mismatch={labels.decimalStepError}
+                            onchange={handleFieldChange}
+                          ></lightning-input>
+                          <p class="field-helper-text">
+                            {i18n.AR_PMS_RetainedCostPrefix}&nbsp;<strong>{formattedCjm}{labels.perDaySuffix}</strong>&nbsp;{i18n.AR_PMS_WithoutCoeffX2}
+                            <template if:true={hasVieCountry}>
+                              <span class="vie-referential-note"
+                                >{vieReferentialNote}</span
+                              >
+                            </template>
+                          </p>
+                          <template if:true={showVieReferentialMismatch}>
+                            <p class="referential-mismatch-note">
+                              {vieReferentialMismatchLabel}
+                            </p>
+                          </template>
+                          <template
+                            if:true={showVieReferentialCurrencyMismatch}
+                          >
+                            <p class="referential-mismatch-note">
+                              {vieReferentialCurrencyMismatchLabel}
+                            </p>
+                          </template>
+                        </div>
+                      </div>
+                      <template if:true={showVieCountryWarning}>
+                        <div
+                          class="referential-warning vie-referential-warning slds-m-top_small"
+                        >
+                          {labels.vieCountryWarning}
+                        </div>
+                      </template>
+                    </template>
+                    <template if:false={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={labels.vieCountry}
+                            value={displayVieCountry}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={vieCjmReadOnlyLabel}
+                            value={displayCjmVie}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+
+                  <!-- Nearshore (session 18, maquette pricing-tool.html:1942-1970 ; règle 18b) : même
+                   structure que VIE, palette violette. -->
+                  <template if:true={isNEARSHORE}>
+                    <template if:true={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-combobox
+                            name="nearshoreCountryId"
+                            label={labels.nearshoreCountry}
+                            value={nearshoreCountryValue}
+                            options={nearshoreCountryOptions}
+                            dropdown-alignment="auto"
+                            placeholder={labels.selectCountryPlaceholder}
+                            onchange={handleNearshoreCountryChange}
+                          ></lightning-combobox>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="number"
+                            name="cjmNearshore"
+                            label={nearshoreCjmEditableLabel}
+                            value={cjmNearshore}
+                            min="0"
+                            step="0.01"
+                            message-when-step-mismatch={labels.decimalStepError}
+                            onchange={handleFieldChange}
+                          ></lightning-input>
+                          <p class="field-helper-text">
+                            {i18n.AR_PMS_RetainedCostPrefix}&nbsp;<strong>{formattedCjm}{labels.perDaySuffix}</strong>&nbsp;{i18n.AR_PMS_WithoutCoeffX2}
+                            <template if:true={hasNearshoreCountry}>
+                              <span class="nearshore-referential-note"
+                                >{nearshoreReferentialNote}</span
+                              >
+                            </template>
+                          </p>
+                          <template if:true={showNearshoreReferentialMismatch}>
+                            <p class="referential-mismatch-note">
+                              {nearshoreReferentialMismatchLabel}
+                            </p>
+                          </template>
+                          <template
+                            if:true={showNearshoreReferentialCurrencyMismatch}
+                          >
+                            <p class="referential-mismatch-note">
+                              {nearshoreReferentialCurrencyMismatchLabel}
+                            </p>
+                          </template>
+                        </div>
+                      </div>
+                      <template if:true={showNearshoreCountryWarning}>
+                        <div
+                          class="referential-warning nearshore-referential-warning slds-m-top_small"
+                        >
+                          {labels.nearshoreCountryWarning}
+                        </div>
+                      </template>
+                    </template>
+                    <template if:false={isEditable}>
+                      <div
+                        class="slds-grid slds-gutters_small slds-m-top_small"
+                      >
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={labels.nearshoreCountry}
+                            value={displayNearshoreCountry}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                          <lightning-input
+                            type="text"
+                            label={nearshoreCjmReadOnlyLabel}
+                            value={displayCjmNearshore}
+                            disabled
+                            class="readonly-input"
+                          ></lightning-input>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+
+                  <!-- Frais OM (session 178) : toujours ouverts -->
+                  <template if:true={showOmAndPonctuelsFees}>
+                    <div class="fee-section-title slds-m-top_medium">
+                      <span>{labels.feesOmToggle}</span>
+                    </div>
+                    <div
+                      class="slds-grid slds-wrap slds-gutters_small slds-m-top_x-small"
+                    >
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeIK.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeIK.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeIk"
+                          label={unitLabels.feeIK}
+                          variant="label-hidden"
+                          value={feeIk}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeMeals.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeMeals.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeMeals"
+                          label={unitLabels.feeMeals}
+                          variant="label-hidden"
+                          value={feeMeals}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeLodging.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeLodging.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeLodging"
+                          label={unitLabels.feeLodging}
+                          variant="label-hidden"
+                          value={feeLodging}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeOther.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeOther.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeOmOther"
+                          label={unitLabels.feeOther}
+                          variant="label-hidden"
+                          value={feeOmOther}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                    </div>
+
+                    <!-- Périodes de frais OM ajoutées (docs/239) : la période 1 reste la rangée ci-dessus. -->
+                    <template if:true={feePeriodFirstLabel}>
+                      <div
+                        class="fee-period-first slds-m-top_x-small slds-text-body_small"
+                      >
+                        <span>{feePeriodFirstLabel}</span>
+                      </div>
+                    </template>
+                    <template for:each={feePeriodRows} for:item="row">
+                      <div
+                        key={row.key}
+                        class="fee-period-row slds-m-top_small"
+                      >
+                        <div
+                          class="slds-grid slds-grid_vertical-align-center slds-gutters_small"
+                        >
+                          <div class="slds-col slds-no-flex fee-period-title">
+                            <span>{row.title}</span>
+                          </div>
+                          <div class="slds-col slds-size_1-of-4">
+                            <lightning-input
+                              type="number"
+                              name="feePeriodDays"
+                              label={labels.feePeriodDays}
+                              variant="label-hidden"
+                              placeholder={labels.feePeriodDays}
+                              value={row.days}
+                              min="0"
+                              step="1"
+                              data-key={row.periodKey}
+                              data-field="days"
+                              disabled={isNotEditable}
+                              onchange={handleFeePeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-grow"></div>
+                          <div class="slds-col slds-no-flex">
+                            <lightning-button-icon
+                              icon-name="utility:close"
+                              variant="bare"
+                              size="small"
+                              alternative-text={row.removeLabel}
+                              title={row.removeLabel}
+                              data-key={row.periodKey}
+                              disabled={isNotEditable}
+                              onclick={handleRemoveFeePeriod}
+                            ></lightning-button-icon>
+                          </div>
+                        </div>
+                        <div
+                          class="slds-grid slds-wrap slds-gutters_small slds-m-top_x-small"
+                        >
+                          <div class="slds-col slds-size_1-of-2">
+                            <label class="slds-form-element__label">
+                              <span>{unitLabelParts.feeIK.main}</span>
+                              <span class="unit-hint"
+                                >{unitLabelParts.feeIK.unit}</span
+                              >
+                            </label>
+                            <lightning-input
+                              type="number"
+                              name="feePeriodIk"
+                              label={unitLabels.feeIK}
+                              variant="label-hidden"
+                              value={row.feeIk}
+                              min="0"
+                              step="0.01"
+                              message-when-step-mismatch={labels.decimalStepError}
+                              data-key={row.periodKey}
+                              data-field="feeIk"
+                              disabled={isNotEditable}
+                              onchange={handleFeePeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-size_1-of-2">
+                            <label class="slds-form-element__label">
+                              <span>{unitLabelParts.feeMeals.main}</span>
+                              <span class="unit-hint"
+                                >{unitLabelParts.feeMeals.unit}</span
+                              >
+                            </label>
+                            <lightning-input
+                              type="number"
+                              name="feePeriodMeals"
+                              label={unitLabels.feeMeals}
+                              variant="label-hidden"
+                              value={row.feeMeals}
+                              min="0"
+                              step="0.01"
+                              message-when-step-mismatch={labels.decimalStepError}
+                              data-key={row.periodKey}
+                              data-field="feeMeals"
+                              disabled={isNotEditable}
+                              onchange={handleFeePeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-size_1-of-2">
+                            <label class="slds-form-element__label">
+                              <span>{unitLabelParts.feeLodging.main}</span>
+                              <span class="unit-hint"
+                                >{unitLabelParts.feeLodging.unit}</span
+                              >
+                            </label>
+                            <lightning-input
+                              type="number"
+                              name="feePeriodLodging"
+                              label={unitLabels.feeLodging}
+                              variant="label-hidden"
+                              value={row.feeLodging}
+                              min="0"
+                              step="0.01"
+                              message-when-step-mismatch={labels.decimalStepError}
+                              data-key={row.periodKey}
+                              data-field="feeLodging"
+                              disabled={isNotEditable}
+                              onchange={handleFeePeriodChange}
+                            ></lightning-input>
+                          </div>
+                          <div class="slds-col slds-size_1-of-2">
+                            <label class="slds-form-element__label">
+                              <span>{unitLabelParts.feeOther.main}</span>
+                              <span class="unit-hint"
+                                >{unitLabelParts.feeOther.unit}</span
+                              >
+                            </label>
+                            <lightning-input
+                              type="number"
+                              name="feePeriodOther"
+                              label={unitLabels.feeOther}
+                              variant="label-hidden"
+                              value={row.feeOmOther}
+                              min="0"
+                              step="0.01"
+                              message-when-step-mismatch={labels.decimalStepError}
+                              data-key={row.periodKey}
+                              data-field="feeOmOther"
+                              disabled={isNotEditable}
+                              onchange={handleFeePeriodChange}
+                            ></lightning-input>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template if:true={feePeriodExceedLabel}>
+                      <div
+                        class="fee-period-exceed slds-m-top_x-small slds-text-color_error"
+                        role="alert"
+                      >
+                        <span>{feePeriodExceedLabel}</span>
+                      </div>
+                    </template>
+                    <template if:true={showFeePeriodAddLink}>
+                      <div class="slds-m-top_x-small">
+                        <lightning-button
+                          variant="base"
+                          label={labels.feePeriodAdd}
+                          onclick={handleAddFeePeriod}
+                        ></lightning-button>
+                      </div>
+                    </template>
+                  </template>
+
+                  <!-- Frais ponctuels / Gratuité (session 178) : toujours ouverts, gratuité pour tous les statuts, les 5
+                   autres champs uniquement CDI/VIE — libellé « Gratuité client annuelle » pour INDEP -->
+                  <div class="fee-section-title slds-m-top_medium">
+                    <span>{fraisPonctuelsToggleLabel}</span>
+                  </div>
+                  <div
+                    class="slds-grid slds-wrap slds-gutters_small slds-m-top_x-small"
+                  >
+                    <div class="slds-col slds-size_1-of-2">
+                      <label class="slds-form-element__label">
+                        <span>{gratuityDaysParts.main}</span>
+                        <span class="unit-hint">{gratuityDaysParts.unit}</span>
+                      </label>
+                      <lightning-input
+                        type="number"
+                        name="gratuityDays"
+                        label={labels.gratuityDays}
+                        variant="label-hidden"
+                        value={gratuityDays}
+                        min="0"
+                        step="0.5"
+                        disabled={isNotEditable}
+                        onchange={handleFieldChange}
+                      ></lightning-input>
+                      <!-- Détail du calcul (session 18, maquette pricing-tool.html:2026-2029) -->
+                      <template if:true={showGratuityDetail}>
+                        <p class="field-helper-text">{gratuityDetailLabel}</p>
+                      </template>
+                    </div>
+                    <template if:true={showOmAndPonctuelsFees}>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeComputer.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeComputer.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeComputer"
+                          label={unitLabels.feeComputer}
+                          variant="label-hidden"
+                          value={feeComputer}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feePhone.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feePhone.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feePhone"
+                          label={unitLabels.feePhone}
+                          variant="label-hidden"
+                          value={feePhone}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label
+                          class="slds-form-element__label"
+                          for="feeMonthlyOther"
+                          title={labels.feeMonthlyOtherHelp}
+                        >
+                          <span>{unitLabelParts.feeMonthlyOther.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeMonthlyOther.unit}</span
+                          >
+                        </label>
+                        <input
+                          id="feeMonthlyOther"
+                          class="slds-input fee-monthly-other-input"
+                          type="number"
+                          name="feeMonthlyOther"
+                          min="0"
+                          step="0.01"
+                          title={labels.feeMonthlyOtherHelp}
+                          value={feeMonthlyOtherInputValue}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        />
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeTraining.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeTraining.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeTraining"
+                          label={unitLabels.feeTraining}
+                          variant="label-hidden"
+                          value={feeTraining}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeEPI.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeEPI.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeEpi"
+                          label={unitLabels.feeEPI}
+                          variant="label-hidden"
+                          value={feeEpi}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox
+                          name="feeOfiiTax"
+                          label={labels.feeOfiiTax}
+                          field-level-help={ofiiTaxHelpText}
+                          value={ofiiTaxValue}
+                          options={ofiiTaxOptions}
+                          dropdown-alignment="auto"
+                          disabled={isNotEditable}
+                          onchange={handleOfiiTaxChange}
+                        ></lightning-combobox>
+                        <template if:true={showOfiiTaxNotSet}>
+                          <p class="field-helper-text">
+                            {labels.ofiiTaxNotSet}
+                          </p>
+                        </template>
+                        <template if:true={showOfiiTaxNoSalary}>
+                          <p class="field-helper-text">
+                            {labels.ofiiTaxNoSalary}
+                          </p>
+                        </template>
+                      </div>
+                      <div class="slds-col slds-size_1-of-2">
+                        <label class="slds-form-element__label">
+                          <span>{unitLabelParts.feeOtherPerMission.main}</span>
+                          <span class="unit-hint"
+                            >{unitLabelParts.feeOtherPerMission.unit}</span
+                          >
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="feeOther"
+                          label={unitLabels.feeOtherPerMission}
+                          variant="label-hidden"
+                          value={feeOther}
+                          min="0"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        ></lightning-input>
+                      </div>
+                    </template>
+                  </div>
+                  <template if:true={showOneTimeFeesYearFallback}>
+                    <p
+                      class="slds-p-around_x-small slds-m-top_x-small slds-text-title_caps"
+                      style="
+                        background-color: #fffacd;
+                        border-left: 4px solid #f59e0b;
+                      "
+                    >
+                      {labels.oneTimeFeesYearFallback}
+                    </p>
+                  </template>
+
+                  <lightning-input
+                    type="number"
+                    name="rfaPercent"
+                    label={labels.rfaPercentLabel}
+                    value={rfaPercent}
+                    min="0"
+                    max="20"
+                    step="0.01"
+                    message-when-step-mismatch={labels.decimalStepError}
+                    disabled={isNotEditable}
+                    onchange={handleFieldChange}
+                    class="slds-m-top_medium"
+                  ></lightning-input>
+
+                  <!-- Session 146b : légende d'héritage RFA -->
+                  <template if:true={rfaInheritanceNote}>
+                    <p
+                      class="field-helper-text rfa-inheritance-note slds-m-top_x-small"
+                    >
+                      {rfaInheritanceNote}
+                    </p>
+                  </template>
+                  <template if:true={rfaReadWarning}>
+                    <div
+                      class="referential-warning vie-referential-warning rfa-read-warning slds-m-top_x-small"
+                    >
+                      {rfaReadWarning}
+                    </div>
+                  </template>
+
+                  <!-- Nombre de jours mission (session 17, pricing-tool.html:1992-2001) : calculé
+                   auto depuis les dates de Zone 1 tant que l'utilisateur ne le modifie pas lui-même. -->
+                  <template if:false={rplsrEnabled}>
+                    <div class="slds-grid slds-gutters_small slds-m-top_medium">
+                      <div class="slds-col slds-size_1-of-2">
+                        <label
+                          class="slds-form-element__label mission-days-label"
+                        >
+                          {labels.missionDaysLabel}
+                          <template if:true={showNumberOfDaysAutoLabel}>
+                            <span class="value-green mission-days-auto-tag"
+                              >{labels.autoCalculatedTag}</span
+                            >
+                          </template>
+                        </label>
+                        <lightning-input
+                          type="number"
+                          name="numberOfDays"
+                          label={labels.missionDaysLabel}
+                          variant="label-hidden"
+                          value={numberOfDays}
+                          min="1"
+                          step="0.01"
+                          message-when-step-mismatch={labels.decimalStepError}
+                          disabled={isNotEditable}
+                          onchange={handleNumberOfDaysChange}
+                        ></lightning-input>
+                        <template if:true={showNumberOfDaysAutoLabel}>
+                          <p class="field-helper-text">
+                            {labels.workingDaysHelper}
+                          </p>
+                        </template>
+                      </div>
+                      <!-- Congés prévus : retranchés des jours de mission (masqués en régie sans régule). -->
+                      <div class="slds-col slds-size_1-of-2">
+                        <label
+                          class="slds-form-element__label planned-leave-label"
+                          for="plannedLeaveDays"
+                          >{labels.plannedLeaveLabel}</label
+                        >
+                        <input
+                          id="plannedLeaveDays"
+                          class="slds-input planned-leave-input"
+                          type="number"
+                          name="plannedLeaveDays"
+                          min="0"
+                          step="1"
+                          value={plannedLeaveInputValue}
+                          disabled={isNotEditable}
+                          onchange={handleFieldChange}
+                        />
+                        <template if:true={leaveExceedsMission}>
+                          <p
+                            class="leave-exceeds-message slds-text-color_error slds-text-body_small slds-m-top_x-small"
+                          >
+                            {labels.leaveExceedsMission}
+                          </p>
+                        </template>
+                      </div>
+                    </div>
+                    <template if:true={billableDaysText}>
+                      <p
+                        class="billable-days slds-m-top_x-small"
+                        title={labels.billableDaysHelp}
+                      >
+                        {billableDaysText}
+                      </p>
+                    </template>
+                  </template>
+
+                  <!-- Encadré de coût journalier (session 15, pricing-tool.html:2038-2043) : rétabli.
+                   Coût nul (session 16) : message explicite plutôt que "—/j" + "- 0 €" incohérents. -->
+                  <div class="cost-summary-box slds-m-top_medium">
+                    <template if:false={isCostCalculable}>
+                      <p class="cost-summary-empty">
+                        {costNotCalculableMessage}
+                      </p>
+                    </template>
+                    <template if:true={isCostCalculable}>
+                      <div
+                        class="cost-summary-row cost-summary-cjm"
+                        title={cjmWeightedTooltip}
+                      >
+                        <span class="cost-summary-label"
+                          >{cjmSummaryLabel}</span
+                        >
+                        <span class="cost-summary-value"
+                          >{formattedCjm}{labels.perDaySuffix}</span
+                        >
+                      </div>
+                      <template if:true={showFeeOmLine}>
+                        <div class="cost-summary-row">
+                          <span class="cost-summary-label"
+                            >{labels.feesOmDailyLabel}</span
+                          >
+                          <span class="cost-summary-value"
+                            >{formattedFeeOmPerDay}</span
+                          >
+                        </div>
+                      </template>
+                      <template if:true={showFeePonctuelsLine}>
+                        <div class="cost-summary-row">
+                          <span class="cost-summary-label"
+                            >{feePonctuelsLineLabel}</span
+                          >
+                          <span class="cost-summary-value"
+                            >{formattedFeePonctuelsPerDay}</span
+                          >
+                        </div>
+                      </template>
+                      <div class="cost-summary-row cost-summary-row-total">
+                        <span>{labels.totalDailyCost}</span>
+                        <span>{formattedTotalDailyCost}</span>
+                      </div>
+                    </template>
+                  </div>
+
+                  <template if:true={hasGrandCompteCorridor}>
+                    <div class="grand-compte-banner slds-m-top_medium">
+                      <lightning-icon
+                        icon-name="utility:favorite"
+                        size="xx-small"
+                        class="grand-compte-icon"
+                      ></lightning-icon>
+                      <span class="grand-compte-label"
+                        >{thresholdsOriginLabel}
+                      </span>
+                      <span class="grand-compte-values"
+                        >{grandCompteBannerLabel}
+                        <span class="grand-compte-standard">
+                          {i18n.AR_PMS_StandardCorridor}</span
+                        ></span
+                      >
+                    </div>
+                  </template>
+                  <div class="threshold-row slds-m-top_medium">
+                    <div class="threshold-card threshold-floor">
+                      <p class="stat-label">{floorPercentLabel}</p>
+                      <p class="stat-value">{formattedTjmFloor}</p>
+                    </div>
+                    <div class="threshold-card threshold-target">
+                      <p class="stat-label">{targetPercentLabel}</p>
+                      <p class="stat-value">{formattedTjmTarget}</p>
+                    </div>
+                    <div class="threshold-card threshold-ideal">
+                      <p class="stat-label">{idealPercentLabel}</p>
+                      <p class="stat-value">{formattedTjmIdeal}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zone 3 : décision — card maquette (pricing-tool.html:2068-2072) -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+              <div class="zone-card">
+                <div class="zone-card-header">
+                  <div class="zone-card-header-left">
+                    <span class="zone-badge">3</span>
+                    <p class="zone-header-title">{labels.zoneDecisionTitle}</p>
+                  </div>
+                </div>
+                <div class="zone-card-body">
+                  <lightning-input
+                    type="number"
+                    name="proposedTjm"
+                    label={unitLabels.proposedTjm}
+                    value={proposedTjm}
+                    min="0"
+                    step="0.01"
+                    message-when-step-mismatch={labels.decimalStepError}
+                    disabled={isNotEditable}
+                    onchange={handleFieldChange}
+                  ></lightning-input>
+
+                  <!-- Périodes de TJM (docs/254) : lien, cadre dessiné par son soulignement, frise, une ligne par
+                       période, pied pondéré. Le cadre reste dans le DOM pour animer l'ouverture et le repli. -->
+                  <template if:true={showTjmPeriodsBlock}>
+                    <div
+                      class={tjmBlockClass}
+                      onpointerdown={handleTjmPanelPointerDown}
+                      onmouseenter={handleTjmBlockMouseEnter}
+                      onmouseleave={handleTjmBlockMouseLeave}
+                    >
+                      <template if:true={showTjmPeriodsLink}>
+                        <button
+                          type="button"
+                          class="tjm-text-btn tjm-toggle"
+                          aria-expanded={tjmToggleExpanded}
+                          aria-controls="tjm-periods-panel"
+                          onclick={handleToggleTjmPeriods}
+                          onmouseleave={handleTjmTextButtonLeave}
+                        >
+                          <svg
+                            class="tjm-chevron"
+                            viewBox="0 0 10 10"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1.5 3.5 5 7l3.5-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.4"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                          <span class="tjm-toggle-label"
+                            >{tjmPeriodsLinkLabel}</span
+                          >
+                        </button>
+                      </template>
+                      <div class="tjm-frame">
+                        <span class="tjm-frame-top" aria-hidden="true"></span>
+                        <span class="tjm-frame-rest" aria-hidden="true"></span>
+                        <div class="tjm-unfold">
+                          <div class="tjm-unfold-inner">
+                            <div
+                              id="tjm-periods-panel"
+                              class={tjmPanelClass}
+                              onfocusin={handleTjmPanelFocusIn}
+                              onfocusout={handleTjmPanelFocusOut}
+                              onkeydown={handleTjmPanelKeydown}
+                            >
+                              <template if:true={hasTjmTimeline}>
+                                <div class="tjm-collapse">
+                                  <div class="tjm-collapse-inner">
+                                    <div
+                                      class="tjm-timeline-ends tjm-fade-item tjm-fade-item_down"
+                                      style="--i: 0; --ri: 0"
+                                    >
+                                      <span>{tjmTimelineStartLabel}</span>
+                                      <span>{tjmTimelineEndLabel}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div
+                                  class="tjm-timeline"
+                                  role={tjmTimelineRole}
+                                  tabindex={tjmTimelineTabindex}
+                                  title={tjmTimelineTitle}
+                                  aria-expanded={tjmTimelineAriaExpanded}
+                                  onmouseenter={handleTjmTimelineMouseEnter}
+                                  onmouseleave={handleTjmTimelineMouseLeave}
+                                  onclick={handleTjmTimelineClick}
+                                  onkeydown={handleTjmTimelineKeydown}
+                                >
+                                  <template
+                                    for:each={tjmTimelineSegments}
+                                    for:item="seg"
+                                  >
+                                    <div
+                                      key={seg.key}
+                                      class={seg.className}
+                                      style={seg.style}
+                                    >
+                                      <span class="tjm-segment-full">
+                                        <span class="tjm-segment-tjm"
+                                          >{seg.tjmLabel}</span
+                                        >
+                                        <span class="tjm-segment-days"
+                                          >{seg.daysLabel}</span
+                                        >
+                                      </span>
+                                      <span
+                                        class="tjm-segment-line"
+                                        aria-hidden="true"
+                                      >
+                                        <span
+                                          ><span class="tjm-segment-line-tjm"
+                                            >{seg.tjmLabel}</span
+                                          ><span class="tjm-segment-line-days">
+                                            · {seg.daysLabel}</span
+                                          ></span
+                                        >
+                                      </span>
+                                    </div>
+                                  </template>
+                                </div>
+                              </template>
+                              <div class="tjm-collapse">
+                                <div class="tjm-collapse-inner">
+                                  <template if:true={tjmMissionUnknown}>
+                                    <p
+                                      class="tjm-periods-message tjm-fade-item"
+                                      style={tjmMessageStyle}
+                                    >
+                                      {labels.tjmPeriodsMissionUnknown}
+                                    </p>
+                                  </template>
+                                  <template if:true={tjmExceedLabel}>
+                                    <p
+                                      class="tjm-periods-message tjm-fade-item"
+                                      style={tjmMessageStyle}
+                                    >
+                                      {tjmExceedLabel}
+                                    </p>
+                                  </template>
+                                  <template if:true={hasTjmPeriods}>
+                                    <div
+                                      class="tjm-period-row tjm-fade-item"
+                                      style={tjmFirstRow.style}
+                                    >
+                                      <span
+                                        class={tjmFirstRow.colorClass}
+                                      ></span>
+                                      <span class="tjm-period-title"
+                                        >{tjmFirstRow.label}</span
+                                      >
+                                      <span
+                                        class="tjm-field tjm-field-days"
+                                      ></span>
+                                      <span
+                                        class="tjm-field tjm-field-tjm tjm-period-first-value"
+                                        ><span class="tjm-first-amount"
+                                          >{tjmFirstRow.amount}</span
+                                        ><span
+                                          class="tjm-field-unit"
+                                          aria-hidden="true"
+                                          >{tjmFirstRow.symbol}</span
+                                        ></span
+                                      >
+                                      <template if:false={isNotEditable}>
+                                        <span class="tjm-remove-slot"></span>
+                                      </template>
+                                    </div>
+                                    <template
+                                      for:each={tjmPeriodRows}
+                                      for:item="row"
+                                    >
+                                      <div
+                                        class="tjm-period-row tjm-fade-item"
+                                        style={row.style}
+                                        key={row.key}
+                                      >
+                                        <span class={row.colorClass}></span>
+                                        <span class="tjm-period-title"
+                                          >{row.title}</span
+                                        >
+                                        <span class="tjm-field tjm-field-days">
+                                          <input
+                                            class="slds-input tjm-period-input"
+                                            type="number"
+                                            min="1"
+                                            step="1"
+                                            data-key={row.periodKey}
+                                            data-field="days"
+                                            aria-label={row.daysAria}
+                                            value={row.days}
+                                            disabled={isNotEditable}
+                                            oninput={handleTjmPeriodChange}
+                                          />
+                                          <span
+                                            class="tjm-field-unit"
+                                            aria-hidden="true"
+                                            >{labels.tjmPeriodDaysUnit}</span
+                                          >
+                                        </span>
+                                        <span class="tjm-field tjm-field-tjm">
+                                          <input
+                                            class="slds-input tjm-period-input"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            data-key={row.periodKey}
+                                            data-field="tjm"
+                                            aria-label={row.tjmAria}
+                                            value={row.tjm}
+                                            disabled={isNotEditable}
+                                            oninput={handleTjmPeriodChange}
+                                          />
+                                          <span
+                                            class="tjm-field-unit"
+                                            aria-hidden="true"
+                                            >{row.currencySymbol}</span
+                                          >
+                                        </span>
+                                        <template if:false={isNotEditable}>
+                                          <span class="tjm-remove-slot">
+                                            <lightning-button-icon
+                                              variant="bare"
+                                              icon-name="utility:close"
+                                              alternative-text={row.removeLabel}
+                                              title={row.removeLabel}
+                                              data-key={row.periodKey}
+                                              onclick={handleRemoveTjmPeriod}
+                                            ></lightning-button-icon
+                                          ></span>
+                                        </template>
+                                      </div>
+                                    </template>
+                                  </template>
+                                  <template if:true={showTjmPeriodAddLink}>
+                                    <div
+                                      class="tjm-add-row tjm-fade-item"
+                                      style={tjmAddLinkStyle}
+                                    >
+                                      <button
+                                        type="button"
+                                        class="tjm-text-btn"
+                                        onclick={handleAddTjmPeriod}
+                                        onmouseleave={handleTjmTextButtonLeave}
+                                      >
+                                        {labels.tjmPeriodAdd}
+                                      </button>
+                                    </div>
+                                  </template>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <template if:true={hasTjmPeriods}>
+                          <div
+                            class={tjmFooterClass}
+                            role={tjmFooterRole}
+                            tabindex={tjmFooterTabindex}
+                            aria-expanded={tjmFooterAriaExpanded}
+                            onclick={handleTjmFooterClick}
+                            onkeydown={handleTjmFooterKeydown}
+                          >
+                            <span class="tjm-weighted-label"
+                              >{labels.tjmWeightedFooter}</span
+                            >
+                            <span class="tjm-weighted-value"
+                              >{tjmWeightedFormatted}</span
+                            >
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- Hiérarchie zone 3 (session 16, pricing-tool.html:2079-2083) : une valeur dominante
+                   + une ligne de contexte, plus 3 tuiles de poids égal (l'ancienne "Remise vs cible"
+                   a déjà quitté cette grille en session 15 pour devenir la note à côté du badge). -->
+                  <div class="mc2-nego-row slds-m-top_medium">
+                    <div class="mc2-dominant-block">
+                      <p class="stat-label">{labels.mc2PerDayLabel}</p>
+                      <p class={mc2DominantValueClass}>{formattedMc2PerDay}</p>
+                      <template if:true={mc2ContextLine}>
+                        <p class="mc2-context-line">{mc2ContextLine}</p>
+                      </template>
+                    </div>
+                    <!-- Prix de négociation 2 et 3 : indicatifs, hors workflow. Éléments natifs stylés SLDS (le
+                         lightning-input n'est pas stylable ici, cf. CLAUDE.md règle des deux tentatives). -->
+                    <div
+                      class="nego-fields"
+                      role="group"
+                      aria-label={labels.negoPriceHelp}
+                      onpointerdown={handleNegoPointerDown}
+                      onmouseenter={handleNegoMouseEnter}
+                      onmouseleave={handleNegoMouseLeave}
+                      onfocusin={handleNegoFieldFocusIn}
+                      onfocusout={handleNegoFieldFocusOut}
+                    >
+                      <div class="nego-field nego-field-grid">
+                        <label class="nego-label" for="clientGrid"
+                          >{labels.clientGridLabel}</label
+                        >
+                        <span
+                          class="nego-grid-box"
+                          title={labels.clientGridHelp}
+                        >
+                          <input
+                            id="clientGrid"
+                            type="checkbox"
+                            name="clientGrid"
+                            checked={clientGrid}
+                            disabled={isNotEditable}
+                            onchange={handleClientGridChange}
+                          />
+                        </span>
+                      </div>
+                      <div class="nego-field">
+                        <label class="nego-label" for="negoPrice2"
+                          >{labels.negoColPrice2}</label
+                        >
+                        <span class="nego-input-wrap">
+                          <input
+                            id="negoPrice2"
+                            class="slds-input nego-input"
+                            type="number"
+                            name="negoPrice2"
+                            min="0"
+                            step="0.01"
+                            value={negoPrice2Input}
+                            disabled={isNegoInputDisabled}
+                            oninput={handleNegoInput}
+                            onchange={handleFieldChange}
+                            onblur={handleNegoBlur}
+                            onkeydown={handleNegoKey}
+                          />
+                          <span class="nego-input-unit" aria-hidden="true"
+                            >{negoCurrencySymbol}</span
+                          >
+                        </span>
+                        <template if:true={negoPrice2Message}>
+                          <p class={negoPrice2MessageClass}>
+                            {negoPrice2Message.text}
+                          </p>
+                        </template>
+                      </div>
+                      <div class="nego-field">
+                        <label class="nego-label" for="negoPrice3"
+                          >{labels.negoColPrice3}</label
+                        >
+                        <span class="nego-input-wrap">
+                          <input
+                            id="negoPrice3"
+                            class="slds-input nego-input"
+                            type="number"
+                            name="negoPrice3"
+                            min="0"
+                            step="0.01"
+                            value={negoPrice3Input}
+                            disabled={isNegoInputDisabled}
+                            oninput={handleNegoInput}
+                            onchange={handleFieldChange}
+                            onblur={handleNegoBlur}
+                            onkeydown={handleNegoKey}
+                          />
+                          <span class="nego-input-unit" aria-hidden="true"
+                            >{negoCurrencySymbol}</span
+                          >
+                        </span>
+                        <template if:true={negoPrice3Message}>
+                          <p class={negoPrice3MessageClass}>
+                            {negoPrice3Message.text}
+                          </p>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Décomposition MC2 (session 15, pricing-tool.html:2085-2096 ; session 150 : une décimale alignée) -->
+                  <template if:true={showMc2Breakdown}>
+                    <div
+                      class={mc2BreakdownBoxClass}
+                      onpointerdown={handleNegoPointerDown}
+                      onmouseenter={handleNegoMouseEnter}
+                      onmouseleave={handleNegoMouseLeave}
+                    >
+                      <template if:true={hasNegoColumns}>
+                        <button
+                          type="button"
+                          class="nego-handle"
+                          data-id="nego-toggle"
+                          aria-expanded={negoToggleExpanded}
+                          aria-controls={negoControlsIds}
+                          onclick={handleToggleNegoColumns}
+                        >
+                          <svg
+                            class="tjm-chevron"
+                            viewBox="0 0 10 10"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1.5 3.5 5 7l3.5-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.4"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                          <span class="nego-handle-text"
+                            >{negoToggleLabel}</span
+                          >
+                        </button>
+                        <div
+                          class={negoHeadClass}
+                          data-id="nego-head"
+                          aria-hidden={negoHeadAriaHidden}
+                        >
+                          <div class="nego-head-inner">
+                            <div class="mc2-breakdown-row nego-head-row">
+                              <span></span>
+                              <span>{labels.negoColPrice1}</span>
+                              <template for:each={negoColumns} for:item="col">
+                                <span key={col.key} data-id="nego-head-cell"
+                                  >{col.header}</span
+                                >
+                              </template>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                      <div
+                        class="mc2-breakdown-row mc2-breakdown-row-has-extra"
+                      >
+                        <template if:true={tjmBasketCaption}>
+                          <div>
+                            <span class="mc2-breakdown-label"
+                              >{invoicedTjmLabel}</span
+                            >
+                            <p class="breakdown-line-caption">
+                              {tjmBasketCaption}
+                            </p>
+                          </div>
+                        </template>
+                        <template if:false={tjmBasketCaption}>
+                          <div>
+                            <span class="mc2-breakdown-label"
+                              >{invoicedTjmLabel}</span
+                            >
+                          </div>
+                        </template>
+                        <span class="mc2-breakdown-strong mc2-breakdown-amount">
+                          <span class="amt-int"
+                            >{proposedTjmBreakdown.intPart}</span
+                          ><span class={proposedTjmBreakdown.decClass}
+                            >{proposedTjmBreakdown.decPart}</span
+                          >&nbsp;{proposedTjmBreakdown.symbol}
+                        </span>
+                        <template for:each={negoColumns} for:item="col">
+                          <span
+                            id={col.tjmId}
+                            class="mc2-breakdown-amount mc2-breakdown-extra"
+                            key={col.key}
+                          >
+                            <template lwc:if={col.tjm.show}>
+                              <span class="amt-int">{col.tjm.intPart}</span
+                              ><span class={col.tjm.decClass}
+                                >{col.tjm.decPart}</span
+                              >&nbsp;{col.tjm.symbol}
+                            </template>
+                          </span>
+                        </template>
+                      </div>
+                      <template if:true={showRfaLineInBreakdown}>
+                        <div class="mc2-breakdown-row mc2-breakdown-row-rfa">
+                          <span>{rfaBreakdownLabel}</span>
+                          <span class="mc2-breakdown-amount"
+                            >-&nbsp;<span class="amt-int"
+                              >{rfaAmountBreakdown.intPart}</span
+                            ><span class={rfaAmountBreakdown.decClass}
+                              >{rfaAmountBreakdown.decPart}</span
+                            >&nbsp;{rfaAmountBreakdown.symbol}</span
+                          >
+                          <template for:each={negoColumns} for:item="col">
+                            <span
+                              class="mc2-breakdown-amount mc2-breakdown-extra"
+                              key={col.key}
+                            >
+                              <template lwc:if={col.rfa.show}
+                                >-&nbsp;<span class="amt-int"
+                                  >{col.rfa.intPart}</span
+                                ><span class={col.rfa.decClass}
+                                  >{col.rfa.decPart}</span
+                                >&nbsp;{col.rfa.symbol}</template
+                              >
+                            </span>
+                          </template>
+                        </div>
+                      </template>
+                      <div class="mc2-breakdown-row">
+                        <span>{labels.netRevenueAfterRfa}</span>
+                        <span class="mc2-breakdown-strong mc2-breakdown-amount">
+                          <span class="amt-int"
+                            >{netRevenueAfterRfaBreakdown.intPart}</span
+                          ><span class={netRevenueAfterRfaBreakdown.decClass}
+                            >{netRevenueAfterRfaBreakdown.decPart}</span
+                          >&nbsp;{netRevenueAfterRfaBreakdown.symbol}
+                        </span>
+                        <template for:each={negoColumns} for:item="col">
+                          <span
+                            class="mc2-breakdown-amount mc2-breakdown-extra"
+                            key={col.key}
+                          >
+                            <template lwc:if={col.net.show}>
+                              <span class="amt-int">{col.net.intPart}</span
+                              ><span class={col.net.decClass}
+                                >{col.net.decPart}</span
+                              >&nbsp;{col.net.symbol}
+                            </template>
+                          </span>
+                        </template>
+                      </div>
+                      <template for:each={costBreakdownLines} for:item="line">
+                        <div
+                          class="mc2-breakdown-row"
+                          key={line.key}
+                          title={line.title}
+                        >
+                          <div>
+                            <span>{line.label}</span>
+                            <template if:true={line.caption}>
+                              <p class="breakdown-line-caption">
+                                {line.caption}
+                              </p>
+                            </template>
+                          </div>
+                          <span class="mc2-breakdown-amount"
+                            >-&nbsp;<span class="amt-int">{line.intPart}</span
+                            ><span class={line.decClass}>{line.decPart}</span
+                            >&nbsp;{line.symbol}</span
+                          >
+                        </div>
+                      </template>
+                      <div class="mc2-breakdown-row mc2-breakdown-row-subtotal">
+                        <span>{labels.totalDailyCost}</span>
+                        <span class="mc2-breakdown-amount"
+                          >-&nbsp;<span class="amt-int"
+                            >{totalDailyCostBreakdown.intPart}</span
+                          ><span class={totalDailyCostBreakdown.decClass}
+                            >{totalDailyCostBreakdown.decPart}</span
+                          >&nbsp;{totalDailyCostBreakdown.symbol}</span
+                        >
+                      </div>
+                      <template lwc:if={isRplsrActive}>
+                        <div
+                          class="mc2-breakdown-row mc2-breakdown-row-rplsr"
+                          data-id="rplsr-gap"
+                        >
+                          <div>
+                            <span>{labels.rplsrProductionGap}</span>
+                            <p class="breakdown-line-caption">
+                              {rplsrGapCaption}
+                            </p>
+                          </div>
+                          <span class={rplsrGapBreakdown.amountClass}
+                            >{rplsrGapBreakdown.sign}&nbsp;<span class="amt-int"
+                              >{rplsrGapBreakdown.intPart}</span
+                            ><span class={rplsrGapBreakdown.decClass}
+                              >{rplsrGapBreakdown.decPart}</span
+                            >&nbsp;{rplsrGapBreakdown.symbol}</span
+                          >
+                        </div>
+                      </template>
+                      <div
+                        class="mc2-breakdown-row mc2-breakdown-row-total mc2-breakdown-row-has-extra"
+                      >
+                        <span class="mc2-breakdown-label"
+                          >{labels.mc2PerDayLabel}
+                          <span class="mc2-breakdown-percent">
+                            ({formattedMc2Percent})</span
+                          ><template lwc:if={showRplsrClassicStrike}
+                            ><span
+                              class="mc2-breakdown-rplsr-classic"
+                              title={labels.rplsrClassicTitle}
+                              data-id="rplsr-classic"
+                              >{rplsrClassicMc2Percent}</span
+                            ></template
+                          ></span
+                        >
+                        <span class={mc2BreakdownValueClass}
+                          ><span class="mc2-breakdown-amount"
+                            ><span class="amt-int"
+                              >{mc2PerDayBreakdown.intPart}</span
+                            ><span class={mc2PerDayBreakdown.decClass}
+                              >{mc2PerDayBreakdown.decPart}</span
+                            >&nbsp;{mc2PerDayBreakdown.symbol}</span
+                          ></span
+                        >
+                        <template for:each={negoColumns} for:item="col">
+                          <span class="nego-mc2-cell" key={col.key}>
+                            <span
+                              class="mc2-breakdown-amount mc2-breakdown-extra"
+                              ><span class="amt-int">{col.mc2.intPart}</span
+                              ><span class={col.mc2.decClass}
+                                >{col.mc2.decPart}</span
+                              >&nbsp;{col.mc2.symbol}<span
+                                class={col.percentClass}
+                                >{col.mc2Percent}</span
+                              ></span
+                            >
+                          </span>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+
+                  <div class="slds-m-top_medium segment-row">
+                    <span class={segmentClass}>{segmentLabel}</span>
+                    <template if:true={showDiscountVsTarget}>
+                      <span class="discount-note">{discountVsTargetLabel}</span>
+                    </template>
+                  </div>
+
+                  <!-- Bandeaux d'alerte contextuels (session 15, pricing-tool.html:2104-2107) : rétablis -->
+                  <template if:true={showBelowFloorBanner}>
+                    <div class="alert-banner alert-banner-red">
+                      <lightning-icon
+                        icon-name="utility:warning"
+                        size="x-small"
+                        class="alert-banner-icon"
+                      ></lightning-icon>
+                      <div>
+                        <p class="alert-banner-title">
+                          {labels.mc2InsufficientTitle}
+                        </p>
+                        <p class="alert-banner-text">
+                          {belowFloorBannerMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                  <template if:true={showLowMarginBanner}>
+                    <div class="alert-banner alert-banner-amber">
+                      <lightning-icon
+                        icon-name="utility:warning"
+                        size="x-small"
+                        class="alert-banner-icon"
+                      ></lightning-icon>
+                      <p class="alert-banner-text">{lowMarginBannerMessage}</p>
+                    </div>
+                  </template>
+                  <template if:true={showRecommendedBanner}>
+                    <div class="alert-banner alert-banner-amber">
+                      <lightning-icon
+                        icon-name="utility:info"
+                        size="x-small"
+                        class="alert-banner-icon"
+                      ></lightning-icon>
+                      <p class="alert-banner-text">
+                        {recommendedBannerMessage}
+                      </p>
+                    </div>
+                  </template>
+                  <template if:true={showSuperstarBanner}>
+                    <div class="alert-banner alert-banner-green">
+                      <lightning-icon
+                        icon-name="utility:check"
+                        size="x-small"
+                        class="alert-banner-icon"
+                      ></lightning-icon>
+                      <p class="alert-banner-text">{superstarBannerMessage}</p>
+                    </div>
+                  </template>
+
+                  <!-- Panneau Arguments de vente (session 28, spec §5.1/§6.4) : repliable, replié
+                       par défaut, aux côtés de la décision de prix. Producteur algorithmique
+                       (arSalesArgumentsEngine), sans LLM (CLAUDE.md, lot 1) — cf. commentaire de
+                       tête du module pour la frontière posée pour la phase 4. -->
+                  <c-ar-sales-arguments-panel
+                    arguments={salesArguments}
+                    unavailable-notes={salesArgumentsUnavailableNotes}
+                  ></c-ar-sales-arguments-panel>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Régie sans régule (docs/265 §5) : plan de production mensuel, juste avant la jauge -->
+          <template lwc:if={showRplsrCard}>
+            <c-ar-rplsr-plan
+              class="rplsr-plan slds-m-top_medium"
+              enabled={rplsrEnabled}
+              days-per-month={rplsrDaysPerMonth}
+              months={rplsrMonths}
+              read-only={isNotEditable}
+              ontoggle={handleRplsrToggle}
+              onbasechange={handleRplsrBaseChange}
+              onproducedchange={handleRplsrProducedChange}
+            ></c-ar-rplsr-plan>
+          </template>
+
+          <!-- Jauge corridor : card autonome (pricing-tool.html:2066, 960-991) -->
+          <div class="zone-card gauge-card slds-m-top_medium">
+            <div class="zone-card-body">
+              <div class="gauge-header">
+                <span class="gauge-header-title">{labels.gaugeTitle}</span>
+                <div class="gauge-header-right">
+                  <template lwc:if={gaugeHeaderPill}>
+                    <span class={gaugeHeaderPill.cssClass}
+                      >{gaugeHeaderPill.text}</span
+                    >
+                  </template>
+                  <template if:true={hasProposedTjm}>
+                    <span class="gauge-header-tjm">{gaugeTitleTjmLabel}</span>
+                  </template>
+                </div>
+              </div>
+              <!-- Masquée quand les seuils ne sont pas calculables (session 17b) : sans CJM les 3
+                   seuils valent 0€, la jauge n'a plus aucun sens (matrice VOLVO, cf.
+                   docs/15-diff-maquette-org.md). Réutilise `isCostCalculable` directement (session 18) —
+                   pas un alias dédié en plus des cards de seuils et de la tuile MC2 qui partagent la
+                   même condition juste en dessous. -->
+              <template if:false={isCostCalculable}>
+                <p class="cost-summary-empty">{labels.gaugeNotPositionable}</p>
+              </template>
+              <template if:true={isCostCalculable}>
+                <div class="gauge-stage" style={gaugeView.stageStyle}>
+                  <!-- Étage des prix : pastilles au-dessus de la piste, reliées à leur repère par une tige. -->
+                  <template for:each={gaugeView.prices} for:item="price">
+                    <div
+                      key={price.key}
+                      class="gauge-price"
+                      data-id={price.key}
+                    >
+                      <span
+                        class={price.stemClass}
+                        style={price.stemStyle}
+                      ></span>
+                      <span
+                        class={price.pillClass}
+                        style={price.pillStyle}
+                        title={price.title}
+                        ><span class={price.tagClass}>{price.tag}</span
+                        ><template lwc:if={price.value}>
+                          <span class="gauge-pill-value">{price.value}</span>
+                        </template></span
+                      >
+                    </div>
+                  </template>
+                  <div class="gauge-track" style={gaugeView.trackStyle}>
+                    <template for:each={gaugeView.separators} for:item="sep">
+                      <span
+                        key={sep.key}
+                        class="gauge-separator"
+                        style={sep.style}
+                      ></span>
+                    </template>
+                    <template for:each={gaugeNegoMarkers} for:item="marker">
+                      <span
+                        key={marker.key}
+                        class={marker.tickClass}
+                        style={marker.tickStyle}
+                        title={marker.title}
+                      ></span>
+                    </template>
+                    <template lwc:if={showRplsrGhost}>
+                      <div
+                        class="gauge-rplsr-ghost"
+                        style={rplsrGhostStyle}
+                        title={rplsrGhostTitle}
+                        data-id="rplsr-ghost"
+                      >
+                        <span class="gauge-rplsr-ghost-dot"></span>
+                      </div>
+                    </template>
+                    <div class="gauge-cursor-wrap" style={gaugeCursorStyle}>
+                      <span class={gaugeCursorClass}></span>
+                    </div>
+                  </div>
+                  <!-- Étage des seuils : trait à la position exacte du seuil, étiquette dessous (étagée si besoin). -->
+                  <template
+                    for:each={gaugeView.thresholds}
+                    for:item="threshold"
+                  >
+                    <div
+                      key={threshold.key}
+                      class="gauge-threshold"
+                      data-id={threshold.key}
+                    >
+                      <span
+                        class="gauge-threshold-tick"
+                        style={threshold.tickStyle}
+                      ></span>
+                      <div
+                        class={threshold.labelClass}
+                        style={threshold.labelStyle}
+                      >
+                        <div class={threshold.nameClass}>
+                          {threshold.name}<template
+                            lwc:if={threshold.hasHelpText}
+                            ><lightning-helptext
+                              content={gaugeCeilingHelpText}
+                            ></lightning-helptext
+                          ></template>
+                        </div>
+                        <div class="gauge-ruler-value">
+                          {threshold.valueText}<span class="gauge-ruler-mc2"
+                            >{threshold.mc2Text}</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                <div class="gauge-legend">
+                  <div class="gauge-legend-zones">
+                    <template for:each={gaugeLegendItems} for:item="item">
+                      <div key={item.key} class="gauge-legend-item">
+                        <span
+                          class="gauge-legend-swatch"
+                          style={item.swatchStyle}
+                        ></span>
+                        <span>{item.label}</span>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="gauge-legend-marks">
+                    <div class="gauge-legend-item">
+                      <span class="gauge-legend-dot"></span>
+                      <span>{labels.gaugeLegendPrice}</span>
+                    </div>
+                    <template lwc:if={hasGaugeNegoMarkers}>
+                      <div class="gauge-legend-item">
+                        <span class="gauge-legend-bar"></span>
+                        <span>{labels.gaugeLegendNego}</span>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Pied de page : action principale pleine largeur (session 16, pricing-tool.html:2108-2126) -->
+          <template if:true={isEditable}>
+            <div class="footer-actions slds-m-top_large">
+              <button
+                class="btn btn-secondary"
+                disabled={isActionDisabled}
+                onclick={handleSaveDraft}
+                type="button"
+              >
+                {labels.saveDraftButton}
+              </button>
+              <!-- Trois états mutuellement exclusifs (session 15, pricing-tool.html:2108-2115) -->
+              <template if:true={showNoTjmButton}>
+                <button
+                  class="btn btn-disabled-state footer-action-main"
+                  disabled
+                  type="button"
+                >
+                  {labels.enterTjmToContinue}
+                </button>
+              </template>
+              <template if:true={showDerogationButton}>
+                <button
+                  class="btn btn-danger footer-action-main"
+                  disabled={isDerogationActionDisabled}
+                  onclick={handleOpenDerogationModal}
+                  type="button"
+                >
+                  <lightning-icon
+                    icon-name="utility:warning"
+                    size="xx-small"
+                    variant="inverse"
+                  ></lightning-icon>
+                  {labels.requestDerogation}
+                </button>
+              </template>
+              <template if:true={showValidateButton}>
+                <button
+                  class="btn btn-success footer-action-main"
+                  disabled={isValidateDisabled}
+                  onclick={handleValidate}
+                  type="button"
+                >
+                  <lightning-icon
+                    icon-name="utility:check"
+                    size="xx-small"
+                    variant="inverse"
+                  ></lightning-icon>
+                  {labels.validateMatrixButton}
+                </button>
+              </template>
+            </div>
+          </template>
+
+          <!-- Génération PTF (session 20 ; déplacée ici en session 20c, après la décision — cf.
+               docs/12-ui-header.md et le constat de régression : la lecture 1-2-3 de la maquette se
+               lit décision d'abord, action ensuite, pas l'inverse. -->
+          <template if:true={isValidatedStatus}>
+            <c-ar-ptf-panel
+              record-id={matrixId}
+              open-on-arrival={openPtfOnArrival}
+              read-only={readOnlyAccess}
+            ></c-ar-ptf-panel>
+          </template>
+        </template>
+      </div>
+    </template>
+
+    <!-- Session 107 : panneau de blocage pour prérequis PTF manquants -->
+    <template if:true={showValidationPrerequisitesPanel}>
+      <div
+        class="prerequisites-panel slds-box slds-box_small slds-m-bottom_medium slds-theme_alert-texture slds-theme_alert"
+        role="alert"
+      >
+        <div class="slds-grid">
+          <div class="slds-col slds-size_11-of-12">
+            <template if:true={hasBlockingPrerequisites}>
+              <p class="slds-text-heading_small slds-m-bottom_small">
+                {i18n.AR_PMS_PrerequisitesBlockingTitle}
+              </p>
+              <ul class="prerequisites-list">
+                <template
+                  for:each={validationPrerequisitesMissing}
+                  for:item="prereq"
+                >
+                  <li key={prereq.label} class="prerequisites-item">
+                    <strong>{prereq.label}</strong> — {prereq.whereToFix}
+                  </li>
+                </template>
+              </ul>
+            </template>
+            <template if:true={hasPrerequisiteWarnings}>
+              <p
+                class="slds-text-heading_small slds-m-vertical_small prerequisites-warnings-title"
+              >
+                {i18n.AR_PMS_PrerequisitesWarningTitle}
+              </p>
+              <ul class="prerequisites-warnings-list">
+                <template
+                  for:each={validationPrerequisitesWarnings}
+                  for:item="warn"
+                >
+                  <li key={warn.label} class="prerequisites-warning-item">
+                    <strong>{warn.label}</strong> — {warn.whereToFix}
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+          <div class="slds-col slds-size_1-of-12 slds-text-align_right">
+            <button
+              class="btn btn-icon"
+              type="button"
+              onclick={handleCloseValidationPrerequisitesPanel}
+              title={i18n.AR_Common_Close}
+              aria-label={i18n.AR_PMS_ClosePanel}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="small"
+              ></lightning-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Modale de demande de dérogation -->
+    <template if:true={showDerogationModal}>
+      <section
+        role="dialog"
+        tabindex="-1"
+        class="slds-modal slds-fade-in-open"
+        aria-modal="true"
+        aria-labelledby="derogation-modal-heading"
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <h2 id="derogation-modal-heading" class="slds-text-heading_medium">
+              {labels.requestDerogation}
+            </h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium">
+            <p class="derogation-recall">{derogationRecallMessage}</p>
+            <template if:true={derogationValidationError}>
+              <div
+                class="slds-box slds-box_small slds-m-bottom_medium slds-theme_alert-texture slds-theme_alert"
+                role="alert"
+              >
+                <p>{derogationValidationError}</p>
+              </div>
+            </template>
+            <lightning-combobox
+              name="derogationValidator"
+              label={labels.validator}
+              field-level-help={labels.validatorFieldHelp}
+              value={derogationValidatorId}
+              options={validatorOptions}
+              dropdown-alignment="auto"
+              placeholder={labels.selectValidatorPlaceholder}
+              onchange={handleDerogationValidatorChange}
+            ></lightning-combobox>
+            <c-ar-reason-multi-select
+              usage="derogation"
+              label={labels.derogationReasonsLabel}
+              required="true"
+              class="slds-m-top_small"
+              onchange={handleDerogationReasonsChange}
+            ></c-ar-reason-multi-select>
+            <lightning-textarea
+              name="derogationReason"
+              label={labels.freeCommentLabel}
+              value={derogationReason}
+              required
+              onchange={handleDerogationReasonChange}
+              class="slds-m-top_small"
+            ></lightning-textarea>
+          </div>
+          <footer class="slds-modal__footer">
+            <button
+              class="btn btn-secondary"
+              onclick={handleCloseDerogationModal}
+              type="button"
+            >
+              {labels.cancel}
+            </button>
+            <button
+              class="btn btn-primary slds-m-left_x-small"
+              disabled={isDerogationSendDisabled}
+              onclick={handleConfirmDerogation}
+              type="button"
+            >
+              {labels.sendRequest}
+            </button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Modale de duplication (session 22) -->
+    <c-ar-matrix-duplicate-modal
+      open={showDuplicateModal}
+      source-matrix-id={matrixId}
+      source-position-id={positionId}
+      source-position-label={duplicateSourcePositionLabel}
+      is-chain-duplication={isChainDuplication}
+      oncancel={handleCloseDuplicateModal}
+      onduplicated={handleMatrixDuplicated}
+    ></c-ar-matrix-duplicate-modal>
+
+    <!-- Modale d'avenant (session 180c) -->
+    <c-ar-avenant-modal
+      open={showAvenantModal}
+      source-matrix-id={matrixId}
+      oncancel={handleCloseAvenantModal}
+      oncreated={handleAvenantCreated}
+    ></c-ar-avenant-modal>
+  </div>
+</template>

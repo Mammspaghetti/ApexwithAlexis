@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Corridor_Segment__c</fullName>
+    <description>Segment de marge déterminé par le % MC2 : below_floor (&lt; 20 %, dérogation obligatoire), low_margin (20-25 %), recommended (25-30 %), superstar (&gt; 30 %).</description>
+    <label>Segment corridor</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>below_floor</fullName>
+                <default>false</default>
+                <label>En dessous du plancher</label>
+            </value>
+            <value>
+                <fullName>low_margin</fullName>
+                <default>false</default>
+                <label>Marge faible</label>
+            </value>
+            <value>
+                <fullName>recommended</fullName>
+                <default>false</default>
+                <label>Recommandé</label>
+            </value>
+            <value>
+                <fullName>superstar</fullName>
+                <default>false</default>
+                <label>Excellence</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

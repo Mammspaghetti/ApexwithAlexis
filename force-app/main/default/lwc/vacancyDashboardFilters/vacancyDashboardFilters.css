@@ -1,0 +1,21 @@
+/**
+ * Created by Kobe on 12/12/2019.
+ */
+
+ .slds-listbox__item{
+    z-index:9999;
+    width:100%;
+}
+.slds-is-open .slds-dropdown{
+   display:block;
+}
+.slds-is-open.slds-dropdown{
+   display:block;
+}
+div.slds-listbox__option{
+    width:100%;
+}
+
+.dropdown-focus{
+    display:block !important;
+}

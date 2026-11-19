@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Special_Terms__c</fullName>
+    <description>Paramètres commerciaux spécifiques à ce compte, non couverts par les autres champs. Saisie libre.</description>
+    <label>Paramètres spécifiques</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

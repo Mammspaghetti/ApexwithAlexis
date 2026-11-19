@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AB_Candidate_DC__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Candidate DC</label>
+    <referenceTo>TP_Candidate_DC__c</referenceTo>
+    <relationshipLabel>Skills DC</relationshipLabel>
+    <relationshipName>Skills_DC</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

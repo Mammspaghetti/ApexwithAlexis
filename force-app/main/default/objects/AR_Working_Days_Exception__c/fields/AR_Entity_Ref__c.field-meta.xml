@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Entity_Ref__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Entité concernée par l&apos;exception de jours travaillés, sélectionnée dans le référentiel des entités PTF. Le champ est facultatif.</description>
+    <label>Entité</label>
+    <referenceTo>AR_PTF_Entity_Referential__c</referenceTo>
+    <relationshipLabel>Exceptions de jours travaillés</relationshipLabel>
+    <relationshipName>AR_Working_Days_Exceptions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

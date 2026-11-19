@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Price_Matrix__c</fullName>
+    <description>Matrice de prix parente. Détail maître : les PTF générées sont supprimées si la matrice est supprimée.</description>
+    <label>Matrice de prix</label>
+    <referenceTo>AR_Price_Matrix__c</referenceTo>
+    <relationshipLabel>Documents PTF</relationshipLabel>
+    <relationshipName>AR_PTF_Documents</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

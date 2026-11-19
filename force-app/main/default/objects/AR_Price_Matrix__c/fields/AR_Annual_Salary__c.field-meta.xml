@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Annual_Salary__c</fullName>
+    <description>Salaire annuel brut, base du calcul du CJM pour les statuts CDI et CDD : coefficient administrable par type de contrat, cf. AR_General_Setting__c.AR_CDI_Coefficient__c / AR_CDD_Coefficient__c.</description>
+    <externalId>false</externalId>
+    <label>Salaire annuel</label>
+    <precision>16</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

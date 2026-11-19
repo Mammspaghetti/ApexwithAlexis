@@ -1,0 +1,56 @@
+<template>
+    <div class="baby-container">
+
+        <div class={classBol}>
+
+            <!-- Emojis -->
+            <span class="emoji star">⭐</span>
+            <span class="emoji heart">💙</span>
+            <span class="emoji baby-emoji">🍼</span>
+
+            <!-- Bras -->
+            <div class="arm arm-left"></div>
+            <div class="arm arm-right"></div>
+
+            <!-- Nuage -->
+            <div class="cloud"></div>
+
+            <!-- Visage -->
+            <div class="face">
+                <div class="eyes">
+                    <span class="eye"></span>
+                    <span class="eye"></span>
+                </div>
+
+                <div class="cheeks">
+                    <span class="cheek"></span>
+                    <span class="cheek"></span>
+                </div>
+
+                <div class="pacifier">
+                    <div class="pacifier-top"></div>
+                    <div class="pacifier-bottom"></div>
+                </div>
+            </div>
+
+            <!-- Jambes -->
+            <div class="legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+            </div>
+
+        </div>
+
+        <div class="baby-name">
+            Baby Cloudy 👶
+        </div>
+
+        <div class="baby-message">
+            Coucouuu ! Je suis le bébé Salesforce ! 🍼 {capacity}
+        </div>
+        <lightning-button label="Nourrir" onclick={servirCroquette}>
+
+        </lightning-button>
+
+    </div>
+</template>

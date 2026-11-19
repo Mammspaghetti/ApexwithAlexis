@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TP_Actual_end_date__c</fullName>
+    <inlineHelpText>Used in Flow to calculate the day + 1 for the auto creation of new actual records.</inlineHelpText>
+    <label>Actual end date</label>
+    <summarizedField>TP_Actual__c.TP_Date_de_fin__c</summarizedField>
+    <summaryForeignKey>TP_Actual__c.TP_Scope__c</summaryForeignKey>
+    <summaryOperation>max</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

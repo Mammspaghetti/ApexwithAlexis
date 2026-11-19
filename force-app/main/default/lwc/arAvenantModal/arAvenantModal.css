@@ -1,0 +1,267 @@
+/* Session 180c — Modale « Créer un avenant ». Même charte que arMatrixDuplicateModal (accent #d31876).
+   Les styles d'un composant LWC ne traversent pas le Shadow DOM : .btn* redéclarés ici. */
+
+/* Position (session 182, même correction que arAdminFormModal en 176i) : la modale SLDS standard est
+   `position: fixed` sur la fenêtre, son titre passait sous l'en-tête Salesforce. Elle est ancrée à
+   `.app-shell` (arPricingApp, calé en JS juste sous ce chrome), marge haute 3rem, hauteur bornée à
+   celle de l'appli : en-tête visible, corps défilant, pied (boutons) toujours visible. */
+.av-modal {
+  position: absolute;
+  align-items: flex-start;
+  padding: 3rem 0 1.5rem;
+}
+
+.av-backdrop {
+  position: absolute;
+}
+
+.av-container {
+  max-width: 52rem;
+  width: 94%;
+  height: auto;
+  max-height: 100%;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.av-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem 1rem;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.av-header-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(211, 24, 118, 0.08);
+  border-radius: 0.5rem;
+  --sds-c-icon-color-foreground-default: #d31876;
+  --slds-c-icon-color-foreground-default: #d31876;
+}
+
+.av-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.av-subtitle {
+  font-size: 0.75rem;
+  color: #767676;
+  margin: 0.25rem 0 0;
+}
+
+.av-body {
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.av-question {
+  margin-top: 1.25rem;
+}
+
+.av-fields {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fafafa;
+  border: 1px solid #ececec;
+  border-radius: 0.5rem;
+}
+
+.av-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.av-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #6b6b6b;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.av-muted {
+  font-size: 0.75rem;
+  color: #767676;
+  margin: 0.25rem 0 0;
+}
+
+.av-impact {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #ececec;
+}
+
+.av-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.av-table th,
+.av-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.av-table th:first-child,
+.av-table tbody th {
+  text-align: left;
+  font-weight: 600;
+  color: #333333;
+}
+
+.av-table thead th {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6b6b6b;
+}
+
+.av-val {
+  margin-right: 0.4rem;
+}
+
+.av-seg {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.av-seg_red {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.av-seg_amber {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.av-seg_green {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.av-seg_green-dark {
+  background: #166534;
+  color: #ffffff;
+  border-color: #14532d;
+}
+
+.av-note {
+  font-size: 0.75rem;
+  color: #767676;
+  margin: 0.5rem 0 0;
+}
+
+.av-decision {
+  margin: 0.75rem 0 0;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.av-decision_ok {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.av-decision_warn {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.av-error {
+  margin-top: 1rem;
+  padding: 0.625rem 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #b91c1c;
+  font-size: 0.8125rem;
+  white-space: pre-line;
+}
+
+.av-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  border-top: 1px solid #ececec;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.625rem;
+  padding: 0.55rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(211, 24, 118, 0.28);
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e8e8e8;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f9f9f9;
+}

@@ -1,0 +1,89 @@
+/* Session 163 : une seule grille pour toute la chaîne ; chaque maillon en hérite les colonnes via
+   subgrid, de sorte que statut, TJM, MC2… tombent sur le même axe vertical d'une version à l'autre. */
+.chain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns:
+    max-content /* version */
+    max-content /* statut */
+    max-content /* TJM */
+    max-content /* libellé MC2 */
+    max-content /* valeur MC2 */
+    minmax(0, 1fr) /* motifs */
+    max-content; /* badge */
+  column-gap: 0.75rem;
+  row-gap: 0.5rem;
+}
+
+.chain-item {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+.chain-node {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+}
+
+.chain-link {
+  cursor: pointer;
+}
+
+/* Couleur de base inchangée ; bleu au survol / focus clavier pour signaler le lien. */
+.chain-link:hover,
+.chain-link:focus-visible,
+.chain-link:hover .chain-reasons,
+.chain-link:focus-visible .chain-reasons {
+  color: #0b5cab;
+}
+
+.chain-link:focus-visible {
+  outline: 2px solid #0b5cab;
+  outline-offset: 1px;
+}
+
+.chain-version {
+  font-weight: 700;
+}
+
+.chain-tjm,
+.chain-mc2 {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chain-mc2-label {
+  margin-right: -0.5rem; /* rapproche « MC2 » de sa valeur malgré le column-gap */
+}
+
+.chain-reasons {
+  color: #5c5c5c;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.chain-badge-cell {
+  text-align: right;
+}
+
+.chain-current-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0b5cab;
+  white-space: nowrap;
+}

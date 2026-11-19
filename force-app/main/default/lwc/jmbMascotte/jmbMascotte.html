@@ -1,0 +1,112 @@
+<template>
+
+    <lightning-card title="Mascotte JMB">
+        <div class="mascotte-wrapper slds-p-around_medium">
+
+            <!-- Titre -->
+            <p class="mascotte-titre">Jumbo l'Explorateur</p>
+            <p class="mascotte-sous-titre">Prêt pour la prochaine aventure ?</p>
+
+            <!-- Scène -->
+            <div class="scene">
+
+                <!-- Paysage dans un cercle -->
+                <div class="paysage">
+                    <div class="soleil"></div>
+                    <div class="nuage nuage-1"></div>
+                    <div class="nuage nuage-2"></div>
+                    <div class="montagne montagne-arriere"></div>
+                    <div class="montagne montagne-avant">
+                        <div class="neige"></div>
+                    </div>
+                    <div class="drapeau"></div>
+                    <div class="colline"></div>
+                    <div class="chemin"></div>
+                </div>
+
+                <!-- Badges flottants -->
+                <div class="badge badge-carte">🗺️</div>
+                <div class="badge badge-boussole">🧭</div>
+                <div class="badge badge-ampoule">💡</div>
+
+                <!-- Jumbo, le petit éléphant explorateur -->
+                <div class="perso">
+                    <div class="sac"></div>
+                    <div class="oreille oreille-gauche"></div>
+                    <div class="oreille oreille-droite"></div>
+                    <div class="bras bras-coucou"></div>
+                    <div class="corps">
+                        <span class="logo">JMB</span>
+                    </div>
+                    <div class="baton"></div>
+                    <div class="bras bras-baton"></div>
+                    <div class="pied pied-gauche"></div>
+                    <div class="pied pied-droit"></div>
+                    <div class="tete">
+                        <div class="oeil oeil-gauche"></div>
+                        <div class="oeil oeil-droit"></div>
+                        <div class="joue joue-gauche"></div>
+                        <div class="joue joue-droite"></div>
+                        <div class="trompe"></div>
+                    </div>
+                    <div class="chapeau-bord"></div>
+                    <div class="chapeau-haut"></div>
+                </div>
+            </div>
+
+            <!-- Bulle -->
+            <div class="bulle text-style">
+                <p>Hello world</p>
+                <p>Mon niveau de faim {faim} donc {humeur}</p>
+                <p>Mon niveau d'humour {rire}</p>
+                <p>Nombre de croquette {croquette}</p>
+            </div>
+
+            <lightning-button label="Laver" onclick={laver}>                
+            </lightning-button>
+
+            <lightning-button label="Nourrir" onclick={nourrir}>                
+            </lightning-button>
+
+            <c-jmb-bol capacite={croquette} onmangerjmb={handleServir} lwc:ref="bol">
+                
+
+            </c-jmb-bol>
+
+            <lightning-button label="Remplir le bol" onclick={remplir}>                
+            </lightning-button>
+
+            <div>
+                <lightning-input label="Nom du Kdo" value={nomCadeau} onchange={handleNomCadeau}>
+                </lightning-input>
+
+                 <lightning-button label="Le bouton du cadeau" onclick={creerCadeau}>                
+                </lightning-button>
+
+            </div>
+            <template lwc:if={message}>
+                {message}
+            </template>
+
+            <div>
+                <template lwc:if={aucunCadeau}> Pas de cadeau </template>
+                <template for:each={cadeauxEnStock} for:item="cadeau">                    
+                    <p key={cadeau.Id}>
+                            {cadeau.Name}
+                    </p>
+                </template>
+
+               <lightning-datatable
+                    key-field="Id"
+                    data={cadeauxEnStock}
+                    columns={colonnes}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column>
+                </lightning-datatable>
+
+            </div>
+
+        </div>
+    </lightning-card>
+
+</template>

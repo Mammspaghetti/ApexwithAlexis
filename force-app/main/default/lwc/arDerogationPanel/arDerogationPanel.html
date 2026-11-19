@@ -1,0 +1,159 @@
+<template>
+  <lightning-card title={i18n.AR_DRG_PanelTitle} icon-name="standard:approval">
+    <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+      <template if:true={isLoading}>
+        <lightning-spinner
+          alternative-text={i18n.AR_Common_Loading}
+          size="small"
+        ></lightning-spinner>
+      </template>
+
+      <template if:false={isLoading}>
+        <template if:true={errorMessage}>
+          <div class="slds-text-color_error">{errorMessage}</div>
+        </template>
+
+        <template if:true={hasPendingDerogation}>
+          <div class="slds-grid slds-wrap slds-gutters_small">
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_Common_ProposedRate}</p>
+              <p class="slds-text-heading_small">{formattedProposedTjm}</p>
+              <p
+                if:true={tjmPeriodsDetail}
+                class="slds-text-body_small slds-text-color_weak"
+              >
+                {tjmPeriodsDetail}
+              </p>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_AVN_Mc2Percent}</p>
+              <p class="slds-text-heading_small">{context.mc2PercentHuman} %</p>
+              <p
+                if:true={context.rplsrMention}
+                class="slds-text-body_small slds-text-color_weak"
+              >
+                {context.rplsrMention}
+              </p>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_DRG_GapVsFloor}</p>
+              <p class="slds-text-heading_small">{formattedGapVsFloor}</p>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_DRG_GapVsTarget}</p>
+              <p class="slds-text-heading_small">{formattedGapVsTarget}</p>
+            </div>
+          </div>
+
+          <template if:true={rfaLine}>
+            <p class="slds-text-body_small slds-m-top_small">{rfaLine}</p>
+          </template>
+
+          <template if:true={reasonView.hasReasonBlock}>
+            <p class="stat-label slds-m-top_medium">
+              {i18n.AR_DRG_RequesterReason}
+            </p>
+            <template if:true={reasonView.reasonInlineText}>
+              <p>{reasonView.reasonInlineText}</p>
+            </template>
+            <template if:true={reasonView.hasReasonItems}>
+              <ul class="reason-list">
+                <template for:each={reasonView.reasonItems} for:item="reason">
+                  <li key={reason.key}>{reason.label}</li>
+                </template>
+              </ul>
+            </template>
+            <template if:true={reasonView.plainText}>
+              <p>{reasonView.plainText}</p>
+            </template>
+          </template>
+
+          <template if:true={canDecide}>
+            <lightning-textarea
+              name="comment"
+              label={i18n.AR_DRG_CommentRequired}
+              value={comment}
+              onchange={handleCommentChange}
+              class="slds-m-top_medium"
+            ></lightning-textarea>
+            <div class="slds-grid slds-gutters_small slds-m-top_medium">
+              <div class="slds-col slds-no-flex">
+                <button
+                  class="btn btn-danger"
+                  disabled={isSaving}
+                  onclick={handleReject}
+                  type="button"
+                >
+                  {i18n.AR_Common_Reject}
+                </button>
+              </div>
+              <div class="slds-col slds-no-flex">
+                <button
+                  class="btn btn-success"
+                  disabled={isSaving}
+                  onclick={handleAccept}
+                  type="button"
+                >
+                  {i18n.AR_DRG_Accept}
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template if:false={canDecide}>
+            <div
+              class="slds-notify slds-notify_alert slds-theme_alert-texture slds-m-top_medium"
+              role="alert"
+            >
+              <span>{readOnlyMessage}</span>
+            </div>
+          </template>
+        </template>
+
+        <template if:true={isDecided}>
+          <div class={lockedBannerClass}>
+            <p class="locked-banner-title">{lockedBannerTitle}</p>
+            <p class="locked-banner-line">
+              {i18n.AR_Common_ProcessedByPrefix}
+              <strong>{context.effectiveValidatorName}</strong> —
+              {formattedDecidedAt}
+            </p>
+            <template if:true={context.validatorComment}>
+              <p class="locked-banner-line">{validatorCommentLabel}</p>
+            </template>
+          </div>
+          <div class="slds-grid slds-wrap slds-gutters_small locked-fields">
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_Common_ProposedRate}</p>
+              <p class="slds-text-heading_small">{formattedProposedTjm}</p>
+              <p
+                if:true={tjmPeriodsDetail}
+                class="slds-text-body_small slds-text-color_weak"
+              >
+                {tjmPeriodsDetail}
+              </p>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <p class="stat-label">{i18n.AR_AVN_Mc2Percent}</p>
+              <p class="slds-text-heading_small">{context.mc2PercentHuman} %</p>
+              <p
+                if:true={context.rplsrMention}
+                class="slds-text-body_small slds-text-color_weak"
+              >
+                {context.rplsrMention}
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <template if:false={hasPendingDerogation}>
+          <template if:false={isDecided}>
+            <p class="slds-text-color_weak">
+              {i18n.AR_DRG_NoPendingDerogation}
+            </p>
+          </template>
+        </template>
+      </template>
+    </div>
+  </lightning-card>
+</template>

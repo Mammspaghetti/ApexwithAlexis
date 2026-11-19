@@ -1,0 +1,573 @@
+.ptf-panel {
+  border: 1px solid var(--aby-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.ptf-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ptf-empty {
+  color: var(--aby-muted, #6b7280);
+  margin-bottom: 12px;
+}
+
+.ptf-doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.ptf-doc-table th,
+.ptf-doc-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--aby-border, #e5e7eb);
+}
+
+.ptf-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ptf-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ptf-status-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #92400e;
+}
+
+.ptf-status-failed {
+  background: #fee2e2;
+  color: #991b1b;
+  cursor: help;
+}
+
+.ptf-status-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ptf-status-unknown {
+  background: #f1f5f9;
+  color: #475569;
+  cursor: help;
+}
+
+.ptf-generating-label {
+  color: var(--aby-muted, #6b7280);
+  font-size: 0.8125rem;
+  margin-right: auto;
+}
+
+.ptf-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.ptf-form-row > * {
+  flex: 1;
+}
+
+/* Case et aide « i » collées au libellé : sans ce retrait, la règle ci-dessus répartit la ligne en deux. */
+.ptf-mensualisation-row {
+  align-items: center;
+}
+
+.ptf-mensualisation-row > lightning-input,
+.ptf-mensualisation-row > lightning-helptext {
+  flex: 0 0 auto;
+}
+
+.ptf-form {
+  padding-bottom: 280px;
+}
+
+.ptf-form lightning-input,
+.ptf-form lightning-textarea {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.ptf-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Session 140 — histoire des PTF : accès au tableau pendant la régénération */
+
+.ptf-sticky-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 0 -16px 0 -16px;
+  background: #ffffff;
+  border-top: 1px solid var(--aby-border, #e5e7eb);
+  z-index: 10;
+}
+
+.btn-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #f9a8d4;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: #fdf2f8;
+  color: #a81260;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-right: auto;
+}
+
+.btn-history:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.btn-history:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ptf-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #a81260;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ptf-chevron {
+  display: inline-block;
+  font-size: 0.75rem;
+}
+
+.ptf-history-overlay {
+  position: sticky;
+  bottom: 60px;
+  z-index: 9;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: #ffffff;
+  margin: 0 -16px 0 -16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--aby-border, #e5e7eb);
+  border-bottom: 1px solid var(--aby-border, #e5e7eb);
+}
+
+.ptf-preview-status {
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+  margin-top: 4px;
+}
+
+/* Session 148 : bandeau discret du brouillon enregistré (formulaire PTF et avenant). */
+.ptf-draft-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+  color: #334155;
+}
+
+.ptf-draft-text,
+.ptf-draft-warning {
+  margin: 0;
+}
+
+.ptf-draft-warning {
+  color: #92400e;
+}
+
+.ptf-draft-confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.ptf-draft-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #0b5cab;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ptf-draft-link:disabled {
+  color: #94a3b8;
+  cursor: default;
+}
+
+/* Mêmes styles que arPriceMatrixSimulator.css : le shadow DOM n'hérite pas du CSS du parent. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.btn-text {
+  background: transparent;
+  color: #64748b;
+  padding: 0.55rem 0.5rem;
+}
+.btn-text:hover:not(:disabled) {
+  color: #333333;
+}
+
+/* --- Session 35 : sélecteur de gabarit et lots --------------------------------------------- */
+
+.ptf-template-source {
+  color: var(--aby-muted, #6b7280);
+  font-size: 0.8125rem;
+  margin: 4px 0 12px;
+}
+
+.ptf-lots-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+
+/* --- Session 39 : champs propres au gabarit ABMI_DQ012 ------------------------------------- */
+
+.ptf-abmi-subtitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--aby-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 14px 0 6px;
+}
+
+.ptf-abmi-hint {
+  font-size: 0.75rem;
+  color: var(--aby-muted, #6b7280);
+  font-style: italic;
+  margin: -2px 0 8px;
+}
+
+.ptf-lot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-bottom: 8px;
+}
+
+.ptf-lot-table th,
+.ptf-lot-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--aby-border, #e5e7eb);
+  vertical-align: top;
+}
+
+/* Un lot surchargé doit se voir d'un coup d'œil : un écart silencieux entre le prix affiché au
+   commercial et le prix imprimé au client est le pire défaut possible sur cet outil. */
+.ptf-lot-row-overridden {
+  background: #fffbeb;
+}
+
+.ptf-lot-impact {
+  font-size: 0.75rem;
+  color: #92400e;
+  margin: 4px 0 0;
+}
+
+.ptf-lot-total-warning {
+  font-size: 0.8125rem;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 12px;
+}
+
+.ptf-field-warning {
+  font-size: 0.8125rem;
+  color: #b91c1c;
+  margin: 4px 0 12px;
+}
+
+.ptf-avenant-price-info {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 8px 0 12px;
+  font-size: 0.8125rem;
+}
+
+.ptf-avenant-price-info p {
+  margin: 4px 0;
+}
+
+.ptf-avenant-price-info p:first-child {
+  margin-top: 0;
+}
+
+.ptf-avenant-price-info p:last-child {
+  margin-bottom: 0;
+}
+
+.ptf-field-warning-orange {
+  font-size: 0.8125rem;
+  color: #92400e;
+  margin: 8px 0 0;
+}
+
+/* --- Session 139 : historique des PTF (case, libellé de modification, popover, fenêtre) ------ */
+
+.ptf-cell-check {
+  width: 1%;
+  text-align: center;
+}
+
+.ptf-row-excluded td:not(.ptf-cell-check) {
+  opacity: 0.5;
+}
+
+.ptf-cell-modification {
+  position: relative;
+  max-width: 260px;
+}
+
+.ptf-mod-text {
+  display: block;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ptf-mod-first {
+  color: var(--aby-muted, #6b7280);
+  cursor: help;
+}
+
+.ptf-mod-cell {
+  display: block;
+  width: 100%;
+  min-height: 1.5rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ptf-mod-cell:hover,
+.ptf-mod-cell:focus-visible {
+  background: #f1f5f9;
+}
+
+.ptf-mod-placeholder {
+  color: var(--aby-muted, #6b7280);
+  font-style: italic;
+}
+
+.ptf-popover-backdrop,
+.ptf-modal-backdrop {
+  position: fixed;
+  top: var(--ar-zone-top, 0px);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9000;
+}
+
+.ptf-modal-backdrop {
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.ptf-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9001;
+  box-sizing: border-box;
+  width: 300px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--aby-border, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  white-space: normal;
+}
+
+.ptf-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ptf-popover-error {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: #991b1b;
+}
+
+/* Dialogue calé sur la zone visible de l'appli (sous l'en-tête Salesforce), cf. arPricingApp. */
+.ptf-modal {
+  position: fixed;
+  top: calc(var(--ar-zone-top, 0px) + var(--ar-zone-height, 100dvh) / 2);
+  left: 50%;
+  z-index: 9001;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.3);
+}
+
+.ptf-modal-title {
+  flex: none;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ptf-modal > c-ar-ptf-modification-picker {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ptf-modal > .ptf-popover-actions {
+  flex: none;
+}
+
+/* Session 180d — matrice avenant : PTF amendée, bouton « Générer l'avenant », résumé du formulaire court. */
+.ptf-avenant-bar {
+  margin-top: 0.75rem;
+}
+
+.ptf-avenant-amends {
+  margin: 0 0 0.5rem;
+}
+
+.ptf-avenant-matrix-summary {
+  margin: 0 0 0.75rem;
+  color: #475569;
+}
+
+.ptf-tjm-periods {
+  margin: 0.5rem 0;
+}
+
+.ptf-tjm-periods-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.ptf-tjm-period-row {
+  margin-bottom: 0.5rem;
+}
+
+/* Session 279 : adresse client modifiable, pastille « Modifiée » et lien « Rétablir ». */
+.client-address {
+  margin-bottom: 0.5rem;
+}
+.client-address-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.client-address-badge {
+  font-size: 0.6875rem;
+  margin-left: 0;
+}
+.client-address-restore {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  padding: 0;
+  color: var(--slds-g-color-brand-base-50, #0176d3);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+}
+.doc-address-modified {
+  margin-left: 0.25rem;
+}
+
+/* Session 279 : documents des versions précédentes (lecture seule, repliables). */
+.ptf-previous-versions {
+  margin-top: 0.75rem;
+}
+.ptf-previous-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.ptf-previous-group {
+  margin-bottom: 0.25rem;
+}
+.ptf-previous-summary {
+  cursor: pointer;
+  color: var(--slds-g-color-neutral-base-30, #444444);
+}

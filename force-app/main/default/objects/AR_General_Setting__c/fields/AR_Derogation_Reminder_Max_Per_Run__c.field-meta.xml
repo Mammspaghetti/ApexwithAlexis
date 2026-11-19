@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Derogation_Reminder_Max_Per_Run__c</fullName>
+    <description>Nombre maximal de dérogations (relance + escalade cumulées) traitées par exécution de AR_DerogationReminderBatch (200 par défaut) : même garde-fou que AR_Draft_Purge_Max_Per_Run__c.</description>
+    <externalId>false</externalId>
+    <label>Plafond relance dérogation / exécution</label>
+    <precision>4</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

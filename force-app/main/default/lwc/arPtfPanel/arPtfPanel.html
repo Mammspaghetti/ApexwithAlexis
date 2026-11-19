@@ -1,0 +1,1522 @@
+<template>
+  <div class="ptf-panel">
+    <h2 class="ptf-title">{i18n.AR_PTF_PanelTitle}</h2>
+
+    <template if:true={isLoading}>
+      <lightning-spinner
+        alternative-text={i18n.AR_Common_Loading}
+        size="small"
+      ></lightning-spinner>
+    </template>
+
+    <template if:false={isLoading}>
+      <template if:true={errorMessage}>
+        <div class="slds-text-color_error slds-m-bottom_small">
+          {errorMessage}
+        </div>
+      </template>
+
+      <template if:false={showForm}>
+        <template if:true={documentsLoadError}>
+          <div class="slds-text-color_error slds-m-bottom_small">
+            {documentsLoadError}
+          </div>
+        </template>
+        <template if:true={hasDocuments}>
+          <div class="ptf-history-container">
+            <table class="ptf-doc-table">
+              <thead>
+                <tr>
+                  <th
+                    class="ptf-cell-check"
+                    title={i18n.AR_PTF_HistoryCheckboxTitle}
+                  >
+                    {i18n.AR_PTF_HistoryColumnShort}
+                  </th>
+                  <th>{i18n.AR_Common_Reference}</th>
+                  <th>{i18n.AR_Common_Version}</th>
+                  <th>{i18n.AR_PTF_GeneratedOnColumn}</th>
+                  <th>{i18n.AR_PTF_ModificationColumn}</th>
+                  <th>{i18n.AR_Common_Status}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={documentRows} for:item="doc">
+                  <tr key={doc.ptfDocumentId} class={doc.rowClass}>
+                    <td class="ptf-cell-check">
+                      <input
+                        type="checkbox"
+                        class="ptf-include-check"
+                        data-id={doc.ptfDocumentId}
+                        checked={doc.isChecked}
+                        disabled={doc.isToggleDisabled}
+                        title={doc.toggleTitle}
+                        aria-label={doc.toggleTitle}
+                        onchange={handleToggleIncluded}
+                      />
+                    </td>
+                    <td>
+                      {doc.reference}
+                      <template if:true={doc.clientAddressModified}>
+                        <lightning-icon
+                          class="doc-address-modified"
+                          icon-name="utility:location"
+                          size="xx-small"
+                          title={i18n.AR_PTF_ClientAddressModifiedHelp}
+                          alternative-text={i18n.AR_PTF_ClientAddressModifiedHelp}
+                        ></lightning-icon>
+                      </template>
+                    </td>
+                    <td class="ptf-cell-version" title={doc.versionTitle}>
+                      <template if:true={doc.hasAvenantLink}>
+                        <button
+                          class="btn btn-text ptf-avenant-link"
+                          type="button"
+                          data-matrix-id={doc.avenantMatrixId}
+                          onclick={handleOpenAvenantMatrix}
+                        >
+                          {doc.avenantLinkLabel}
+                        </button>
+                      </template>
+                      <template if:false={doc.hasAvenantLink}>
+                        {doc.versionLabel}
+                      </template>
+                    </td>
+                    <td>{doc.generatedAtLabel}</td>
+                    <td class="ptf-cell-modification">
+                      <template if:true={doc.isFirst}>
+                        <span
+                          class="ptf-mod-first"
+                          title={i18n.AR_PTF_FirstVersionNoModification}
+                          >—</span
+                        >
+                      </template>
+                      <template if:true={doc.isEditable}>
+                        <button
+                          type="button"
+                          class="ptf-mod-cell"
+                          data-id={doc.ptfDocumentId}
+                          title={doc.modificationTitle}
+                          onclick={handleOpenModification}
+                        >
+                          <template if:true={doc.modificationText}>
+                            <span class="ptf-mod-text"
+                              >{doc.modificationText}</span
+                            >
+                          </template>
+                          <template if:false={doc.modificationText}>
+                            <span class="ptf-mod-placeholder"
+                              >{i18n.AR_PTF_SpecifyEllipsis}</span
+                            >
+                          </template>
+                        </button>
+                      </template>
+                      <template if:true={doc.isModReadonly}>
+                        <span class="ptf-mod-text" title={doc.modificationTitle}
+                          >{doc.modificationText}</span
+                        >
+                      </template>
+                      <template if:true={doc.isEditing}>
+                        <div
+                          class="ptf-popover-backdrop"
+                          onclick={handleCancelModification}
+                        ></div>
+                        <div
+                          class="ptf-popover"
+                          role="dialog"
+                          aria-label={i18n.AR_PTF_VersionModificationAriaLabel}
+                          onkeydown={handlePopoverKeydown}
+                        >
+                          <c-ar-ptf-modification-picker
+                            type={editType}
+                            detail={editDetail}
+                            onmodificationchange={handleEditChange}
+                            onmodificationsubmit={handleSaveModification}
+                          ></c-ar-ptf-modification-picker>
+                          <template if:true={editError}>
+                            <p class="ptf-popover-error" role="alert">
+                              {editError}
+                            </p>
+                          </template>
+                          <div class="ptf-popover-actions">
+                            <button
+                              class="btn btn-text"
+                              type="button"
+                              onclick={handleCancelModification}
+                            >
+                              {i18n.AR_Common_Cancel}
+                            </button>
+                            <button
+                              class="btn btn-primary"
+                              type="button"
+                              onclick={handleSaveModification}
+                              disabled={isEditSaveDisabled}
+                            >
+                              {i18n.AR_Common_Save}
+                            </button>
+                          </div>
+                        </div>
+                      </template>
+                    </td>
+                    <td>
+                      <template if:true={doc.isPending}>
+                        <span class="ptf-status ptf-status-pending"
+                          >{i18n.AR_PTF_GenerationInProgress}</span
+                        >
+                        <template if:true={doc.isStalePending}>
+                          <span class="ptf-status-note"
+                            >{i18n.AR_PTF_RenderProbablyInterrupted}</span
+                          >
+                        </template>
+                      </template>
+                      <template if:true={doc.isFailed}>
+                        <span
+                          class="ptf-status ptf-status-failed"
+                          title={doc.errorMessage}
+                          >{i18n.AR_PTF_StatusFailed}</span
+                        >
+                      </template>
+                      <template if:true={doc.isSuccess}>
+                        <span class="ptf-status ptf-status-success"
+                          >{i18n.AR_PTF_StatusGenerated}</span
+                        >
+                      </template>
+                      <template if:true={doc.isUnknownStatus}>
+                        <span
+                          class="ptf-status ptf-status-unknown"
+                          title={i18n.AR_PTF_LegacyDocumentTitle}
+                          >—</span
+                        >
+                      </template>
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-text"
+                        type="button"
+                        data-id={doc.contentDocumentId}
+                        onclick={handleOpenDocument}
+                        disabled={doc.hasNoFile}
+                      >
+                        {i18n.AR_Common_Open}
+                      </button>
+                      <button
+                        class="btn btn-text"
+                        type="button"
+                        data-id={doc.contentDocumentId}
+                        onclick={handleDownload}
+                        disabled={doc.hasNoFile}
+                      >
+                        {i18n.AR_Common_Download}
+                      </button>
+                      <template if:true={doc.canRetryRender}>
+                        <button
+                          class="btn btn-text"
+                          type="button"
+                          data-id={doc.ptfDocumentId}
+                          onclick={handleRetryRender}
+                          disabled={doc.isRetryDisabled}
+                        >
+                          {i18n.AR_PTF_RetryRender}
+                        </button>
+                      </template>
+                      <template if:true={doc.canCreateAvenant}>
+                        <button
+                          class="btn btn-text"
+                          type="button"
+                          data-id={doc.ptfDocumentId}
+                          data-reference={doc.reference}
+                          onclick={handleOpenAvenantForm}
+                        >
+                          {i18n.AR_PTF_CreateAvenant}
+                        </button>
+                      </template>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <button class="btn btn-text" type="button" onclick={handleRefresh}>
+              {i18n.AR_Common_Refresh}
+            </button>
+          </div>
+        </template>
+
+        <!--
+          Session 37 — formulaire court de création d'avenant (prompt de session : « rien d'autre —
+          tout le reste est repris du document d'origine »). Séparé du formulaire PTF ci-dessous :
+          ouvert uniquement depuis la ligne d'une PTF déjà générée (data-id ci-dessus).
+        -->
+        <template if:true={showAvenantForm}>
+          <div class="ptf-form">
+            <p class="ptf-template-source">{avenantOriginReadonlyLabel}</p>
+            <template if:true={hasAvenantDraft}>
+              <div class="ptf-draft-banner" role="status">
+                <p class="ptf-draft-text">{avenantDraftStamp}</p>
+                <template if:true={isAvenantDraftOtherOrigin}>
+                  <p class="ptf-draft-warning">
+                    {i18n.AR_PTF_DraftOtherAvenantWarning}
+                  </p>
+                </template>
+                <template if:false={isConfirmingAvenantDraftReset}>
+                  <button
+                    class="ptf-draft-link"
+                    type="button"
+                    onclick={handleAskAvenantDraftReset}
+                    disabled={isClearingDraft}
+                  >
+                    {i18n.AR_PTF_ResetToDefaults}
+                  </button>
+                </template>
+                <template if:true={isConfirmingAvenantDraftReset}>
+                  <span class="ptf-draft-confirm">
+                    {i18n.AR_PTF_ResetDraftConfirm}
+                    <button
+                      class="ptf-draft-link"
+                      type="button"
+                      onclick={handleConfirmAvenantDraftReset}
+                      disabled={isClearingDraft}
+                    >
+                      {i18n.AR_PTF_YesClear}
+                    </button>
+                    <button
+                      class="ptf-draft-link"
+                      type="button"
+                      onclick={handleCancelAvenantDraftReset}
+                      disabled={isClearingDraft}
+                    >
+                      {i18n.AR_Common_No}
+                    </button>
+                  </span>
+                </template>
+              </div>
+            </template>
+            <template if:true={isAvenantMatrixForm}>
+              <p class="ptf-avenant-matrix-summary">
+                {i18n.AR_PTF_AvenantReadFromMatrix} {avenantMatrixSummary}
+              </p>
+            </template>
+            <template if:true={isAvenantLegacyForm}>
+              <lightning-input
+                type="date"
+                label={i18n.AR_PTF_ExtensionUntil}
+                value={avenantForm.prolongationJusquAu}
+                data-field="prolongationJusquAu"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+              <lightning-input
+                type="checkbox"
+                label={i18n.AR_PTF_PriceChanges}
+                checked={avenantForm.revisionPrix}
+                data-field="revisionPrix"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+            </template>
+
+            <div class="ptf-form-row">
+              <lightning-combobox
+                label={i18n.AR_PTF_ValidatorName}
+                value={avenantForm.valideurId}
+                options={valideurComboOptions}
+                data-field="valideurId"
+                onchange={handleAvenantValideurChange}
+              ></lightning-combobox>
+              <lightning-input
+                label={i18n.AR_PTF_ValidatorRole}
+                value={avenantForm.valideurFonction}
+                data-field="valideurFonction"
+                max-length="255"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+            </div>
+            <template if:true={isAvenantValideurMissing}>
+              <p class="ptf-field-warning">{avenantValideurBlocage}</p>
+            </template>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_AuthorName}
+                value={avenantForm.redacteurNom}
+                data-field="redacteurNom"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_AuthorRole}
+                value={avenantForm.redacteurFonction}
+                data-field="redacteurFonction"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+            </div>
+            <!-- Session 279 : adresse client de l'avenant, même règle que le formulaire PTF. -->
+            <div class="client-address" data-id="avenant-client-address">
+              <div class="client-address-head">
+                <span class="slds-form-element__label"
+                  >{i18n.AR_PTF_ClientAddress}</span
+                >
+                <template if:true={isAvenantClientAddressModified}>
+                  <span
+                    class="slds-badge client-address-badge"
+                    data-id="avenant-address-modified"
+                    >{i18n.AR_PTF_ClientAddressModified}</span
+                  >
+                </template>
+                <template if:true={canRestoreAvenantClientAddress}>
+                  <button
+                    type="button"
+                    class="slds-button client-address-restore"
+                    data-id="avenant-address-restore"
+                    onclick={handleRestoreAvenantClientAddress}
+                  >
+                    {i18n.AR_PTF_ClientAddressRestore}
+                  </button>
+                </template>
+              </div>
+              <lightning-textarea
+                label={i18n.AR_PTF_ClientAddress}
+                variant="label-hidden"
+                value={avenantForm.adresseClient}
+                data-field="adresseClient"
+                onchange={handleAvenantFieldChange}
+              ></lightning-textarea>
+            </div>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_ClientContactName}
+                value={avenantForm.interNom}
+                data-field="interNom"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_ClientContactRole}
+                value={avenantForm.interFonction}
+                data-field="interFonction"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+            </div>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_ContactPhone}
+                value={avenantForm.interTel}
+                data-field="interTel"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_ContactEmail}
+                value={avenantForm.interEmail}
+                data-field="interEmail"
+                onchange={handleAvenantFieldChange}
+              ></lightning-input>
+            </div>
+            <template if:true={avenantDefaultsWarning}>
+              <p class="ptf-field-warning-orange">{avenantDefaultsWarning}</p>
+            </template>
+
+            <template if:true={showAvenantPriceBlock}>
+              <template if:true={isAvenantLegacyForm}>
+                <lightning-input
+                  type="date"
+                  label={i18n.AR_PTF_NewRateEffectiveDate}
+                  value={avenantForm.revisionPrixADateDu}
+                  data-field="revisionPrixADateDu"
+                  onchange={handleAvenantFieldChange}
+                ></lightning-input>
+                <lightning-input
+                  type="number"
+                  label={i18n.AR_PTF_NewDailyRate}
+                  step="1"
+                  value={avenantForm.nouveauTjm}
+                  data-field="nouveauTjm"
+                  required
+                  onchange={handleAvenantFieldChange}
+                ></lightning-input>
+                <template if:true={avenantPriceInfo}>
+                  <div class="ptf-avenant-price-info">
+                    <p>
+                      <strong>{i18n.AR_PTF_OldDailyRatePrefix}</strong>
+                      {avenantPriceInfo.ancienTjmLabel}
+                    </p>
+                    <p>
+                      <strong>{i18n.AR_PTF_GapPrefix}</strong>
+                      {avenantPriceInfo.ecartLabel}
+                    </p>
+                    <template if:true={avenantPriceInfo.hasMarginImpact}>
+                      <p>
+                        <strong>{i18n.AR_PTF_MarginImpactPrefix}</strong>
+                        {avenantPriceInfo.marginImpactLabel}
+                      </p>
+                      <template if:true={avenantPriceInfo.marginWarning}>
+                        <p class="ptf-field-warning-orange">
+                          {avenantPriceInfo.marginWarning}
+                        </p>
+                      </template>
+                    </template>
+                    <template if:false={avenantPriceInfo.hasMarginImpact}>
+                      <p>{avenantPriceInfo.noMarginImpactLabel}</p>
+                    </template>
+                  </div>
+                </template>
+              </template>
+              <template if:true={avenantLotsError}>
+                <p class="ptf-field-warning-orange">{avenantLotsError}</p>
+              </template>
+              <template if:false={hasAvenantLots}>
+                <p class="slds-text-color_weak">
+                  <template if:true={isAvenantLegacyForm}>
+                    {i18n.AR_PTF_ScheduleNeedsInputs}
+                  </template>
+                  <template if:true={isAvenantMatrixForm}>
+                    {i18n.AR_PTF_ScheduleLoading}
+                  </template>
+                </p>
+              </template>
+              <template if:true={hasAvenantLots}>
+                <table class="ptf-lot-table">
+                  <thead>
+                    <tr>
+                      <th>{i18n.AR_PTF_LotColumn}</th>
+                      <th>{i18n.AR_PTF_MonthColumn}</th>
+                      <th>{i18n.AR_PTF_DaysColumn}</th>
+                      <th>{i18n.AR_PTF_ComputedAmountColumn}</th>
+                      <th>{i18n.AR_PTF_RetainedAmountColumn}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={avenantLotRows} for:item="lot">
+                      <tr key={lot.key}>
+                        <td>{lot.libelle}</td>
+                        <td>{lot.mois}</td>
+                        <td>{lot.jours}</td>
+                        <td>{lot.montantCalculeLabel}</td>
+                        <td>
+                          <lightning-input
+                            type="number"
+                            variant="label-hidden"
+                            label={i18n.AR_PTF_LotAmount}
+                            step="1"
+                            placeholder={lot.montantPlaceholder}
+                            value={lot.montantValue}
+                            data-index={lot.index}
+                            onchange={handleAvenantLotMontantChange}
+                          ></lightning-input>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </template>
+            </template>
+
+            <div class="ptf-form-actions">
+              <template if:true={isGenerating}>
+                <span class="ptf-generating-label"
+                  >{i18n.AR_PTF_GenerationInProgressFewSeconds}</span
+                >
+              </template>
+              <button
+                class="btn btn-text"
+                type="button"
+                onclick={handleCancelAvenantForm}
+                disabled={isGenerating}
+              >
+                {i18n.AR_Common_Cancel}
+              </button>
+              <button
+                class="btn btn-text"
+                type="button"
+                onclick={handleSaveAvenantDraft}
+                disabled={isSaveAvenantDraftDisabled}
+              >
+                {i18n.AR_PTF_SaveDraft}
+              </button>
+              <button
+                class="btn btn-primary"
+                type="button"
+                onclick={handleCreateAvenant}
+                disabled={isCreateAvenantDisabled}
+              >
+                {i18n.AR_PTF_ConfirmGenerateAvenant}
+              </button>
+            </div>
+          </div>
+        </template>
+        <template if:false={hasDocuments}>
+          <template if:true={showGeneratePtfButton}>
+            <p class="ptf-empty">{i18n.AR_PTF_NoPtfForMatrix}</p>
+          </template>
+          <template if:true={isAvenantMatrix}>
+            <p class="ptf-empty">{i18n.AR_PTF_NoAvenantForMatrix}</p>
+          </template>
+        </template>
+        <!-- Session 279 : documents des versions précédentes de la chaîne, lecture seule. -->
+        <template if:true={previousVersionsError}>
+          <div class="slds-text-color_error slds-m-bottom_small">
+            {previousVersionsError}
+          </div>
+        </template>
+        <template if:true={hasPreviousVersionGroups}>
+          <div class="ptf-previous-versions" data-id="ptf-previous-versions">
+            <p class="ptf-previous-title">
+              {i18n.AR_PTF_PreviousVersionsTitle}
+            </p>
+            <template for:each={previousVersionGroupRows} for:item="grp">
+              <details key={grp.matrixId} class="ptf-previous-group">
+                <summary class="ptf-previous-summary">{grp.title}</summary>
+                <table class="ptf-doc-table">
+                  <tbody>
+                    <template for:each={grp.documents} for:item="doc">
+                      <tr key={doc.ptfDocumentId}>
+                        <td>
+                          {doc.reference}
+                          <template if:true={doc.clientAddressModified}>
+                            <lightning-icon
+                              class="doc-address-modified"
+                              icon-name="utility:location"
+                              size="xx-small"
+                              title={i18n.AR_PTF_ClientAddressModifiedHelp}
+                              alternative-text={i18n.AR_PTF_ClientAddressModifiedHelp}
+                            ></lightning-icon>
+                          </template>
+                        </td>
+                        <td>{doc.kindLabel}</td>
+                        <td>{doc.generatedAtLabel}</td>
+                        <td class="ptf-cell-actions">
+                          <button
+                            class="btn btn-text"
+                            type="button"
+                            data-id={doc.contentDocumentId}
+                            onclick={handleDownload}
+                            disabled={doc.hasNoFile}
+                          >
+                            {i18n.AR_Common_Download}
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </details>
+            </template>
+          </div>
+        </template>
+
+        <template if:true={showGeneratePtfButton}>
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick={handleOpenForm}
+          >
+            {generateButtonLabel}
+          </button>
+        </template>
+
+        <template if:true={isAvenantMatrix}>
+          <div class="ptf-avenant-bar">
+            <p class="ptf-avenant-amends">
+              {i18n.AR_PTF_AvenantToPtf}
+              <template if:true={hasAmendedPtfFile}>
+                <button
+                  class="btn btn-text ptf-amended-link"
+                  type="button"
+                  onclick={handleOpenAmendedPtf}
+                >
+                  {avenantState.amendedPtfReference}
+                </button>
+              </template>
+              <template if:false={hasAmendedPtfFile}>
+                <strong>{avenantState.amendedPtfReference}</strong>
+              </template>
+            </p>
+            <template if:true={avenantAwaitsDecision}>
+              <p class="slds-text-color_weak ptf-avenant-await">
+                {i18n.AR_PTF_AvenantGeneratedAfterValidation}
+              </p>
+            </template>
+            <template if:true={canGenerateAvenantDocument}>
+              <button
+                class="btn btn-primary ptf-avenant-generate"
+                type="button"
+                onclick={handleOpenAvenantDocumentForm}
+              >
+                {avenantGenerateLabel}
+              </button>
+            </template>
+          </div>
+        </template>
+      </template>
+
+      <template if:true={showForm}>
+        <div class="ptf-form">
+          <!--
+            Session 148 : bandeau du brouillon enregistré. Discret, au-dessus du formulaire ;
+            « Revenir aux valeurs par défaut » se confirme sur place (pas de confirm() navigateur).
+          -->
+          <template if:true={showDraftBanner}>
+            <div class="ptf-draft-banner" role="status">
+              <template if:true={formDraftWarning}>
+                <p class="ptf-draft-warning">{formDraftWarning}</p>
+              </template>
+              <template if:true={hasPtfDraft}>
+                <p class="ptf-draft-text">{ptfDraftStamp}</p>
+                <template if:true={isPtfDraftOtherTemplate}>
+                  <p class="ptf-draft-warning">{ptfDraftOtherTemplateText}</p>
+                  <button
+                    class="ptf-draft-link"
+                    type="button"
+                    onclick={handleApplyDraftTemplate}
+                  >
+                    {ptfDraftApplyLabel}
+                  </button>
+                </template>
+                <template if:false={isConfirmingDraftReset}>
+                  <button
+                    class="ptf-draft-link"
+                    type="button"
+                    onclick={handleAskDraftReset}
+                    disabled={isClearingDraft}
+                  >
+                    {i18n.AR_PTF_ResetToDefaults}
+                  </button>
+                </template>
+                <template if:true={isConfirmingDraftReset}>
+                  <span class="ptf-draft-confirm">
+                    {i18n.AR_PTF_ResetDraftConfirm}
+                    <button
+                      class="ptf-draft-link"
+                      type="button"
+                      onclick={handleConfirmDraftReset}
+                      disabled={isClearingDraft}
+                    >
+                      {i18n.AR_PTF_YesClear}
+                    </button>
+                    <button
+                      class="ptf-draft-link"
+                      type="button"
+                      onclick={handleCancelDraftReset}
+                      disabled={isClearingDraft}
+                    >
+                      {i18n.AR_Common_No}
+                    </button>
+                  </span>
+                </template>
+              </template>
+            </div>
+          </template>
+          <template if:true={hasGenerationWarnings}>
+            <div
+              class="slds-scoped-notification slds-media slds-media_center slds-theme_warning"
+              role="status"
+            >
+              <div class="slds-media__body">
+                <template
+                  for:each={displayedGenerationWarnings}
+                  for:item="warning"
+                >
+                  <p key={warning}>{warning}</p>
+                </template>
+              </div>
+            </div>
+          </template>
+          <!--
+            Sélecteur de gabarit, premier champ du formulaire : pré-positionné sur le gabarit résolu
+            automatiquement, avec la mention de sa provenance. Les champs affichés dessous suivent
+            le gabarit choisi (fieldVisible, cf. TEMPLATE_FIELDS).
+          -->
+          <div class="ptf-form-row">
+            <lightning-combobox
+              label={i18n.AR_PTF_DocumentTemplate}
+              value={form.templateCode}
+              options={templateOptions}
+              onchange={handleTemplateChange}
+            ></lightning-combobox>
+          </div>
+          <p class="ptf-template-source">{templateSourceLabel}</p>
+          <template if:true={entityTemplateWarning}>
+            <p class="ptf-field-warning-orange">{entityTemplateWarning}</p>
+          </template>
+          <template if:true={fieldVisible.adresseClient}>
+            <!-- Session 279 : adresse client pré-remplie depuis le compte, modifiable ; signalée si modifiée. -->
+            <div class="client-address" data-id="ptf-client-address">
+              <div class="client-address-head">
+                <span class="slds-form-element__label"
+                  >{i18n.AR_PTF_ClientAddress}</span
+                >
+                <template if:true={isPtfClientAddressModified}>
+                  <span
+                    class="slds-badge client-address-badge"
+                    data-id="ptf-address-modified"
+                    >{i18n.AR_PTF_ClientAddressModified}</span
+                  >
+                </template>
+                <template if:true={canRestorePtfClientAddress}>
+                  <button
+                    type="button"
+                    class="slds-button client-address-restore"
+                    data-id="ptf-address-restore"
+                    onclick={handleRestoreClientAddress}
+                  >
+                    {i18n.AR_PTF_ClientAddressRestore}
+                  </button>
+                </template>
+              </div>
+              <lightning-textarea
+                label={i18n.AR_PTF_ClientAddress}
+                variant="label-hidden"
+                value={form.adresseClient}
+                data-field="adresseClient"
+                onchange={handleFieldChange}
+              ></lightning-textarea>
+            </div>
+          </template>
+          <template if:true={fieldVisible.objet}>
+            <lightning-textarea
+              label={i18n.AR_PTF_Subject}
+              value={form.objet}
+              data-field="objet"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+          </template>
+          <template if:true={fieldVisible.contexte}>
+            <lightning-textarea
+              label={contexteLabel}
+              value={form.contexte}
+              data-field="contexte"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+          </template>
+          <template if:true={fieldVisible.domaineExpertise}>
+            <!--
+            Session 37 : gabarit Abylsen I.2, "...savoir-faire éprouvé dans le domaine ___". Saisie
+            pure (aucune source Connexys identifiée) — jamais une valeur héritée d'un exemple. Le
+            champ complète la phrase : il doit porter son propre article ("des méthodes", "de la
+            cybersécurité industrielle"), pas seulement le nom du domaine.
+          -->
+            <lightning-input
+              label={i18n.AR_PTF_ExpertiseDomain}
+              placeholder={i18n.AR_PTF_ExpertiseDomainPlaceholder}
+              value={form.domaineExpertise}
+              data-field="domaineExpertise"
+              onchange={handleFieldChange}
+            ></lightning-input>
+          </template>
+          <template if:true={fieldVisible.livrables}>
+            <lightning-textarea
+              label={i18n.AR_PTF_Deliverables}
+              value={form.livrables}
+              data-field="livrables"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+          </template>
+
+          <template if:true={fieldVisible.redacteur}>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_AuthorName}
+                value={form.redacteurNom}
+                data-field="redacteurNom"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_AuthorRole}
+                value={form.redacteurFonction}
+                data-field="redacteurFonction"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+          </template>
+          <div class="ptf-form-row">
+            <lightning-combobox
+              label={i18n.AR_PTF_ValidatorName}
+              value={form.valideurId}
+              options={valideurComboOptions}
+              data-field="valideurId"
+              onchange={handleValideurChange}
+            ></lightning-combobox>
+            <lightning-input
+              label={i18n.AR_PTF_ValidatorRole}
+              value={form.valideurFonction}
+              data-field="valideurFonction"
+              max-length="255"
+              onchange={handleFieldChange}
+            ></lightning-input>
+          </div>
+          <template if:true={isValideurMissing}>
+            <p class="ptf-field-warning">{valideurBlocage}</p>
+          </template>
+          <template if:true={fieldVisible.inter}>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_ContactPhone}
+                value={form.interTel}
+                data-field="interTel"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_ContactEmail}
+                value={form.interEmail}
+                data-field="interEmail"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+          </template>
+          <template if:true={fieldVisible.freqReunions}>
+            <lightning-input
+              label={i18n.AR_PTF_MeetingFrequency}
+              value={form.freqReunions}
+              data-field="freqReunions"
+              onchange={handleFieldChange}
+            ></lightning-input>
+          </template>
+
+          <template if:true={fieldVisible.materielRow}>
+            <div class="ptf-form-row">
+              <template if:true={fieldVisible.materielClient}>
+                <lightning-input
+                  type="checkbox"
+                  label={i18n.AR_PTF_ClientProvidedEquipment}
+                  checked={form.materielClient}
+                  data-field="materielClient"
+                  onchange={handleFieldChange}
+                ></lightning-input>
+              </template>
+              <template if:true={fieldVisible.materielItems}>
+                <!--
+              C27 (session 35) : la case à cocher ci-dessus ne sert plus qu'au gabarit générique
+              (rendu inchangé). Les gabarits 36-38 impriment ces items : vides, ils affichent
+              « Mis à disposition par <NOM CLIENT> » ; renseignés, « OUI » suivi de la liste.
+            -->
+                <lightning-input
+                  label={i18n.AR_PTF_ProvidedEquipment}
+                  placeholder={i18n.AR_PTF_CommaSeparatedPlaceholder}
+                  value={form.materielItems}
+                  data-field="materielItems"
+                  onchange={handleFieldChange}
+                ></lightning-input>
+              </template>
+              <template if:true={fieldVisible.fraisDepl}>
+                <lightning-input
+                  type="checkbox"
+                  label={i18n.AR_PTF_TravelCostsAtActual}
+                  checked={form.fraisDepl}
+                  data-field="fraisDepl"
+                  onchange={handleFieldChange}
+                ></lightning-input>
+              </template>
+            </div>
+          </template>
+
+          <!-- TJM par périodes (docs/254d) : une date de début par période à partir de la 2ᵉ, pré-remplie
+               avec la date estimée par le serveur (jours ouvrés), modifiable, obligatoire pour générer.
+               Champ natif (oninput + onchange) : la valeur est relue même sans sortie du champ. -->
+          <template if:true={hasTjmPeriods}>
+            <div class="ptf-tjm-periods" data-id="tjm-periods">
+              <p class="ptf-tjm-periods-title">{i18n.AR_PTF_TjmPeriodsTitle}</p>
+              <template for:each={tjmPeriodDateRows} for:item="row">
+                <div class="slds-form-element ptf-tjm-period-row" key={row.key}>
+                  <label class="slds-form-element__label" for={row.inputId}>
+                    {row.label}
+                    <abbr class="slds-required" title="required">*</abbr>
+                  </label>
+                  <div class="slds-form-element__control">
+                    <input
+                      type="date"
+                      class={row.inputClass}
+                      id={row.inputId}
+                      value={row.value}
+                      data-tjm-period-date={row.index}
+                      aria-required="true"
+                      oninput={handleTjmPeriodDateChange}
+                      onchange={handleTjmPeriodDateChange}
+                    />
+                  </div>
+                  <div class="slds-form-element__help">{row.summary}</div>
+                  <div class="slds-form-element__help">
+                    {i18n.AR_PTF_TjmPeriodDateHelp}
+                  </div>
+                  <template if:true={row.showError}>
+                    <div
+                      class="slds-form-element__help slds-text-color_error"
+                      role="alert"
+                      data-id="tjm-period-error"
+                    >
+                      {row.error}
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- Régie sans régule (ex-facturation mensuelle lissée), décochée par défaut. Coché, l'échéancier et les lots
+               sont relus côté serveur (previewPtfLots) ; décoché, il reste celui du jour ouvré réel. Matrice en mode
+               actif (docs/265c) : cochée et verrouillée, échéancier repris du plan de production. -->
+          <div class="ptf-form-row ptf-mensualisation-row">
+            <lightning-input
+              type="checkbox"
+              label={i18n.AR_PTF_MonthlyLissed}
+              checked={isMensualisationChecked}
+              disabled={rplsrActive}
+              data-field="facturationMensuelleLissee"
+              onchange={handleMensualisationChange}
+            ></lightning-input>
+            <lightning-helptext
+              content={mensualisationHelp}
+            ></lightning-helptext>
+          </div>
+
+          <template if:true={fieldVisible.conditionsReglement}>
+            <lightning-input
+              label={i18n.AR_PTF_PaymentTerms}
+              value={form.conditionsReglement}
+              data-field="conditionsReglement"
+              onchange={handleFieldChange}
+            ></lightning-input>
+          </template>
+          <template if:true={fieldVisible.tribunalCompetent}>
+            <lightning-input
+              label={i18n.AR_PTF_CompetentCourt}
+              value={form.tribunalCompetent}
+              data-field="tribunalCompetent"
+              onchange={handleFieldChange}
+            ></lightning-input>
+          </template>
+          <template if:true={fieldVisible.evolutionPrix}>
+            <lightning-textarea
+              label={i18n.AR_PTF_PriceEvolution}
+              value={form.evolutionPrix}
+              data-field="evolutionPrix"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+          </template>
+
+          <!--
+            Champs propres au gabarit ABMI_DQ012 (session 39, cf. arPtfPanel.js isAbmiTemplate) :
+            affichés uniquement quand le gabarit résolu ou surchargé ci-dessus est ABMI_DQ012 — les
+            trois autres gabarits ne les utilisent pas et le formulaire est déjà long. Les cinq
+            arbitrages structurels de docs/33-gabarits-ptf-annotations-matthieu.md §3 restent sans
+            réponse client : ces champs sont donc de la saisie libre, vides par défaut (à l'exception
+            des signataires, pré-remplis rédacteur/valideur par le serveur), sans aucun contenu hérité
+            du .docx source.
+          -->
+          <template if:true={isAbmiTemplate}>
+            <h4 class="ptf-lots-title">{i18n.AR_PTF_AbmiTemplateFields}</h4>
+
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_PTF_OurReferences}
+                value={form.abmiNosReferences}
+                data-field="abmiNosReferences"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_ForTheAttentionOf}
+                value={form.abmiAttentionDe}
+                data-field="abmiAttentionDe"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+
+            <h5 class="ptf-abmi-subtitle">{i18n.AR_PTF_Signatory1}</h5>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_Common_Name}
+                value={form.abmiSignataire1Nom}
+                data-field="abmiSignataire1Nom"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_Role}
+                value={form.abmiSignataire1Fonction}
+                data-field="abmiSignataire1Fonction"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_Common_Phone}
+                value={form.abmiSignataire1Tel}
+                data-field="abmiSignataire1Tel"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_Mobile}
+                value={form.abmiSignataire1Mobile}
+                data-field="abmiSignataire1Mobile"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_Common_Email}
+                value={form.abmiSignataire1Email}
+                data-field="abmiSignataire1Email"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+
+            <h5 class="ptf-abmi-subtitle">{i18n.AR_PTF_Signatory2}</h5>
+            <p class="ptf-abmi-hint">{i18n.AR_PTF_Signatory2Help}</p>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_Common_Name}
+                value={form.abmiSignataire2Nom}
+                data-field="abmiSignataire2Nom"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_PTF_Role}
+                value={form.abmiSignataire2Fonction}
+                data-field="abmiSignataire2Fonction"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+            <div class="ptf-form-row">
+              <lightning-input
+                label={i18n.AR_Common_Phone}
+                value={form.abmiSignataire2Tel}
+                data-field="abmiSignataire2Tel"
+                onchange={handleFieldChange}
+              ></lightning-input>
+              <lightning-input
+                label={i18n.AR_Common_Email}
+                value={form.abmiSignataire2Email}
+                data-field="abmiSignataire2Email"
+                onchange={handleFieldChange}
+              ></lightning-input>
+            </div>
+
+            <h5 class="ptf-abmi-subtitle">
+              {i18n.AR_PTF_NeedAndSolutionSection}
+            </h5>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section22}
+              value={form.abmiDescriptionTravaux}
+              data-field="abmiDescriptionTravaux"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section23}
+              value={form.abmiDonneesEntree}
+              data-field="abmiDonneesEntree"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section31}
+              value={form.abmiDescriptionSolution}
+              data-field="abmiDescriptionSolution"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section32}
+              value={form.abmiAvantages}
+              data-field="abmiAvantages"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section33}
+              value={form.abmiRessources}
+              data-field="abmiRessources"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section34}
+              value={form.abmiOrganisationProjet}
+              data-field="abmiOrganisationProjet"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section39}
+              value={form.abmiHabilitations}
+              data-field="abmiHabilitations"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section310}
+              value={form.abmiAnalyseRisques}
+              data-field="abmiAnalyseRisques"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+            <lightning-textarea
+              label={i18n.AR_PTF_Section41}
+              value={form.abmiPropositionFinanciereTexte}
+              data-field="abmiPropositionFinanciereTexte"
+              onchange={handleFieldChange}
+            ></lightning-textarea>
+          </template>
+
+          <!--
+            C40/C43/C44/C45 — les lots. Le montant reste calculé (TJM x jours ouvrés du mois) tant
+            qu'il n'est pas surchargé ; un lot surchargé est marqué visiblement et son impact sur la
+            marge est chiffré à côté. Aucune dérogation n'est déclenchée par une surcharge à la
+            baisse : arbitrage Matthieu en attente (question 1 de docs/34-plan-avant-prochaine-
+            reunion.md).
+          -->
+          <template if:true={showLots}>
+            <h4 class="ptf-lots-title">{i18n.AR_PTF_LotsAndSchedule}</h4>
+            <table class="ptf-lot-table">
+              <thead>
+                <tr>
+                  <th>{i18n.AR_PTF_LotColumn}</th>
+                  <th>{i18n.AR_PTF_MonthColumn}</th>
+                  <th>{i18n.AR_PTF_DaysColumn}</th>
+                  <th>{i18n.AR_PTF_DueDateColumn}</th>
+                  <th>{i18n.AR_PTF_ComputedAmountColumn}</th>
+                  <th>{i18n.AR_PTF_RetainedAmountColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={lotRows} for:item="lot">
+                  <tr key={lot.key} class={lot.rowClass}>
+                    <td>{lot.libelle}</td>
+                    <td>{lot.mois}</td>
+                    <td>{lot.joursLabel}</td>
+                    <td>{lot.echeanceLabel}</td>
+                    <td>{lot.montantCalculeLabel}</td>
+                    <td>
+                      <lightning-input
+                        type="number"
+                        variant="label-hidden"
+                        label={i18n.AR_PTF_LotAmount}
+                        step="1"
+                        placeholder={lot.montantPlaceholder}
+                        value={lot.montantValue}
+                        data-index={lot.index}
+                        onchange={handleLotMontantChange}
+                      ></lightning-input>
+                      <template if:true={lot.isOverridden}>
+                        <p class="ptf-lot-impact">
+                          {i18n.AR_PTF_Overridden} — {lot.marginImpactLabel}
+                        </p>
+                      </template>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <template if:true={hasLotOverride}>
+              <p class="ptf-lot-total-warning">{lotsTotalsWarning}</p>
+            </template>
+          </template>
+
+          <template if:true={previewStatusLabel}>
+            <p class="ptf-preview-status">{previewStatusLabel}</p>
+          </template>
+
+          <template if:true={isEntityNotReady}>
+            <p class="ptf-field-warning">{entityNotReadyMessage}</p>
+          </template>
+        </div>
+
+        <!-- Session 149 : history panel displayed above sticky actions when isHistoryOpen is true -->
+        <template if:true={isHistoryOpen}>
+          <div class="ptf-history-overlay">
+            <template if:true={documentsLoadError}>
+              <div class="slds-text-color_error slds-m-bottom_small">
+                {documentsLoadError}
+              </div>
+            </template>
+            <template if:true={hasDocuments}>
+              <table class="ptf-doc-table">
+                <thead>
+                  <tr>
+                    <th
+                      class="ptf-cell-check"
+                      title={i18n.AR_PTF_HistoryCheckboxTitle}
+                    >
+                      {i18n.AR_PTF_HistoryColumnShort}
+                    </th>
+                    <th>{i18n.AR_Common_Reference}</th>
+                    <th>{i18n.AR_Common_Version}</th>
+                    <th>{i18n.AR_PTF_GeneratedOnColumn}</th>
+                    <th>{i18n.AR_PTF_ModificationColumn}</th>
+                    <th>{i18n.AR_Common_Status}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={documentRows} for:item="doc">
+                    <tr key={doc.ptfDocumentId} class={doc.rowClass}>
+                      <td class="ptf-cell-check">
+                        <input
+                          type="checkbox"
+                          class="ptf-include-check"
+                          data-id={doc.ptfDocumentId}
+                          checked={doc.isChecked}
+                          disabled={doc.isToggleDisabled}
+                          title={doc.toggleTitle}
+                          aria-label={doc.toggleTitle}
+                          onchange={handleToggleIncluded}
+                        />
+                      </td>
+                      <td>
+                        {doc.reference}
+                        <template if:true={doc.clientAddressModified}>
+                          <lightning-icon
+                            class="doc-address-modified"
+                            icon-name="utility:location"
+                            size="xx-small"
+                            title={i18n.AR_PTF_ClientAddressModifiedHelp}
+                            alternative-text={i18n.AR_PTF_ClientAddressModifiedHelp}
+                          ></lightning-icon>
+                        </template>
+                      </td>
+                      <td class="ptf-cell-version" title={doc.versionTitle}>
+                        {doc.versionLabel}
+                      </td>
+                      <td>{doc.generatedAtLabel}</td>
+                      <td class="ptf-cell-modification">
+                        <template if:true={doc.isFirst}>
+                          <span
+                            class="ptf-mod-first"
+                            title={i18n.AR_PTF_FirstVersionNoModification}
+                            >—</span
+                          >
+                        </template>
+                        <template if:true={doc.isEditable}>
+                          <button
+                            type="button"
+                            class="ptf-mod-cell"
+                            data-id={doc.ptfDocumentId}
+                            title={doc.modificationTitle}
+                            onclick={handleOpenModification}
+                          >
+                            <template if:true={doc.modificationText}>
+                              <span class="ptf-mod-text"
+                                >{doc.modificationText}</span
+                              >
+                            </template>
+                            <template if:false={doc.modificationText}>
+                              <span class="ptf-mod-placeholder"
+                                >{i18n.AR_PTF_SpecifyEllipsis}</span
+                              >
+                            </template>
+                          </button>
+                        </template>
+                        <template if:true={doc.isModReadonly}>
+                          <span
+                            class="ptf-mod-text"
+                            title={doc.modificationTitle}
+                            >{doc.modificationText}</span
+                          >
+                        </template>
+                        <template if:true={doc.isEditing}>
+                          <div
+                            class="ptf-popover-backdrop"
+                            onclick={handleCancelModification}
+                          ></div>
+                          <div
+                            class="ptf-popover"
+                            role="dialog"
+                            aria-label={i18n.AR_PTF_VersionModificationAriaLabel}
+                            onkeydown={handlePopoverKeydown}
+                          >
+                            <c-ar-ptf-modification-picker
+                              type={editType}
+                              detail={editDetail}
+                              onmodificationchange={handleEditChange}
+                              onmodificationsubmit={handleSaveModification}
+                            ></c-ar-ptf-modification-picker>
+                            <template if:true={editError}>
+                              <p class="ptf-popover-error" role="alert">
+                                {editError}
+                              </p>
+                            </template>
+                            <div class="ptf-popover-actions">
+                              <button
+                                class="btn btn-text"
+                                type="button"
+                                onclick={handleCancelModification}
+                              >
+                                {i18n.AR_Common_Cancel}
+                              </button>
+                              <button
+                                class="btn btn-primary"
+                                type="button"
+                                onclick={handleSaveModification}
+                                disabled={isEditSaveDisabled}
+                              >
+                                {i18n.AR_Common_Save}
+                              </button>
+                            </div>
+                          </div>
+                        </template>
+                      </td>
+                      <td>
+                        <template if:true={doc.isPending}>
+                          <span class="ptf-status ptf-status-pending"
+                            >{i18n.AR_PTF_GenerationInProgress}</span
+                          >
+                          <template if:true={doc.isStalePending}>
+                            <span class="ptf-status-note"
+                              >{i18n.AR_PTF_RenderProbablyInterrupted}</span
+                            >
+                          </template>
+                        </template>
+                        <template if:true={doc.isFailed}>
+                          <span
+                            class="ptf-status ptf-status-failed"
+                            title={doc.errorMessage}
+                            >{i18n.AR_PTF_StatusFailed}</span
+                          >
+                        </template>
+                        <template if:true={doc.isSuccess}>
+                          <span class="ptf-status ptf-status-success"
+                            >{i18n.AR_PTF_StatusGenerated}</span
+                          >
+                        </template>
+                        <template if:true={doc.isUnknownStatus}>
+                          <span
+                            class="ptf-status ptf-status-unknown"
+                            title={i18n.AR_PTF_LegacyDocumentTitle}
+                            >—</span
+                          >
+                        </template>
+                      </td>
+                      <td>
+                        <button
+                          class="btn btn-text"
+                          type="button"
+                          data-id={doc.contentDocumentId}
+                          onclick={handleOpenDocument}
+                          disabled={doc.hasNoFile}
+                        >
+                          {i18n.AR_Common_Open}
+                        </button>
+                        <button
+                          class="btn btn-text"
+                          type="button"
+                          data-id={doc.contentDocumentId}
+                          onclick={handleDownload}
+                          disabled={doc.hasNoFile}
+                        >
+                          {i18n.AR_Common_Download}
+                        </button>
+                        <template if:true={doc.canRetryRender}>
+                          <button
+                            class="btn btn-text"
+                            type="button"
+                            data-id={doc.ptfDocumentId}
+                            onclick={handleRetryRender}
+                            disabled={doc.isRetryDisabled}
+                          >
+                            {i18n.AR_PTF_RetryRender}
+                          </button>
+                        </template>
+                        <template if:true={doc.canCreateAvenant}>
+                          <button
+                            class="btn btn-text"
+                            type="button"
+                            data-id={doc.ptfDocumentId}
+                            data-reference={doc.reference}
+                            onclick={handleOpenAvenantForm}
+                          >
+                            {i18n.AR_PTF_CreateAvenant}
+                          </button>
+                        </template>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </template>
+          </div>
+        </template>
+
+        <!-- Session 140 : sticky bottom bar with history toggle and form actions -->
+        <div class="ptf-sticky-actions">
+          <template if:true={hasDocuments}>
+            <button
+              class="btn btn-history"
+              type="button"
+              onclick={handleToggleHistory}
+              disabled={isGenerating}
+              aria-expanded={isHistoryOpen}
+              title={i18n.AR_PTF_TogglePdfHistoryTitle}
+            >
+              {i18n.AR_PTF_AlreadyGeneratedPdfs}
+              <span class="ptf-badge">{documentRows.length}</span>
+              <span class="ptf-chevron" aria-hidden="true">{chevronIcon}</span>
+            </button>
+          </template>
+          <template if:true={isGenerating}>
+            <span class="ptf-generating-label"
+              >{i18n.AR_PTF_GenerationInProgressFewSeconds}</span
+            >
+          </template>
+          <button
+            class="btn btn-text"
+            type="button"
+            onclick={handleCancelForm}
+            disabled={isGenerating}
+          >
+            {i18n.AR_Common_Cancel}
+          </button>
+          <button
+            class="btn btn-text"
+            type="button"
+            onclick={handleSaveDraft}
+            disabled={isSaveDraftDisabled}
+          >
+            {i18n.AR_PTF_SaveDraft}
+          </button>
+          <button
+            class="btn btn-text"
+            type="button"
+            onclick={handlePreview}
+            disabled={isPreviewing}
+          >
+            {i18n.AR_Common_Preview}
+          </button>
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick={handleGenerate}
+            disabled={isGenerateDisabled}
+          >
+            {i18n.AR_PTF_ConfirmAndGenerate}
+          </button>
+        </div>
+      </template>
+
+      <!-- Session 139 — génération d'une version ≥ V2 : quelle modification ? -->
+      <template if:true={showModificationDialog}>
+        <div class="ptf-modal-backdrop"></div>
+        <div
+          class="ptf-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={dialogTitle}
+          onkeydown={handleDialogKeydown}
+        >
+          <h3 class="ptf-modal-title">{dialogTitle}</h3>
+          <c-ar-ptf-modification-picker
+            type={dialogType}
+            detail={dialogDetail}
+            onmodificationchange={handleDialogChange}
+            onmodificationsubmit={handleDialogSubmit}
+          ></c-ar-ptf-modification-picker>
+          <div class="ptf-popover-actions">
+            <button
+              class="btn btn-text"
+              type="button"
+              onclick={handleDialogCancel}
+            >
+              {i18n.AR_Common_Cancel}
+            </button>
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick={handleDialogConfirm}
+              disabled={isDialogConfirmDisabled}
+            >
+              {i18n.AR_Common_Generate}
+            </button>
+          </div>
+        </div>
+      </template>
+    </template>
+  </div>
+  <c-ar-avenant-modal
+    open={showAvenantModal}
+    source-matrix-id={recordId}
+    preselected-ptf-id={avenantModalPtfId}
+    oncancel={handleAvenantModalCancel}
+    oncreated={handleAvenantCreated}
+  ></c-ar-avenant-modal>
+</template>

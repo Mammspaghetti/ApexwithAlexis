@@ -1,0 +1,28 @@
+<template>
+  <template if:true={hasData}>
+    <svg class="donut" viewBox="0 0 100 100" role="img" aria-label={ariaLabel}>
+      <g transform="rotate(-90 50 50)">
+        <template for:each={arcs} for:item="arc">
+          <circle
+            key={arc.key}
+            class="arc"
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke={arc.color}
+            stroke-width="16"
+            stroke-dasharray={arc.dashArray}
+            stroke-dashoffset={arc.dashOffset}
+            data-length={arc.length}
+          >
+            <title>{arc.tooltip}</title>
+          </circle>
+        </template>
+      </g>
+      <text class="center" x="50" y="50" text-anchor="middle" dy="0.35em">
+        {centerLabel}
+      </text>
+    </svg>
+  </template>
+</template>

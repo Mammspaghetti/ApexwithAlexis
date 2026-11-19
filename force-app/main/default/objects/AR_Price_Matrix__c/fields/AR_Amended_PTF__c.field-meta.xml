@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Amended_PTF__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>PTF d&apos;origine concernée par cette version de type avenant. Ce champ est renseigné uniquement pour les avenants.</description>
+    <label>PTF amendée</label>
+    <referenceTo>AR_PTF_Document__c</referenceTo>
+    <relationshipLabel>Matrices avenant</relationshipLabel>
+    <relationshipName>AR_Amending_Matrices</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

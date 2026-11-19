@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Entity_Ref__c</fullName>
+    <description>Entité PTF dont l&apos;utilisateur est valideur. Supprimer l&apos;entité supprime ses valideurs.</description>
+    <label>Entité PTF</label>
+    <referenceTo>AR_PTF_Entity_Referential__c</referenceTo>
+    <relationshipLabel>Valideurs</relationshipLabel>
+    <relationshipName>AR_Entity_Validators</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

@@ -1,0 +1,187 @@
+/* AR_PTFStyleAbylsenV11 — session 128 : feuille dédiée au gabarit ABYLSEN_AT_V11 (AR_PTFTemplateAbylsen.page).
+   Reconstruite à partir des mesures du modèle validé (docs/gabarits/SIGMA__PTF_AT_v11_FR1-modele-vierge.pdf,
+   positions et tailles relevées au point près avec PyMuPDF) et des styles du .docx source
+   (docs/gabarits/SIGMA__PTF_AT_v11_FR.docx : marges 1417 twips = 25 mm, Titre1 16 pt, Titre2 14 pt gras,
+   Titre3 12 pt gras, Titre4 12 pt gras italique, corps Arial 9 pt, espace avant 3 pt). Toutes les unités
+   sont en points (pt) pour coller aux valeurs Word. Hauteur de ligne Word en interligne simple pour Arial
+   = 1,15 × corps (ascendante 0,905 + descendante 0,212 + interligne 0,033) : 9 pt -> 10,35 pt, etc.
+   Police : Helvetica (sans-serif, seule valeur supportée avec gras/italique — cf. docs/58d), clone
+   métrique d'Arial : mêmes chasses, donc mêmes coupures de ligne que le modèle Word.
+   L'avenant (AR_PTFAvenant.page) garde AR_PTFStyleAbylsen.css tant qu'il n'est pas repris à son tour. */
+
+/* ── Pages : en-tête et pied courants en éléments « running » dans les marges de page (FS R8).
+   Remplace la table paginée (-fs-table-paginate) : le pied n'était pas en bas de page et changeait
+   de hauteur d'une page à l'autre (il suivait la fin du contenu). Marges = modèle : gauche/droite
+   25 mm (70,8 pt), haut = bas de l'image d'en-tête (95,5 pt), bas 25 mm (71 pt). */
+@page {
+  size: A4;
+  margin: 95.5pt 70.8pt 70pt 70.8pt;
+  @top-center { content: element(abyHeader); vertical-align: top; }
+  @bottom-center { content: element(abyFooter); vertical-align: top; }
+}
+@page :first {
+  margin: 0;
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+body { font-family: sans-serif; font-size: 9pt; line-height: 10.35pt; color: #000000; margin: 0; }
+p { margin: 0; }
+table { border-collapse: collapse; }
+td { vertical-align: top; padding: 0; }
+
+/* En-tête courant : image du modèle (word/media/image2.jpg), bord à bord (597 × 95,5 pt). */
+.abyv-header { position: running(abyHeader); margin-left: -70.8pt; width: 597pt; height: 95.5pt; }
+.abyv-header-img { width: 597pt; height: 95.5pt; display: block; }
+
+/* Pied courant (footer2.xml du modèle) : ABYLSEN 8 pt gras, confidentialité 6 pt gras, référence 6 pt,
+   numéro de page aligné à droite (Calibri 12 pt dans le modèle -> Helvetica 12 pt). Positions relevées :
+   ABYLSEN à 783 pt, numéro à 813 pt, identiques sur toutes les pages. */
+.abyv-footer { position: running(abyFooter); padding-top: 11pt; text-align: center; }
+.abyv-f-brand { font-size: 8pt; line-height: 9.2pt; font-weight: bold; }
+.abyv-f-conf { font-size: 6pt; line-height: 6.9pt; font-weight: bold; }
+.abyv-f-ref { font-size: 6pt; line-height: 6.9pt; }
+.abyv-f-num { font-size: 12pt; line-height: 13.8pt; text-align: right; }
+.abyv-f-num span:before { content: counter(page); }
+
+/* Bandeau d'aperçu (session 127) : noir, superposé en haut de chaque page, jamais dans le flux.
+   Porté par l'en-tête courant (pages 2+) et par la page de garde. */
+.abyv-preview { position: absolute; top: 0; left: 0; width: 100%; background-color: #000000; color: #FFFFFF;
+  text-align: center; font-weight: bold; font-size: 9pt; line-height: 10.35pt; letter-spacing: 1px; padding: 4pt 0; }
+.abyv-rel { position: relative; }
+
+/* ── Page de garde : géométrie relevée sur le modèle (points). ── */
+.abyv-cover { position: relative; height: 841.8pt; page-break-after: always; }
+.abyv-cov-banner { position: absolute; left: 0; top: 0; width: 594.8pt; height: 141.4pt; }
+/* Titre : Arial gras 11 pt, 3 lignes, x = 413,9 pt, lignes à 66,8 / 79,6 / 92,1 pt — calé en bas de sa
+   zone, juste au-dessus du filet horizontal du bandeau (demande Alexis, 30/09/2026). */
+.abyv-cov-title { position: absolute; left: 413.9pt; top: 66.5pt; font-size: 11pt; line-height: 12.65pt;
+  font-weight: bold; }
+.abyv-cov-footer { position: absolute; left: 0; top: 751.7pt; width: 594.8pt; height: 90.1pt; }
+
+/* Tableau d'identification (dans l'en-tête de première page du modèle) : x 31,5 -> 563,7 pt, y 141,5 pt. */
+.abyv-ident { position: absolute; left: 31.5pt; top: 141.5pt; width: 532.2pt; table-layout: fixed; }
+.abyv-ident td { border: 0.5pt solid #FFFFFF; padding: 0 5.3pt; font-size: 9pt; line-height: 13.5pt; }
+.abyv-ident td.k { background-color: #C3D66F; }
+.abyv-ident td.k2 { background-color: #9EC539; }
+.abyv-ident td.v { background-color: #EEF5DF; }
+
+/* Tableaux du corps de garde : x 42,3 -> 574,5 pt, premier filet gris à 337,6 pt, 13 pt entre blocs. */
+.abyv-cov-body { padding-top: 337.6pt; }
+.abyv-rule { margin-left: 48pt; width: 499pt; height: 0; border-top: 0.25pt solid #D8D9D8; margin-top: 13pt; }
+.abyv-rule-first { margin-top: 0; }
+.abyv-grid { margin-left: 42.3pt; width: 532.2pt; table-layout: fixed; margin-top: 0.3pt; }
+.abyv-grid td { border: 0.5pt solid #FFFFFF; padding: 0 5.2pt; font-size: 9pt; line-height: 10.35pt; }
+.abyv-grid td.h { background-color: #C3D66F; }
+.abyv-grid td.b { background-color: #EEF5DF; height: 10.35pt; }
+.abyv-grid td.c { text-align: center; }
+.abyv-grid td.tall { height: 72.45pt; }
+/* Historique des modifications (session 138) : tableau de longueur variable. Texte centré (classe .c du
+   modèle), jamais justifié (piège du bloc RIB, session 58) ; retour à la ligne dans la cellule
+   (Modification jusqu'à 255 caractères) ; ligne indivisible. Sur la garde, le tableau est borné par
+   AR_PTFTemplateController (place restante) : -fs-table-paginate n'y est PAS posé, un débordement
+   recouvrirait le pied image puis le sommaire. */
+.abyv-hist tr { page-break-inside: avoid; }
+.abyv-hist td { word-wrap: break-word; }
+/* Page de continuation : flux normal, en-têtes (<thead>) répétés si la suite déborde, saut de page
+   après pour que le sommaire reparte sur sa propre page. Pas de -fs-page-sequence (pièges session 58). */
+.abyv-hist-suite-page { page-break-after: always; }
+.abyv-hist-suite { -fs-table-paginate: paginate; margin-left: 0; width: 453.4pt; margin-top: 18pt; }
+
+.abyv-content { width: 453.4pt; }
+
+/* ── Sommaire (TM1 / TM2 du modèle). TM1 : Source Sans Pro gras 10 pt ; TM2 : Calibri 12 pt, interligne
+   19,6 pt. Polices indisponibles sur le moteur PDF : Helvetica gras 10 pt et Helvetica 11 pt (rendu le
+   plus proche du Calibri 12), mêmes positions verticales et horizontales que le modèle. ── */
+.abyv-toc-title { font-size: 24pt; line-height: 27.6pt; margin-top: 74.9pt; }
+.abyv-toc1 { width: 453.4pt; table-layout: fixed; margin-top: 6pt; }
+.abyv-toc1 td { font-size: 10pt; line-height: 12.3pt; font-weight: bold; }
+.abyv-toc2 { width: 441.4pt; table-layout: fixed; margin-left: 12pt; margin-bottom: 5pt; }
+.abyv-toc2 td { font-size: 11pt; line-height: 14.65pt; }
+.abyv-toc-first { margin-top: 11.4pt; }
+.abyv-toc-pg { text-align: right; white-space: nowrap; }
+.abyv-toc-pg a { color: #000000; text-decoration: none; }
+.abyv-toc-pg a:after { content: target-counter(attr(href), page); }
+.abyv-toc-lbl { overflow: hidden; white-space: nowrap; }
+.abyv-toc-n1 { display: inline-block; width: 24pt; }
+.abyv-toc-n2 { display: inline-block; width: 24pt; }
+.abyv-toc-n2w { display: inline-block; width: 36pt; }
+.abyv-toc-dots { letter-spacing: 0.6pt; }
+
+/* ── Corps : styles Word reproduits. ── */
+.w-t1 { font-size: 16pt; line-height: 18.4pt; font-weight: normal; margin: 0; padding-left: 18pt;
+  page-break-before: always; }
+.w-t1-num { display: inline-block; width: 36pt; }
+.w-t2 { font-size: 14pt; line-height: 16.1pt; font-weight: bold; margin-top: 2pt; padding-left: 18pt;
+  page-break-after: avoid; }
+.w-t2-num { display: inline-block; width: 18pt; }
+.w-t2-wide .w-t2-num { width: 52.8pt; }
+.w-t3 { font-size: 12pt; line-height: 13.8pt; font-weight: bold; margin-top: 2pt; page-break-after: avoid; }
+.w-t3b { font-size: 12pt; line-height: 13.8pt; font-weight: bold; page-break-after: avoid; }
+.w-t4 { font-size: 12pt; line-height: 13.8pt; font-weight: bold; font-style: italic; margin-top: 2pt;
+  page-break-after: avoid; }
+.w-p { font-size: 9pt; line-height: 10.35pt; }
+.w-p3 { margin-top: 3pt; }
+.w-j { text-align: justify; }
+.w-e { font-size: 1pt; line-height: 1pt; page-break-inside: avoid; }
+.w-b { font-weight: bold; }
+.w-i { font-style: italic; }
+.w-bi { font-weight: bold; font-style: italic; }
+.w-up { text-transform: uppercase; }
+.w-li { padding-left: 36pt; }
+.w-li .w-bul { float: left; margin-left: -18pt; width: 18pt; }
+.w-li-dash27 { padding-left: 27pt; }
+.w-li-dash27 .w-bul { margin-left: -18pt; }
+/* Section II : lignes découpées aux fins de ligne du modèle (scripts/ptf/abylsen-v11/build.py). Chaque
+   ligne est un bloc d'une ligne ; la ligne est justifiée grâce à un élément de remplissage (w-fill) qui
+   passe sur une seconde ligne masquée. Les rares lignes que Word avait fait tenir en compressant ses
+   espaces sont imprimées à une taille réduite d'au plus 2,5 % (classes w-fsNNN, invisibles à l'œil). */
+.w-lines .w-ln { display: block; height: 10.35pt; overflow: hidden; text-align: justify; page-break-inside: avoid; }
+.w-lines .w-ln-last { text-align: left; }
+.w-p.w-lines { text-align: left; }
+.w-fill { display: inline-block; width: 100%; height: 0; }
+/* Première ligne d'un élément de liste : la puce Word (police Symbol/Verdana) agrandit la ligne
+   d'environ 0,45 pt — relevé sur le modèle (articles 6, 9, 10, 16, 18). */
+.w-lines .w-ln-li { height: 10.8pt; }
+.w-lines .w-ln-li7 { height: 11.1pt; }
+.w-lines .w-ln-li11 { height: 10.45pt; }
+.w-fs874 { font-size: 8.74pt; }
+.w-fs875 { font-size: 8.75pt; }
+.w-fs876 { font-size: 8.76pt; }
+.w-fs877 { font-size: 8.77pt; }
+.w-fs878 { font-size: 8.78pt; }
+.w-fs879 { font-size: 8.79pt; }
+.w-fs880 { font-size: 8.80pt; }
+.w-fs881 { font-size: 8.81pt; }
+.w-fs882 { font-size: 8.82pt; }
+.w-fs883 { font-size: 8.83pt; }
+.w-fs884 { font-size: 8.84pt; }
+.w-fs885 { font-size: 8.85pt; }
+.w-fs887 { font-size: 8.87pt; }
+.w-fs889 { font-size: 8.89pt; }
+.w-fs890 { font-size: 8.90pt; }
+.w-fs891 { font-size: 8.91pt; }
+.w-fs892 { font-size: 8.92pt; }
+.w-fs893 { font-size: 8.93pt; }
+.w-fs894 { font-size: 8.94pt; }
+.w-fs895 { font-size: 8.95pt; }
+.w-fs896 { font-size: 8.96pt; }
+.w-fs897 { font-size: 8.97pt; }
+.w-fs898 { font-size: 8.98pt; }
+/* Étiquette « Lot N: » : 26,5 pt = modèle v11 jusqu'à 9 lots. nowrap obligatoire : sinon « Lot 10: »
+   passe à la ligne dans la boîte et le justify hérité l'étire lettre à lettre. Au-delà de 9 lots,
+   toutes les étiquettes passent à 31,5 pt (« Lot 10: » ≈ 27,5 pt en Arial 9 + même blanc qu'au modèle). */
+.w-lot-lbl { display: inline-block; width: 26.5pt; white-space: nowrap; }
+.w-lot-lbl-l { width: 31.5pt; }
+.w-pre { white-space: pre-line; }
+
+/* Tableau 4.3 : x 77,5 -> 517,7 pt, filets noirs 0,5 pt, colonnes 167,6 / 139,8 / 132,3 pt. */
+.w-sch { margin-left: 6.7pt; width: 440.2pt; table-layout: fixed; }
+.w-sch td { border: 0.5pt solid #000000; padding: 0.4pt 3.5pt 0 3.5pt; font-size: 9pt; line-height: 10.35pt;
+  text-align: left; }
+.w-sch td.row { height: 16.5pt; }
+.w-sch td.hd { height: 13.5pt; }
+.w-sch .w-12 { font-size: 12pt; line-height: 13.8pt; }
+
+/* Bloc signature : taquet à 368,6 pt (297,8 pt après la marge). */
+.w-sig { width: 453.4pt; table-layout: fixed; }
+.w-sig td { font-size: 9pt; line-height: 10.35pt; padding: 3pt 0 0 0; }

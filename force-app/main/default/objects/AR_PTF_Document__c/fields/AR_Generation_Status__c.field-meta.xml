@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Generation_Status__c</fullName>
+    <description>Le snapshot est créé immédiatement, tandis que le rendu PDF intervient ensuite. Le statut permet de signaler un échec de génération du document.</description>
+    <label>Statut de génération</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>En cours</fullName>
+                <default>true</default>
+                <label>En cours</label>
+            </value>
+            <value>
+                <fullName>Généré</fullName>
+                <default>false</default>
+                <label>Généré</label>
+            </value>
+            <value>
+                <fullName>Échec</fullName>
+                <default>false</default>
+                <label>Échec</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

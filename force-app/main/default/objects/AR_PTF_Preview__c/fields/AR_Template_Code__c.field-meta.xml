@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Template_Code__c</fullName>
+    <description>Code du gabarit (GENERIQUE / ABYLSEN_AT_V11 / AVENANT_AT_V11 / ABMI_DQ012) pour aiguiller le rendu</description>
+    <externalId>false</externalId>
+    <label>Code gabarit</label>
+    <length>40</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

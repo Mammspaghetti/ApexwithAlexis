@@ -1,0 +1,182 @@
+<template>
+  <template if:true={open}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      class="slds-modal slds-fade-in-open dup-modal"
+      aria-modal="true"
+      aria-labelledby="duplicate-modal-heading"
+    >
+      <div class="slds-modal__container dup-container">
+        <!-- En-tête (session 114) : même signature visuelle que la carte « Sélection du besoin »
+             de la vue Matrice AT — pastille icône rose, titre, sous-titre discret. -->
+        <header class="dup-header">
+          <div class="dup-header-icon">
+            <lightning-icon
+              icon-name="utility:copy"
+              size="small"
+            ></lightning-icon>
+          </div>
+          <div class="dup-header-text">
+            <h2 id="duplicate-modal-heading" class="dup-title">{modalTitle}</h2>
+            <p class="dup-subtitle">{subtitle}</p>
+          </div>
+        </header>
+
+        <div class="dup-body">
+          <template if:true={showNewTjmChoice}>
+            <lightning-radio-group
+              name="newTjm"
+              label={i18n.AR_MDM_NewTjmTitle}
+              options={newTjmOptions}
+              value={newTjmChoice}
+              type="radio"
+              class="dup-new-tjm"
+              onchange={handleNewTjmChange}
+            ></lightning-radio-group>
+          </template>
+
+          <!-- Besoin cible : le besoin d'origine est la cible par défaut, affiché comme une option
+               déjà cochée ; la recherche en dessous permet d'en choisir un autre. -->
+          <p class="dup-section-label">{i18n.AR_MDM_TargetNeed}</p>
+          <div class="dup-target-card">
+            <div class="dup-target-left">
+              <span class="dup-target-name">{targetName}</span>
+              <template if:true={targetAccount}>
+                <span class="dup-target-account">
+                  <lightning-icon
+                    icon-name="utility:company"
+                    size="xx-small"
+                    class="dup-target-account-icon"
+                  ></lightning-icon>
+                  {targetAccount}
+                </span>
+              </template>
+            </div>
+            <div class="dup-target-right">
+              <span class={targetTagClass}>{targetTagLabel}</span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10" fill="#d31876"></circle>
+                <path
+                  d="M8 12.5l2.5 2.5L16 9.5"
+                  fill="none"
+                  stroke="#ffffff"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <template if:true={isOtherTarget}>
+            <button
+              class="dup-reset-link"
+              type="button"
+              onclick={handleResetToSourcePosition}
+            >
+              {i18n.AR_MDM_BackToSourceNeed}
+            </button>
+          </template>
+
+          <p class="dup-section-label dup-section-label_spaced">
+            {i18n.AR_MDM_DuplicateToOtherNeed}
+          </p>
+          <div class="dup-search-bar">
+            <lightning-icon
+              icon-name="utility:search"
+              size="x-small"
+              class="dup-search-icon"
+            ></lightning-icon>
+            <input
+              type="search"
+              class="dup-search-input"
+              placeholder={i18n.AR_MDM_SearchPlaceholder}
+              aria-label={i18n.AR_MDM_SearchOtherNeed}
+              value={searchTerm}
+              oninput={handleSearchInput}
+            />
+          </div>
+          <template if:true={showResults}>
+            <ul class="dup-results" role="list">
+              <template for:each={enrichedOptions} for:item="opt">
+                <li key={opt.positionId} role="listitem">
+                  <button
+                    type="button"
+                    class={opt.rowClass}
+                    data-position-id={opt.positionId}
+                    onclick={handleSelectPosition}
+                  >
+                    <span class="dup-result-left">
+                      <span class="dup-result-name">{opt.name}</span>
+                      <span class="dup-result-account">{opt.account}</span>
+                    </span>
+                    <template if:true={opt.isSource}>
+                      <span class="dup-tag dup-tag_neutral"
+                        >{i18n.AR_MDM_SourceNeed}</span
+                      >
+                    </template>
+                  </button>
+                </li>
+              </template>
+              <template if:true={showNoResults}>
+                <li class="dup-results-empty" role="listitem">
+                  {i18n.AR_MDM_NoNeedFound}
+                </li>
+              </template>
+            </ul>
+          </template>
+
+          <template if:true={isChainDuplication}>
+            <div class="dup-chain-fields">
+              <c-ar-reason-multi-select
+                usage="version"
+                label={i18n.AR_MDM_VersionChangeReasons}
+                required="true"
+                onchange={handleReasonsChange}
+              ></c-ar-reason-multi-select>
+              <lightning-textarea
+                label={i18n.AR_MDM_CommentOptional}
+                value={changeComment}
+                onchange={handleCommentChange}
+              ></lightning-textarea>
+            </div>
+          </template>
+
+          <template if:true={errorMessage}>
+            <div class="dup-error" role="alert">{errorMessage}</div>
+          </template>
+        </div>
+
+        <footer class="dup-footer">
+          <button
+            class="btn btn-secondary"
+            type="button"
+            onclick={handleCancel}
+            disabled={isSaving}
+          >
+            {i18n.AR_Common_Cancel}
+          </button>
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick={handleConfirm}
+            disabled={isSaving}
+          >
+            <lightning-icon
+              icon-name="utility:copy"
+              size="xx-small"
+              class="btn-icon-inverse"
+            ></lightning-icon>
+            {i18n.AR_Common_Duplicate}
+          </button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+</template>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Reminder_Sent__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Positionné par AR_DerogationReminderBatch (en bypass trigger) quand la relance simple au valideur sélectionné a été envoyée. Une dérogation ne franchit ce palier qu&apos;une fois.</description>
+    <label>Relance envoyée (palier 1)</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

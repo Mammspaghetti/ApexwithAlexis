@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Tribunal_Competent__c</fullName>
+    <description>Texte complet du tribunal de commerce imprimé dans la PTF (ex. Tribunal de Commerce de Lyon). Résolution : saisie formulaire &gt; entité de la matrice &gt; réglage global (AR_Default_Tribunal_Competent__c).</description>
+    <externalId>false</externalId>
+    <label>Tribunal de commerce compétent</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

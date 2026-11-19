@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Max_Derogation_Penalty__c</fullName>
+    <description>Seuil de marge en dessous duquel aucune dérogation n&apos;est possible.</description>
+    <externalId>false</externalId>
+    <label>% Pénalité max dérogation</label>
+    <precision>5</precision>
+    <required>true</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

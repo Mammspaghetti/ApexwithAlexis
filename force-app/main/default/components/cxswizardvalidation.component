@@ -1,0 +1,8 @@
+<apex:component >
+    <apex:attribute name="userlocale" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="dateformat" type="String" description="TODO: Describe me"/>
+  <!-- Begin Default Content REMOVE THIS -->
+  <h1>Congratulations</h1>
+  This is your new Component: cxswizardvalidation
+  <!-- End Default Content REMOVE THIS -->
+</apex:component>

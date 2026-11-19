@@ -1,0 +1,465 @@
+<template>
+  <div class="view-header">
+    <h1 class="view-title">{i18n.AR_App_NavDashboard}</h1>
+    <p class="view-subtitle">{matrixCountLabel}</p>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={settingsErrorMessage}>
+    <div class="error-message">{settingsErrorMessage}</div>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">
+      <lightning-icon
+        icon-name="utility:summary"
+        size="medium"
+      ></lightning-icon>
+      <p class="empty-state-title">{i18n.AR_ML_NoMatrixYet}</p>
+      <p class="empty-state-text">{i18n.AR_DB_NoMatrixYetHelp}</p>
+    </div>
+  </template>
+
+  <template if:true={showDashboard}>
+    <div class={dashboardClass}>
+      <div class="filter-bar section-card">
+        <lightning-combobox
+          class="filter-period"
+          name="period"
+          label={i18n.AR_DB_FilterPeriod}
+          value={filters.period}
+          options={periodOptions}
+          onchange={handlePeriodChange}
+        ></lightning-combobox>
+        <template if:true={isCustomPeriod}>
+          <lightning-input
+            class="filter-from"
+            type="date"
+            label={i18n.AR_DB_FilterFrom}
+            value={filters.from}
+            onchange={handleFromChange}
+          ></lightning-input>
+          <lightning-input
+            class="filter-to"
+            type="date"
+            label={i18n.AR_DB_FilterTo}
+            value={filters.to}
+            onchange={handleToChange}
+          ></lightning-input>
+        </template>
+        <lightning-combobox
+          class="filter-country"
+          name="country"
+          label={i18n.AR_DB_FilterCountry}
+          value={filters.country}
+          options={countryOptions}
+          disabled={isGroupAxis}
+          onchange={handleCountryChange}
+        ></lightning-combobox>
+        <lightning-combobox
+          class="filter-entity"
+          name="entity"
+          label={i18n.AR_DB_FilterEntity}
+          value={filters.entityId}
+          options={entityOptions}
+          disabled={isGroupAxis}
+          onchange={handleEntityChange}
+        ></lightning-combobox>
+        <div class="axis-filter">
+          <span class="axis-label" id="axis-label">{lbl.AnalyzeBy}</span>
+          <div class="axis-group" role="group" aria-label={lbl.AriaAxis}>
+            <template for:each={axisButtons} for:item="btn">
+              <button
+                key={btn.value}
+                type="button"
+                class={btn.className}
+                data-axis={btn.value}
+                aria-pressed={btn.pressed}
+                onclick={handleAxisClick}
+              >
+                {btn.label}
+              </button>
+            </template>
+          </div>
+          <template if:true={groupNote}>
+            <span class="axis-note">{groupNote}</span>
+          </template>
+        </div>
+        <lightning-button
+          class="filter-reset"
+          variant="neutral"
+          label={i18n.AR_DB_FilterReset}
+          onclick={handleReset}
+        ></lightning-button>
+      </div>
+
+      <div
+        class="tab-bar"
+        role="tablist"
+        aria-label={lbl.AriaTabs}
+        onkeydown={handleTabKeydown}
+      >
+        <template for:each={tabs} for:item="tab">
+          <button
+            key={tab.value}
+            type="button"
+            role="tab"
+            class={tab.className}
+            data-tab={tab.value}
+            aria-selected={tab.selected}
+            tabindex={tab.tabIndex}
+            onclick={handleTabClick}
+          >
+            {tab.label}
+          </button>
+        </template>
+      </div>
+
+      <template if:true={showTabSkeleton}>
+        <div class="skeleton" aria-busy="true" role="status">
+          <div class="skeleton-row">
+            <div class="skeleton-block"></div>
+            <div class="skeleton-block"></div>
+            <div class="skeleton-block"></div>
+            <div class="skeleton-block"></div>
+          </div>
+          <div class="skeleton-block is-tall"></div>
+        </div>
+      </template>
+      <template if:true={activeTabError}>
+        <div class="error-message tab-error">{activeTabError}</div>
+      </template>
+      <template if:true={showTabContent}>
+        <div class={tabBodyClass}>
+          <template if:true={isDerogationsTab}>
+            <c-ar-dashboard-derogations
+              data={activeTabData}
+              onmotiffilter={handleMotifFilter}
+            ></c-ar-dashboard-derogations>
+          </template>
+          <template if:true={isProfitabilityTab}>
+            <c-ar-dashboard-profitability
+              data={activeTabData}
+            ></c-ar-dashboard-profitability>
+          </template>
+          <template if:true={isWonTab}>
+            <c-ar-dashboard-won
+              data={activeTabData}
+              onconfirmdeal={handleConfirmDeal}
+            ></c-ar-dashboard-won>
+          </template>
+        </div>
+      </template>
+
+      <template if:true={isOverview}>
+        <div class="kpi-row">
+          <div class="kpi-card kpi-tint-navy" data-kpi="simulations">
+            <p class="kpi-label">{lbl.KpiSimulations}</p>
+            <p class="kpi-value">{formattedSimulations}</p>
+          </div>
+          <div class="kpi-card kpi-tint-green" data-kpi="validated">
+            <p class="kpi-label">{i18n.AR_DB_ValidatedMatrices}</p>
+            <p class="kpi-value">{formattedValidatedCount}</p>
+          </div>
+          <div class="kpi-card kpi-tint-green" data-kpi="won">
+            <p class="kpi-label">{lbl.KpiWon}</p>
+            <p class="kpi-value">{formattedWon}</p>
+          </div>
+          <div class="kpi-card kpi-tint-amber" data-kpi="derogation">
+            <p class="kpi-label">{i18n.AR_DB_DerogationRate}</p>
+            <p class="kpi-value">{formattedDerogationRate}</p>
+          </div>
+          <div class="kpi-card kpi-tint-navy" data-kpi="tjm">
+            <p class="kpi-label">{i18n.AR_DB_AverageRateEur}</p>
+            <p class="kpi-value">{formattedAverageTjm}</p>
+          </div>
+          <div class={mc2KpiClass} data-kpi="mc2">
+            <p class="kpi-label">
+              {i18n.AR_DB_AverageMc2}
+              <lightning-helptext
+                content={corridorSettingsTooltip}
+              ></lightning-helptext>
+            </p>
+            <p class="kpi-value">{formattedAverageMc2}</p>
+          </div>
+        </div>
+        <template if:true={hasInsufficientData}>
+          <p class="insufficient-note">{i18n.AR_DB_InsufficientData}</p>
+        </template>
+
+        <div class="grid-two">
+          <div class="section-card block-validation">
+            <p class="section-title">{i18n.AR_DB_ValidationTitle}</p>
+            <template if:true={hasEnoughData}>
+              <div class="donut-row">
+                <c-ar-donut-chart
+                  segments={validationSegments}
+                  center-label={validatedCount}
+                  aria-title={i18n.AR_DB_ValidationTitle}
+                ></c-ar-donut-chart>
+                <ul class="legend">
+                  <template for:each={validationLegend} for:item="item">
+                    <li key={item.label} class="legend-item">
+                      <span class="legend-dot" style={item.style}></span>
+                      <span class="legend-label">{item.label}</span>
+                      <span class="legend-value">{item.detail}</span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </template>
+            <template if:true={hasInsufficientData}>
+              <p class="empty-message">{i18n.AR_DB_InsufficientData}</p>
+            </template>
+            <template if:true={hasNoValidated}>
+              <p class="empty-message">{i18n.AR_DB_NoDataPeriod}</p>
+            </template>
+          </div>
+
+          <div class="section-card block-bands">
+            <p class="section-title">{i18n.AR_DB_Mc2BandsTitle}</p>
+            <template if:true={hasEnoughData}>
+              <template for:each={mc2Buckets} for:item="bucket">
+                <div key={bucket.key} class="segment-row">
+                  <span class="segment-name">{bucket.label}</span>
+                  <div class="bar-track">
+                    <div class="bar-fill" style={bucket.barStyle}></div>
+                  </div>
+                  <span class="segment-count">{bucket.detail}</span>
+                </div>
+              </template>
+            </template>
+            <template if:true={hasInsufficientData}>
+              <p class="empty-message">{i18n.AR_DB_InsufficientData}</p>
+            </template>
+            <template if:true={hasNoValidated}>
+              <p class="empty-message">{i18n.AR_DB_NoDataPeriod}</p>
+            </template>
+          </div>
+
+          <div class="section-card block-thresholds">
+            <p class="section-title">{i18n.AR_DB_ThresholdsTitle}</p>
+            <template if:true={hasEnoughData}>
+              <div class="donut-row">
+                <c-ar-donut-chart
+                  segments={thresholdSegments}
+                  center-label={validatedCount}
+                  aria-title={i18n.AR_DB_ThresholdsTitle}
+                ></c-ar-donut-chart>
+                <ul class="legend">
+                  <template for:each={thresholdLegend} for:item="item">
+                    <li key={item.segment} class="legend-item">
+                      <span class="legend-dot" style={item.style}></span>
+                      <span class="legend-label">{item.label}</span>
+                      <span class="legend-value">{item.detail}</span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+              <p class="subsection-title">{byAxisTitle}</p>
+              <template for:each={entityBars} for:item="bar">
+                <div key={bar.key} class="entity-row">
+                  <span class="entity-name">{bar.name}</span>
+                  <c-ar-stacked-bar
+                    class="entity-bar"
+                    segments={bar.segments}
+                    aria-title={bar.name}
+                  ></c-ar-stacked-bar>
+                  <span class="entity-total">{bar.total}</span>
+                </div>
+              </template>
+            </template>
+            <template if:true={hasInsufficientData}>
+              <p class="empty-message">{i18n.AR_DB_InsufficientData}</p>
+            </template>
+            <template if:true={hasNoValidated}>
+              <p class="empty-message">{i18n.AR_DB_NoDataPeriod}</p>
+            </template>
+          </div>
+
+          <div class="section-card block-reasons">
+            <p class="section-title">{i18n.AR_DB_ReasonsTitle}</p>
+            <template if:true={hasReasons}>
+              <template for:each={reasonRows} for:item="row">
+                <div key={row.key} class="segment-row">
+                  <span class="segment-name reason-name">{row.label}</span>
+                  <div class="bar-track">
+                    <div class="bar-fill" style={row.barStyle}></div>
+                  </div>
+                  <span class="segment-count">{row.detail}</span>
+                </div>
+              </template>
+              <p class="reasons-count">{reasonsCountLabel}</p>
+            </template>
+            <template if:true={reasonsInsufficient}>
+              <p class="empty-message">{i18n.AR_DB_InsufficientData}</p>
+            </template>
+            <template if:true={reasonsEmpty}>
+              <p class="empty-message">{i18n.AR_DB_NoDataPeriod}</p>
+            </template>
+          </div>
+        </div>
+
+        <div class="section-card block-funnel">
+          <p class="section-title">{lbl.FunnelTitle}</p>
+          <div class="funnel" role="img" aria-label={funnelAria}>
+            <template for:each={funnelRows} for:item="row">
+              <div key={row.key} class="funnel-row">
+                <span class="funnel-label">{row.label}</span>
+                <div class="bar-track funnel-track">
+                  <div class="bar-fill" style={row.barStyle}></div>
+                </div>
+                <span class="funnel-count">{row.count}</span>
+                <span class="funnel-ratio">{row.ratio}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="section-card block-trend">
+          <p class="section-title">{i18n.AR_DB_TrendTitle}</p>
+          <template if:true={trendHasData}>
+            <div class="trend">
+              <template for:each={monthColumns} for:item="col">
+                <div key={col.key} class="trend-col" title={col.title}>
+                  <span class="trend-total">{col.total}</span>
+                  <div class="trend-slot">
+                    <div class="trend-stack" style={col.columnStyle}>
+                      <template for:each={col.parts} for:item="part">
+                        <div
+                          key={part.key}
+                          class="trend-part"
+                          style={part.style}
+                          title={part.title}
+                        ></div>
+                      </template>
+                    </div>
+                  </div>
+                  <span class="trend-month">{col.label}</span>
+                </div>
+              </template>
+            </div>
+            <ul class="legend legend-inline">
+              <template for:each={trendLegend} for:item="item">
+                <li key={item.key} class="legend-item">
+                  <span class="legend-dot" style={item.style}></span>
+                  <span class="legend-label">{item.label}</span>
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template if:false={trendHasData}>
+            <p class="empty-message">{i18n.AR_DB_NoDataPeriod}</p>
+          </template>
+        </div>
+
+        <div class="block-clients">
+          <template if:true={noEligibleClients}>
+            <div class="section-card">
+              <p class="section-title">{i18n.AR_DB_ClientsSingle}</p>
+              <p class="empty-message">{i18n.AR_DB_ClientsNone}</p>
+            </div>
+          </template>
+          <template if:true={hasEligibleClients}>
+            <div class="grid-two">
+              <div class="section-card">
+                <p class="section-title">
+                  <template if:true={isSingleRanking}
+                    >{i18n.AR_DB_ClientsSingle}</template
+                  >
+                  <template if:false={isSingleRanking}
+                    >{i18n.AR_DB_ClientsBest}</template
+                  >
+                </p>
+                <table class="rank-table best-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{i18n.AR_DB_ColAccount}</th>
+                      <th class="num">{i18n.AR_DB_ColMatrices}</th>
+                      <th class="num">{i18n.AR_DB_ColMc2}</th>
+                      <th class="num">{i18n.AR_DB_ColRate}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={bestRows} for:item="row">
+                      <tr key={row.key}>
+                        <td>{row.rank}</td>
+                        <td>{row.accountName}</td>
+                        <td class="num">{row.matrixCount}</td>
+                        <td class={row.mc2Class}>{row.mc2}</td>
+                        <td class="num">{row.tjm}</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <template if:false={isSingleRanking}>
+                <div class="section-card">
+                  <p class="section-title">{i18n.AR_DB_ClientsWorst}</p>
+                  <table class="rank-table worst-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>{i18n.AR_DB_ColAccount}</th>
+                        <th class="num">{i18n.AR_DB_ColMatrices}</th>
+                        <th class="num">{i18n.AR_DB_ColMc2}</th>
+                        <th class="num">{i18n.AR_DB_ColRate}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={worstRows} for:item="row">
+                        <tr key={row.key}>
+                          <td>{row.rank}</td>
+                          <td>{row.accountName}</td>
+                          <td class="num">{row.matrixCount}</td>
+                          <td class={row.mc2Class}>{row.mc2}</td>
+                          <td class="num">{row.tjm}</td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <div class="section-card">
+          <p class="section-title">{i18n.AR_DB_LatestMatrices}</p>
+          <template for:each={recentMatrices} for:item="row">
+            <div
+              key={row.matrixId}
+              data-id={row.matrixId}
+              onclick={handleRowClick}
+              class="recent-row"
+            >
+              <span class="recent-name">{row.name}</span>
+              <span class="recent-detail">{row.recentDetail}</span>
+              <span class="recent-status">{row.status}</span>
+              <span class="recent-date">{row.formattedDate}</span>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <template if:true={showWonDialog}>
+      <c-ar-won-deal-dialog
+        position-id={wonPositionId}
+        onclose={handleWonClose}
+        onconfirmed={handleWonConfirmed}
+      ></c-ar-won-deal-dialog>
+    </template>
+  </template>
+</template>

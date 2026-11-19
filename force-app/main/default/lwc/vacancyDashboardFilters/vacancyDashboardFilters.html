@@ -1,0 +1,32 @@
+<!--
+ - Created by Kobe on 12/12/2019.
+ -->
+
+<!-- Actonomy Facet Filters -->
+<template>
+    <div class="slds-form-element">
+        <div class="slds-form-element__control">
+            <div class="slds-combobox_container">
+                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" aria-expanded="false" aria-haspopup="listbox" role="combobox" data-id="combobox">
+                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                        <lightning-icon class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" size="x-small" icon-name="utility:search"></lightning-icon>
+                        <input type="text" class="slds-input slds-combobox__input" value={searchTerm} aria-autocomplete="list" aria-controls="listbox-id-19" autocomplete="off" role="textbox"   placeholder={label} onfocus={toggleOptions}  onfocusout={toggleOptions} onkeyup={searchOptions} disabled={disableInput} />
+                    </div>
+                    <div id="listboxNominal" class="slds-dropdown slds-dropdown_length-7 slds-dropdown_fluid " role="listbox" style="z-index:9999">
+                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                            <template for:each={facetPropertyMutable.items} for:item="facet" for:index="id">
+                                <li role="presentation" class="slds-listbox__item" key={facet.Name} data-item={facet.Value} data-label={facet.Name} onmousedown={selectOption}>
+                                    <div id={id} class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate">{facet.Name}</span>
+                                        </span>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

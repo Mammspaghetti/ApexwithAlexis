@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Include_In_History__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Include this PTF in the version history displayed in the panel and in the snapshot</description>
+    <label>Include in History</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,67 @@
+ul.candidateList {
+    list-style: none;
+    border: 1px solid lightgray;
+    margin: 2%;
+    padding: 1%;
+    cursor: pointer;
+}
+
+ul.candidateList:after {
+    content: '>';
+    float: right;
+    margin-top: -26px;
+    font-size: 20px;
+    margin-right: 3px
+}
+.slds-listbox__option{
+    text-align: left !important;
+}
+.bottomSpinner {
+    display:block;
+    top:4.75rem;
+}
+.THIS .slds-modal__content{
+    overflow: initial;
+}
+.modalBody{
+    position: relative;
+  }
+
+label.dashboardLabel {
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+td {
+    vertical-align: top;
+    text-align: left;
+}
+.hide{
+    display:none;
+}
+
+.modalBody {
+    position: relative;
+}
+.slds-listbox__item{
+    z-index:9999;
+    width:100%;
+}
+.slds-is-open .slds-dropdown{
+   display:block;
+}
+.slds-is-open.slds-dropdown{
+   display:block;
+}
+div.slds-listbox__option{
+    width:100%;
+}
+
+.dropdown-focus{
+    display:block !important;
+}
+.slds-dropdown-trigger_click.slds-is-open .slds-dropdown{
+    position: absolute  !important;
+    top: -148px  !important;
+}

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Consultant_meeting_notes</fullName>
+    <active>true</active>
+    <label>Consultant meeting notes</label>
+    <picklistValues>
+        <picklist>AB_Annees_dexperience__c</picklist>
+        <values>
+            <fullName>%3C à 1 an</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>%3E à 15 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>1 à 2 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>11 à 15 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3 à 4 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>5 à 7 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>8 à 10 ans</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Jeune diplomé</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Disponibilite__c</picklist>
+        <values>
+            <fullName>%3C 1 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>%3E 3 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>1 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Immédiate</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Job_application_country__c</picklist>
+        <values>
+            <fullName>Allemagne</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Angleterre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Belgique</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Canada</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Espagne</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>France</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Italie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Luxembourg</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Maroc</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pays-Bas</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Portugal</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Suisse</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Type_de_recrutement__c</picklist>
+        <values>
+            <fullName>Projet</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RTI</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Habilitable__c</picklist>
+        <values>
+            <fullName>Non</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Oui</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sous condition</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Monnaie__c</picklist>
+        <values>
+            <fullName>CAD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CHF</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>DH</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>EUR</fullName>
+            <default>true</default>
+        </values>
+        <values>
+            <fullName>GBP</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Niveau_tudes__c</picklist>
+        <values>
+            <fullName>Bac%2B2</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bac%2B3</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bac%2B4</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bac%2B5</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bac%2B6 et%2B</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Less Than Bac%2B2</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Sensibilit_au_risque__c</picklist>
+        <values>
+            <fullName>1</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>4</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>5</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Type_Ev_nement__c</picklist>
+        <values>
+            <fullName>Autre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Changement de mission</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Controle absence maladie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Evaluation</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Jour 1</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Mois 1</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Point RH</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Point de suivi</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Point de suivi arret maladie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pré Qualif</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Prépa Qualif</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Qualif</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Recrutement TA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>SdP avec client</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>SdP sans client</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Semaine 1</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Signature</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Signature RTI</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Signature de contrat</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Suivi de sortie</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Type_de_contrat__c</picklist>
+        <values>
+            <fullName>Apprentissage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CDD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CDI</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CPROF</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sous-traitant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Stage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>VIE</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

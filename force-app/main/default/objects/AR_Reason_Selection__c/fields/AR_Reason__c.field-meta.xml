@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Reason__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Motif du catalogue sélectionné. Restrict : protège l&apos;intégrité du reporting historique, un motif utilisé ne peut pas être supprimé (le désactiver via AR_Active__c à la place).</description>
+    <label>Motif</label>
+    <referenceTo>AR_Reason__c</referenceTo>
+    <relationshipLabel>Sélections de motif</relationshipLabel>
+    <relationshipName>AR_Reason_Selections</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

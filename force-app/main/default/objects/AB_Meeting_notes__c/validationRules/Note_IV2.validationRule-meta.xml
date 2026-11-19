@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Note_IV2</fullName>
+    <active>true</active>
+    <description>Si type d&apos;événement E2, alors minimum de 30 caractères dans les notes de l&apos;IV2</description>
+    <errorConditionFormula>IF( ISNEW(), false,
+IF ( RecordType.Id &lt;&gt; $Label.ABY_Meeting_notes_record_type, false,
+IF( TEXT(Type_Ev_nement__c) &lt;&gt; &apos;E2&apos;, false,
+IF( LEN( AB_IV_2_notes__c )&gt;29, false,true)
+)
+)
+)</errorConditionFormula>
+    <errorMessage>Minimum de 30 caractères pour les notes d&apos;E2.</errorMessage>
+</ValidationRule>

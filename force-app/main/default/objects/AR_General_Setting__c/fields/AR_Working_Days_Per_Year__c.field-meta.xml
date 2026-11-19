@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Working_Days_Per_Year__c</fullName>
+    <description>Nombre de jours travaillés par an utilisé dans les calculs de CJM et de frais (218 par défaut). Une valeur définie pour l&apos;entité ou la convention collective peut remplacer ce paramètre.</description>
+    <externalId>false</externalId>
+    <label>Jours travaillés / an</label>
+    <precision>5</precision>
+    <required>true</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Medical_Checklist__c</fullName>
+    <label>Medical Checklist</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Monitor worker / technical assistant (not subject to Medical Examination)</fullName>
+                <default>false</default>
+                <label>Monitor worker / technical assistant (not subject to Medical Examination)</label>
+            </value>
+            <value>
+                <fullName>Monitor worker / technical assistant (3 years subject to Medical Examination / 20% exposure)</fullName>
+                <default>false</default>
+                <label>Monitor worker / technical assistant (3 years subject to Medical Examination / 20% exposure)</label>
+            </value>
+            <value>
+                <fullName>Piping / mechanical inspector / engineer (subject annually to Medical Examination + breathing air + safety function)</fullName>
+                <default>false</default>
+                <label>Piping / mechanical inspector / engineer (subject annually to Medical Examination + breathing air + safety function)</label>
+            </value>
+            <value>
+                <fullName>Consultant Seveso outdoor (annually subject to Medical Examination / exposure 60-100%)</fullName>
+                <default>false</default>
+                <label>Consultant Seveso outdoor (annually subject to Medical Examination / exposure 60-100%)</label>
+            </value>
+            <value>
+                <fullName>ICT telecoms (prior to employment medical supervision, thereafter not subject to Medical Examination annually)</fullName>
+                <default>false</default>
+                <label>ICT telecoms (prior to employment medical supervision, thereafter not subject to Medical Examination annually)</label>
+            </value>
+            <value>
+                <fullName>Civil consultancy (annually subject to Medical Examination /60% exposure + safety function)</fullName>
+                <default>false</default>
+                <label>Civil consultancy (annually subject to Medical Examination /60% exposure + safety function)</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

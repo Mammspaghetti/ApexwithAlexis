@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Severity_Derogation_Pending__c</fullName>
+    <defaultValue>&quot;Warning&quot;</defaultValue>
+    <description>Sévérité appliquée quand le besoin a une matrice au statut En dérogation mais aucune Validée : Ignore / Warning / Blocking. Paramètre distinct de AR_Severity_No_Matrix__c.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Sévérité - Dérogation en attente</label>
+    <length>20</length>
+    <required>true</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,466 @@
+<template>
+  <div class="queue-page">
+    <div class="queue-header">
+      <div>
+        <h2 class="queue-title">{i18n.AR_DQ_Title}</h2>
+        <p class="queue-subtitle">{i18n.AR_DQ_Subtitle}</p>
+      </div>
+      <div class="queue-identity">
+        <lightning-icon
+          icon-name="utility:filter"
+          size="xx-small"
+          class="identity-icon"
+        ></lightning-icon>
+        {i18n.AR_DQ_ConnectedAs}
+        <strong>{currentUserName}</strong> ({currentUserJobTitle})
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <template for:each={tabs} for:item="tab">
+        <button
+          key={tab.key}
+          class={tab.cssClass}
+          data-key={tab.key}
+          onclick={handleTabClick}
+          type="button"
+        >
+          <span>{tab.label}</span>
+          <span class={tab.countClass}>{tab.count}</span>
+        </button>
+      </template>
+    </div>
+
+    <div class="queue-card">
+      <!-- Filtres de la file d'approbation (session 28 §5, exigence spec §7.5) : bandeau
+                 discret, accolé à la table dont il filtre le contenu, plutôt qu'une seconde barre
+                 de contrôles flottant entre les onglets et la table (session 31 §2). -->
+      <div class="queue-filters">
+        <lightning-combobox
+          label={i18n.AR_Common_Validator}
+          variant="label-hidden"
+          value={validatorFilter}
+          options={validatorOptions}
+          onchange={handleValidatorFilterChange}
+          class="queue-filter"
+        ></lightning-combobox>
+        <lightning-combobox
+          label={i18n.AR_DQ_AgencyBu}
+          variant="label-hidden"
+          value={entityFilter}
+          options={entityOptions}
+          onchange={handleEntityFilterChange}
+          class="queue-filter"
+        ></lightning-combobox>
+        <lightning-combobox
+          label={i18n.AR_Common_Client}
+          variant="label-hidden"
+          value={accountFilter}
+          options={accountOptions}
+          onchange={handleAccountFilterChange}
+          class="queue-filter"
+        ></lightning-combobox>
+        <lightning-combobox
+          label={i18n.AR_Common_BM}
+          variant="label-hidden"
+          value={bmFilter}
+          options={bmOptions}
+          onchange={handleBmFilterChange}
+          class="queue-filter"
+        ></lightning-combobox>
+        <template if:true={hasActiveFilters}>
+          <button
+            class="queue-filter-reset"
+            type="button"
+            onclick={handleResetFilters}
+          >
+            {i18n.AR_Common_Reset}
+          </button>
+        </template>
+      </div>
+
+      <template if:true={isLoading}>
+        <lightning-spinner
+          alternative-text={i18n.AR_Common_Loading}
+          size="small"
+        ></lightning-spinner>
+      </template>
+
+      <template if:true={errorMessage}>
+        <div class="error-message">{errorMessage}</div>
+      </template>
+
+      <template if:true={isEmpty}>
+        <div class="empty-state">
+          <template if:true={isMineTab}>
+            <template if:true={hasOtherPendingForOthers}>
+              <lightning-icon
+                icon-name="utility:info"
+                size="medium"
+              ></lightning-icon>
+              <p class="empty-state-title">{i18n.AR_DQ_NoneForYou}</p>
+              <p class="empty-state-text">{pendingForOthersLabel}</p>
+              <button
+                class="queue-goto-all"
+                type="button"
+                onclick={handleGoToAllTab}
+              >
+                {i18n.AR_DQ_SeeAll}
+              </button>
+            </template>
+            <template if:false={hasOtherPendingForOthers}>
+              <lightning-icon
+                icon-name="utility:check"
+                size="medium"
+                class="empty-state-check"
+              ></lightning-icon>
+              <p class="empty-state-title">{i18n.AR_DQ_NoPending}</p>
+            </template>
+          </template>
+          <template if:false={isMineTab}>
+            <template if:true={hasNoDerogationsAtAll}>
+              <lightning-icon
+                icon-name="utility:warning"
+                size="medium"
+              ></lightning-icon>
+              <p class="empty-state-title">{i18n.AR_DQ_NoneYet}</p>
+              <p class="empty-state-text">{i18n.AR_DQ_NoneYetHelp}</p>
+            </template>
+            <template if:false={hasNoDerogationsAtAll}>
+              <template if:true={isEmptyPendingTab}>
+                <lightning-icon
+                  icon-name="utility:check"
+                  size="medium"
+                  class="empty-state-check"
+                ></lightning-icon>
+                <p class="empty-state-title">{i18n.AR_DQ_NoPending}</p>
+              </template>
+              <template if:false={isEmptyPendingTab}>
+                <p class="empty-state-title">{i18n.AR_DQ_None}</p>
+              </template>
+            </template>
+          </template>
+        </div>
+      </template>
+
+      <template if:false={isLoading}>
+        <template if:false={isEmpty}>
+          <div class="table-wrap">
+            <div class="derogation-table">
+              <div class="table-head-row">
+                <div class="th th-type">{i18n.AR_Common_Type}</div>
+                <!-- Session 116 : en-têtes triables (1er clic décroissant, 2e croissant). -->
+                <template for:each={sortColumns} for:item="col">
+                  <div
+                    key={col.key}
+                    class={col.thClass}
+                    role="columnheader"
+                    aria-sort={col.ariaSort}
+                  >
+                    <button
+                      class={col.buttonClass}
+                      data-key={col.key}
+                      title={col.title}
+                      type="button"
+                      onclick={handleSortClick}
+                    >
+                      <span>{col.label}</span>
+                      <template if:true={col.active}>
+                        <lightning-icon
+                          class="sort-icon"
+                          icon-name={col.iconName}
+                          size="xx-small"
+                        ></lightning-icon>
+                      </template>
+                    </button>
+                  </div>
+                </template>
+                <div class="th th-chevron"></div>
+              </div>
+
+              <template for:each={rows} for:item="row">
+                <div key={row.derogationId} class="row-group">
+                  <div
+                    class="derogation-row"
+                    data-id={row.derogationId}
+                    onclick={handleRowClick}
+                  >
+                    <div class="td td-type">
+                      <span class="type-badge">{i18n.AR_DQ_TypeAT}</span>
+                    </div>
+                    <div class="td td-client">
+                      <div class="cell-primary">{row.accountName}</div>
+                      <div class="cell-secondary">{row.sublabel}</div>
+                    </div>
+                    <div class="td td-indicator">
+                      <div class="cell-label">
+                        {i18n.AR_Common_ProposedRate}
+                      </div>
+                      <div class="cell-value">{row.formattedTjm}</div>
+                      <div
+                        if:true={row.tjmPeriodsDetail}
+                        class="slds-text-body_small slds-text-color_weak"
+                      >
+                        {row.tjmPeriodsDetail}
+                      </div>
+                    </div>
+                    <div class="td td-mc2">
+                      <div class={row.mc2Class}>
+                        {row.formattedMc2}<span class="mc2-per-day"
+                          >{row.mc2PerDayLabel}</span
+                        >
+                      </div>
+                      <span class={row.segmentTextClass}
+                        >{row.segmentLabel}</span
+                      >
+                      <span if:true={row.rplsrMention} class="rplsr-mention"
+                        >{row.rplsrMention}</span
+                      >
+                    </div>
+                    <div class="td td-status">
+                      <span class={row.decisionClass}>{row.decisionLabel}</span>
+                    </div>
+                    <div class="td td-owner cell-owner">
+                      {row.requesterName}
+                    </div>
+                    <div class="td td-date cell-date">
+                      {row.formattedRequestedAt}
+                    </div>
+                    <div class="td td-chevron">
+                      <lightning-icon
+                        icon-name={row.chevronIcon}
+                        size="xx-small"
+                        class="chevron-icon"
+                      ></lightning-icon>
+                    </div>
+                  </div>
+
+                  <template if:true={row.isExpanded}>
+                    <div class="detail-panel">
+                      <div class="detail-col">
+                        <div class="detail-block-title">
+                          {i18n.AR_DQ_ProfitabilityIndicators}
+                        </div>
+                        <div class="indicator-grid">
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_FloorPrefix} </span
+                            ><span class="indicator-value"
+                              >{row.formattedTjmFloor}</span
+                            >
+                          </div>
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_TargetPrefix} </span
+                            ><span class="indicator-value"
+                              >{row.formattedTjmTarget}</span
+                            >
+                          </div>
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_IdealPrefix} </span
+                            ><span class="indicator-value"
+                              >{row.formattedTjmIdeal}</span
+                            >
+                          </div>
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_ProposedRatePrefix} </span
+                            ><span class="indicator-value"
+                              >{row.formattedTjm}</span
+                            >
+                          </div>
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_Mc2Prefix} </span
+                            ><span class="indicator-value"
+                              >{row.mc2WithPerDayLabel}</span
+                            >
+                          </div>
+                          <div>
+                            <span class="indicator-label"
+                              >{i18n.AR_DQ_SegmentPrefix} </span
+                            ><span class="indicator-value"
+                              >{row.segmentLabel}</span
+                            >
+                          </div>
+                        </div>
+
+                        <template if:true={row.rfaLine}>
+                          <p class="indicator-label rfa-line">{row.rfaLine}</p>
+                        </template>
+
+                        <template if:true={row.reasonView.hasReasonBlock}>
+                          <div
+                            class="detail-block-title detail-block-title-spaced"
+                          >
+                            {i18n.AR_DQ_DerogationReason}
+                          </div>
+                          <template if:true={row.reasonView.reasonInlineText}>
+                            <p class="boxed-text">
+                              {row.reasonView.reasonInlineText}
+                            </p>
+                          </template>
+                          <template if:true={row.reasonView.hasReasonItems}>
+                            <ul class="boxed-text reason-list">
+                              <template
+                                for:each={row.reasonView.reasonItems}
+                                for:item="reason"
+                              >
+                                <li key={reason.key}>{reason.label}</li>
+                              </template>
+                            </ul>
+                          </template>
+                          <template if:true={row.reasonView.plainText}>
+                            <p class="boxed-text">{row.reasonView.plainText}</p>
+                          </template>
+                        </template>
+
+                        <template if:false={row.isPending}>
+                          <template if:true={row.validatorComment}>
+                            <div
+                              class="detail-block-title detail-block-title-spaced"
+                            >
+                              {i18n.AR_DQ_ValidatorComment}
+                            </div>
+                            <p class="boxed-text">{row.validatorComment}</p>
+                            <p class="treated-by">{row.processedByLabel}</p>
+                          </template>
+                        </template>
+
+                        <!-- Session 113 : lien discret vers la matrice qui porte la dérogation (contexte
+                                                     complet : besoin, profil, calculs) — pendant inverse de l'encart valideur
+                                                     de la session 112, même contrat d'événement `openmatrix`. Repositionné en bas
+                                                     de la colonne gauche (session XXX), aligné sur les boutons de décision. -->
+                        <template if:true={row.matrixId}>
+                          <div class="detail-footer">
+                            <button
+                              class="detail-link"
+                              type="button"
+                              data-matrix-id={row.matrixId}
+                              onclick={handleOpenDerogation}
+                            >
+                              <lightning-icon
+                                icon-name="utility:preview"
+                                size="xx-small"
+                                class="detail-link-icon"
+                              ></lightning-icon>
+                              {i18n.AR_DQ_ViewMatrix}
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+
+                      <div class="detail-col">
+                        <template if:true={row.canDecide}>
+                          <div class="detail-block-title">
+                            {i18n.AR_DQ_DecisionRequired}
+                          </div>
+                          <div class="notice-amber">
+                            <lightning-icon
+                              icon-name="utility:warning"
+                              size="xx-small"
+                              class="notice-icon"
+                            ></lightning-icon>
+                            <p>
+                              {i18n.AR_DQ_NotifiedValidatorPrefix}
+                              <strong>{row.selectedValidatorName}</strong>.
+                              {i18n.AR_DQ_YouCanProcess}
+                            </p>
+                          </div>
+                          <label class="field-label"
+                            >{i18n.AR_DQ_MandatoryComment}</label
+                          >
+                          <textarea
+                            class="comment-input"
+                            rows="3"
+                            data-id={row.derogationId}
+                            oninput={handleCommentInput}
+                            onclick={handleCommentClick}
+                            placeholder={i18n.AR_DQ_CommentPlaceholder}
+                          >
+{row.comment}</textarea>
+                          <div class="decision-buttons">
+                            <button
+                              class="btn btn-success"
+                              data-id={row.derogationId}
+                              onclick={handleApprove}
+                              type="button"
+                            >
+                              <lightning-icon
+                                icon-name="utility:check"
+                                size="xx-small"
+                                variant="inverse"
+                              ></lightning-icon>
+                              {i18n.AR_DQ_Approve}
+                            </button>
+                            <button
+                              class="btn btn-danger"
+                              data-id={row.derogationId}
+                              onclick={handleReject}
+                              type="button"
+                            >
+                              <lightning-icon
+                                icon-name="utility:ban"
+                                size="xx-small"
+                                variant="inverse"
+                              ></lightning-icon>
+                              {i18n.AR_Common_Reject}
+                            </button>
+                          </div>
+                        </template>
+
+                        <template if:true={row.showInfoOnly}>
+                          <div class="notice-amber">
+                            <lightning-icon
+                              icon-name="utility:warning"
+                              size="xx-small"
+                              class="notice-icon"
+                            ></lightning-icon>
+                            <p>
+                              {i18n.AR_DQ_NotifiedValidatorPrefix}
+                              <strong>{row.selectedValidatorName}</strong>.
+                            </p>
+                          </div>
+                        </template>
+
+                        <template if:false={row.isPending}>
+                          <div class="result-badge-wrap">
+                            <template if:true={row.isApproved}>
+                              <div class="result-badge result-approved">
+                                <lightning-icon
+                                  icon-name="utility:check"
+                                  size="medium"
+                                ></lightning-icon>
+                                <span>{i18n.AR_DQ_Approved}</span>
+                                <span class="result-timestamp"
+                                  >{row.formattedDecidedAt}</span
+                                >
+                              </div>
+                            </template>
+                            <template if:true={row.isRejected}>
+                              <div class="result-badge result-rejected">
+                                <lightning-icon
+                                  icon-name="utility:ban"
+                                  size="medium"
+                                ></lightning-icon>
+                                <span>{i18n.AR_DQ_Rejected}</span>
+                                <span class="result-timestamp"
+                                  >{row.formattedDecidedAt}</span
+                                >
+                              </div>
+                            </template>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </template>
+    </div>
+  </div>
+</template>

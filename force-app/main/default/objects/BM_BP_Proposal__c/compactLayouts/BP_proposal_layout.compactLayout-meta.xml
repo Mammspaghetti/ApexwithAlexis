@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BP_proposal_layout</fullName>
+    <fields>BP_Title__c</fields>
+    <fields>Abylsen_agency__c</fields>
+    <fields>Abylsen_company__c</fields>
+    <fields>Starting_date__c</fields>
+    <label>BP proposal layout</label>
+</CompactLayout>

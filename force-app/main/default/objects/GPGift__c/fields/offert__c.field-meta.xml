@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>offert__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Ceci est un exemple pour apprendre a manipuler les objets</description>
+    <label>offert</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

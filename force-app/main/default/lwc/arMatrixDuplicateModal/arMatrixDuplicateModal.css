@@ -1,0 +1,374 @@
+/* Session 114 — Refonte visuelle de la modale « Dupliquer ».
+   Reprend la charte de la carte « Sélection du besoin » (arPriceMatrixSimulator, sessions 86-96) :
+   accent #d31876, pastille icône rose, barre de recherche native avec halo, lignes de résultat,
+   boutons dégradé. Les styles d'un composant LWC ne traversent pas le Shadow DOM : les classes
+   .btn* du simulateur sont redéclarées ici (sans elles, les boutons s'affichaient en natif). */
+
+/* Modale limitée à la zone visible de l'appli (sous l'en-tête Salesforce), corps défilant. */
+.slds-modal {
+  top: var(--ar-zone-top, 0px);
+  bottom: auto;
+  height: var(--ar-zone-height, 100dvh);
+}
+
+.slds-backdrop {
+  top: var(--ar-zone-top, 0px);
+}
+
+.dup-container {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+  max-width: 40rem;
+  width: 92%;
+}
+
+.dup-header,
+.dup-footer {
+  flex: none;
+}
+
+.dup-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dup-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem 1rem;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.dup-header-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(211, 24, 118, 0.08);
+  border-radius: 0.5rem;
+  --sds-c-icon-color-foreground-default: #d31876;
+  --slds-c-icon-color-foreground-default: #d31876;
+}
+
+.dup-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.dup-subtitle {
+  font-size: 0.75rem;
+  color: #767676;
+  margin: 0.25rem 0 0;
+}
+
+.dup-body {
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+}
+
+.dup-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #6b6b6b;
+  margin: 0 0 0.5rem;
+}
+
+.dup-section-label_spaced {
+  margin-top: 1.5rem;
+}
+
+/* Carte du besoin cible : toujours affichée comme l'option cochée */
+.dup-target-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #fdf1f7;
+  border: 1px solid #d31876;
+  border-radius: 0.625rem;
+}
+
+.dup-target-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.dup-target-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dup-target-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #767676;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dup-target-account-icon {
+  --sds-c-icon-color-foreground-default: #9a9a9a;
+  --slds-c-icon-color-foreground-default: #9a9a9a;
+}
+
+.dup-target-right {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+}
+
+.dup-tag {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dup-tag_source {
+  background: #ffffff;
+  color: #d31876;
+  border: 1px solid rgba(211, 24, 118, 0.35);
+}
+
+.dup-tag_other {
+  background: #d31876;
+  color: #ffffff;
+}
+
+.dup-tag_neutral {
+  background: #f3f3f3;
+  color: #6b6b6b;
+}
+
+.dup-reset-link {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d31876;
+  cursor: pointer;
+}
+
+.dup-reset-link:hover {
+  text-decoration: underline;
+}
+
+/* Barre de recherche : <input> natif (cf. session 96 du simulateur, lightning-input non stylable) */
+.dup-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0.625rem;
+  height: 2.75rem;
+  overflow: hidden;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+.dup-search-bar:focus-within {
+  border-color: #d31876;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.12);
+}
+
+.dup-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  --sds-c-icon-color-foreground-default: #706e6b;
+  --slds-c-icon-color-foreground-default: #706e6b;
+}
+
+.dup-search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 0.75rem 0 2.25rem;
+  font-size: 0.8125rem;
+  color: #16325c;
+  font-family: inherit;
+}
+
+.dup-search-input::placeholder {
+  color: #706e6b;
+}
+
+.dup-results {
+  list-style: none;
+  margin: 0.625rem 0 0;
+  padding: 0;
+  max-height: 15rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dup-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0.375rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: #111111;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dup-result:hover {
+  background: #f5f5f5;
+  border-color: #d1d5db;
+}
+
+.dup-result_selected {
+  background: #fdf1f7;
+  border-color: #d31876;
+}
+
+.dup-result-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.dup-result-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dup-result-account {
+  font-size: 0.75rem;
+  color: #767676;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dup-results-empty {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  text-align: center;
+}
+
+.dup-chain-fields {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dup-error {
+  margin-top: 1rem;
+  padding: 0.625rem 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #b91c1c;
+  font-size: 0.8125rem;
+}
+
+.dup-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  border-top: 1px solid #ececec;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Boutons — mêmes règles que .btn / .btn-primary / .btn-secondary du simulateur,
+   avec le rayon et l'ombre du pied de l'aperçu besoin (.position-preview-footer). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.625rem;
+  padding: 0.55rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(211, 24, 118, 0.28);
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e8e8e8;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f9f9f9;
+}
+
+.btn-icon-inverse {
+  --sds-c-icon-color-foreground-default: #ffffff;
+  --slds-c-icon-color-foreground-default: #ffffff;
+}

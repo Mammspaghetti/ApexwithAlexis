@@ -1,0 +1,666 @@
+<apex:page controller="AR_PTFTemplateController"
+  renderAs="pdf"
+  applyBodyTag="false"
+  applyHtmlTag="false"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  cache="false"
+  docType="html-5.0"
+>
+<!--
+  Gabarit ABYLSEN_AT_V11 — reconstruit en session 128 pour être IDENTIQUE au modèle validé par les
+  équipes juridiques du client : docs/gabarits/SIGMA__PTF_AT_v11_FR.docx et son rendu
+  docs/gabarits/SIGMA__PTF_AT_v11_FR1-modele-vierge.pdf. Méthode, écarts résiduels et historique :
+  docs/128-ptf-abylsen-iso-modele.md (les notes des sessions 36 à 127 restent dans docs/, ce fichier
+  ne les recopie plus).
+
+  Règles de ce gabarit :
+  - Texte statique = texte du .docx, caractère pour caractère (apostrophes droites ou courbes, espaces
+    insécables, coquilles du modèle comprises : « Dispositives diverses », « Prestations.Le »,
+    « Relation Client- Prestataire »…). La Section II est GÉNÉRÉE depuis le .docx
+    (scripts/ptf/abylsen-v11/build.py) et contrôlée par scripts/check-ptf-cg-articles-vs-docx.js.
+  - Mise en page = mesures du PDF modèle, en points. Marges, en-tête et pied courants : @page +
+    éléments « running » (feuille AR_PTFStyleAbylsenV11).
+  - Rappels des pièges déjà payés : tout champ consommé ici est une propriété avec accesseurs sur le
+    contrôleur ; SPLIT() n'est pas reconnu ; AR_PTFTemplateController rend une page VIDE en cas
+    d'erreur de désérialisation — jamais de champ renommé/retypé sur AR_PTFData, seulement des ajouts ;
+    font-weight en style inline ne s'imprime pas : gras toujours par classe (.w-b).
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<apex:stylesheet value="{!URLFOR($Resource.AR_PTFStyleAbylsenV11)}" />
+</head>
+<body>
+
+<!-- ═══ En-tête et pied courants (pages 2 et suivantes), placés dans les marges par @page ═══ -->
+<div class="abyv-header">
+  <div class="abyv-rel">
+    <img class="abyv-header-img" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-content-header.jpg')}" alt="" />
+    <apex:outputPanel rendered="{!ptf.isPreview}" layout="none">
+      <div class="abyv-preview">PREVIEW: non-contractual and unregistered document</div>
+    </apex:outputPanel>
+  </div>
+</div>
+<div class="abyv-footer">
+  <div class="abyv-f-brand">ABYLSEN</div>
+  <div class="abyv-f-conf">Les informations renseignées sur ce document sont strictement confidentielles. Elles ne doivent en aucun cas être diffusées ou traitées en dehors d’Abylsen ou du client concerné par le projet.</div>
+  <div class="abyv-f-ref">Référence document interne :<apex:outputText value=" {!ptf.reference}" /></div>
+  <div class="abyv-f-num"><span></span></div>
+</div>
+
+<!-- ═══════════════════════════ PAGE DE GARDE ═══════════════════════════ -->
+<div class="abyv-cover">
+  <img class="abyv-cov-banner" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-cover-header.jpg')}" alt="" />
+  <div class="abyv-cov-title">PROPOSITION<br/>TECHNIQUE ET<br/>FINANCIERE</div>
+
+  <!-- Tableau d'identification. Référence PTF : format interne (PTF-MAT-…-V<n>) tant que la
+       nomenclature du modèle (ABYLSEN_PTF_NomClient_InitialesConsultant_Date) n'est pas arbitrée. -->
+  <table class="abyv-ident">
+    <col style="width:92.1pt;"/><col style="width:219.8pt;"/><col style="width:92.3pt;"/><col/>
+    <tr>
+      <td class="k">Référence PTF</td>
+      <td class="v" colspan="3"><apex:outputText value="{!ptf.reference}" /></td>
+    </tr>
+    <tr>
+      <td class="k">Client</td>
+      <td class="v" colspan="3"><apex:outputText value="{!ptf.client}" /></td>
+    </tr>
+    <tr>
+      <td class="k">Projet</td>
+      <td class="v"><apex:outputText value="{!ptf.titreBesoin}" /></td>
+      <td class="k2">Version numéro</td>
+      <td class="v"><apex:outputText value="{!versionNumeroLabel}" /></td>
+    </tr>
+  </table>
+
+  <div class="abyv-cov-body">
+    <div class="abyv-rule abyv-rule-first"></div>
+    <table class="abyv-grid">
+      <tr>
+        <td class="h" style="width:241.1pt;">Rédacteur<br/>(nom/prénom/fonction)</td>
+        <td class="h">Valideur<br/>(nom/prénom/fonction)</td>
+      </tr>
+      <tr>
+        <td class="b">
+          <apex:outputText value="{!ptf.redacteurNom}" />
+          <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.redacteurFonction))}"><apex:param value="{!ptf.redacteurFonction}" /></apex:outputText>
+        </td>
+        <td class="b">
+          <apex:outputText value="{!IF(ISBLANK(ptf.valideurNom), '', ptf.valideurNom + ' ')}" />
+          <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.valideurFonction))}"><apex:param value="{!ptf.valideurFonction}" /></apex:outputText>
+        </td>
+      </tr>
+      <tr><td class="b"></td><td class="b"></td></tr>
+      <tr><td class="b"></td><td class="b"></td></tr>
+    </table>
+
+    <div class="abyv-rule"></div>
+    <table class="abyv-grid">
+      <tr>
+        <td class="h" style="width:241.1pt;">Interlocuteurs CLIENT</td>
+        <td class="h">Fonctions / coordonnées</td>
+      </tr>
+      <tr>
+        <td class="b"><apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ptf.interNom + ' ')}" /></td>
+        <td class="b">
+          <apex:outputText value="{!IF(ISBLANK(ptf.interFonction), '', ptf.interFonction + ' ')}" />
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interTel))}" layout="none"><br/><apex:outputText value="{!ptf.interTel}" /></apex:outputPanel>
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interEmail))}" layout="none"><br/><apex:outputText value="{!ptf.interEmail}" /></apex:outputPanel>
+        </td>
+      </tr>
+      <tr><td class="b"></td><td class="b"></td></tr>
+      <tr><td class="b"></td><td class="b"></td></tr>
+    </table>
+
+    <!-- Historique des modifications (session 138) : une ligne par version cochée du périmètre, plus la
+         ligne en cours, figées dans le snapshot (AR_PTFData.historique) — aucune ligne vide de
+         remplissage. La garde a une hauteur fixe : seules les lignes qui y tiennent sont ici
+         (historiqueCoverRows), la suite est sur la page de continuation qui suit la garde.
+         Session 151 : ne pas afficher le bloc historique si c’est une V01. -->
+    <apex:outputPanel layout="none" rendered="{!showHistorique}">
+    <div class="abyv-rule"></div>
+    <table class="abyv-grid abyv-hist">
+      <col style="width:113.5pt;"/><col style="width:113.3pt;"/><col style="width:120.6pt;"/><col/>
+      <tr><td class="h" colspan="4">Historique des modifications</td></tr>
+      <tr>
+        <td class="h c">Version</td>
+        <td class="h c">Date d’émission</td>
+        <td class="h c">Modification</td>
+        <td class="h c">Responsable de la modification</td>
+      </tr>
+      <apex:repeat value="{!historiqueCoverRows}" var="hrow">
+        <tr>
+          <td class="b c"><apex:outputText value="{!hrow.version}" /></td>
+          <td class="b c"><apex:outputText value="{!hrow.dateLabel}" /></td>
+          <td class="b c"><apex:outputText value="{!hrow.objetModification}" /></td>
+          <td class="b c"><apex:outputText value="{!hrow.responsable}" /></td>
+        </tr>
+      </apex:repeat>
+    </table>
+    </apex:outputPanel>
+
+    <!-- Adresses : libellés « Client : », « Adresse : », « SIRET : » toujours imprimés, comme le modèle.
+         Entité en capitales (« Adresse ABYLSEN SIGMA »), comme le modèle. -->
+    <div class="abyv-rule"></div>
+    <table class="abyv-grid">
+      <tr>
+        <td class="h" style="width:241.1pt;">Nom et adresse du CLIENT</td>
+        <td class="h">Adresse <span class="w-up"><apex:outputText value="{!ptf.entite}" /></span></td>
+      </tr>
+      <tr>
+        <td class="b tall">
+          <br/>
+          <apex:outputText value="Client : {0}"><apex:param value="{!ptf.client}" /></apex:outputText><br/>
+          <span class="w-pre"><apex:outputText value="Adresse : {0}"><apex:param value="{!ptf.adresseClient}" /></apex:outputText></span><br/>
+          <apex:outputText value="SIRET : {0}"><apex:param value="{!ptf.siretClient}" /></apex:outputText>
+        </td>
+        <td class="b tall">
+          <br/>
+          <span class="w-up"><apex:outputText value="{!ptf.entite}" /></span><br/>
+          <span class="w-pre"><apex:outputText value="{!ptf.entiteInfo.adresse}" /></span><br/>
+          <br/>
+          <br/>
+          <apex:outputText value="SIRET : {0}"><apex:param value="{!ptf.entiteInfo.siret}" /></apex:outputText>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <img class="abyv-cov-footer" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-cover-footer.jpg')}" alt="" />
+  <apex:outputPanel rendered="{!ptf.isPreview}" layout="none">
+    <div class="abyv-preview">PREVIEW: non-contractual and unregistered document</div>
+  </apex:outputPanel>
+</div>
+
+<!-- ═══════════ SUITE DE L'HISTORIQUE (uniquement si la garde n'a pas pu tout contenir) ═══════════ -->
+<!-- Page en flux normal, après la garde (qui force son propre saut de page) : en-têtes répétés si la
+     suite déborde, une ligne ne se coupe jamais entre deux pages. Le saut de page final renvoie le
+     sommaire sur sa propre page. Conteneur à largeur fixe : même contournement que le sommaire.
+     Session 151 : ne pas afficher si c'est une V01 (showHistorique=false). -->
+<apex:outputPanel layout="none" rendered="{!AND(showHistorique, hasHistoriqueSuite)}">
+<div class="abyv-content abyv-hist-suite-page">
+  <table class="abyv-grid abyv-hist abyv-hist-suite">
+    <col style="width:80pt;"/><col style="width:100pt;"/><col style="width:140pt;"/><col/>
+    <thead>
+      <tr><td class="h" colspan="4">Historique des modifications (suite)</td></tr>
+      <tr>
+        <td class="h c">Version</td>
+        <td class="h c">Date d’émission</td>
+        <td class="h c">Modification</td>
+        <td class="h c">Responsable de la modification</td>
+      </tr>
+    </thead>
+    <tbody>
+      <apex:repeat value="{!historiqueSuiteRows}" var="srow">
+        <tr>
+          <td class="b c"><apex:outputText value="{!srow.version}" /></td>
+          <td class="b c"><apex:outputText value="{!srow.dateLabel}" /></td>
+          <td class="b c"><apex:outputText value="{!srow.objetModification}" /></td>
+          <td class="b c"><apex:outputText value="{!srow.responsable}" /></td>
+        </tr>
+      </apex:repeat>
+    </tbody>
+  </table>
+</div>
+</apex:outputPanel>
+
+<!-- ═══════════════════════════ SOMMAIRE ═══════════════════════════ -->
+<!-- Numéros de page : target-counter() sur les ids des titres (sessions 58/58b). Libellés et numérotation
+     du modèle (« I- » / « 1- » … « 18- »), points de conduite rognés par overflow:hidden. -->
+<!-- Conteneur à largeur fixe (453,4 pt = zone de texte du modèle) : contourne un défaut du moteur PDF qui,
+     avec une première page sans marges (@page :first), calcule les lignes des pages suivantes trop larges
+     (texte rogné à droite). Ne pas retirer. -->
+<div class="abyv-content">
+<div>
+    <p class="abyv-toc-title">SOMMAIRE</p>
+    <table class="abyv-toc1 abyv-toc-first"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n1">I-</span>PROPOSITION TECHNIQUE ET FINANCIERE <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-i"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">1-</span>Objet du document <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-obj"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">2-</span>Contexte du projet <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-contexte"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">3-</span>Proposition Technique et Qualité <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-prop"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">4-</span>Conditions financières <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-cond"></a></td></tr></table>
+    <table class="abyv-toc1"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n1">II-</span>CONDITIONS GENERALES <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#toc-sec-ii"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">1-</span>Définitions <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-1"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">2-</span>Force contractuelle <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-2"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">3-</span>Durée – Renouvellement <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-3"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">4-</span>Engagement du Prestataire <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-4"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">5-</span>Obligation de collaboration et suivi <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-5"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">6-</span>Engagements du Client <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-6"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">7-</span>Hygiène et sécurité <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-7"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">8-</span>Responsabilité, force majeure et assurance <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-8"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2">9-</span>Confidentialité <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-9"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">10-</span>Propriété intellectuelle <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-10"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">11-</span>Suspension – Résiliation <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-11"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">12-</span>Non-sollicitation du personnel <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-12"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">13-</span>Indépendance des parties – personnel <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-13"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">14-</span>Cession – Sous-Traitance <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-14"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">15-</span>Données à caractère personnel <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-15"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">16-</span>Dispositives diverses <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-16"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">17-</span>Droit applicable et juridiction compétente <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-17"></a></td></tr></table>
+    <table class="abyv-toc2"><col/><col style="width:20pt;"/><tr><td class="abyv-toc-lbl"><span class="abyv-toc-n2w">18-</span>Sécurité de l’information <span class="abyv-toc-dots">........................................................................................................................................................................................................</span></td><td class="abyv-toc-pg"><a href="#cg-art-18"></a></td></tr></table>
+</div>
+
+<!-- ═══════════════════════ SECTION I — PROPOSITION TECHNIQUE ET FINANCIERE ═══════════════════════ -->
+<!-- Suite de paragraphes = celle du .docx (paragraphes vides compris : ils portent les espacements du
+     modèle). w-e = paragraphe vide (hauteur = interligne de sa taille : 12 pt -> 13,8 pt ; 9 pt -> 10,35 pt). -->
+<div>
+  <h1 class="w-t1" id="toc-sec-i"><span class="w-t1-num">I-</span>PROPOSITION TECHNIQUE ET FINANCIERE</h1>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t2" id="toc-sec-obj"><span class="w-t2-num">1-</span>Objet du document</div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <!-- Session 49 : la clause « en {discipline} » reste omise (aucune donnée source), la clause
+       « sur le site de {lieu} » est conditionnelle. -->
+  <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.objetSaisi))}">
+    <p class="w-p w-p3 w-j"><apex:outputText value="{!ptf.objetSaisi}" /></p>
+  </apex:outputPanel>
+  <apex:outputPanel rendered="{!ISBLANK(ptf.objetSaisi)}">
+  <p class="w-p w-p3 w-j">
+    <apex:outputText value="Ce document présente les conditions d’intervention de la société " /><span class="w-up"><apex:outputText value="{!ptf.entite}" /></span><apex:outputText value=" (ci-après « le Prestataire »), dans le cadre d’une prestation d’assistance technique, pour le compte de {0} (ci-après « le Client »)"><apex:param value="{!ptf.client}" /></apex:outputText><apex:outputText value=" sur le site de {0}" rendered="{!NOT(ISBLANK(ptf.lieuPrestation))}"><apex:param value="{!ptf.lieuPrestation}" /></apex:outputText><apex:outputText value="." />
+  </p>
+  </apex:outputPanel>
+  <p class="w-p w-p3 w-j">Le Client et le Prestataire ont effectué une réunion de travail qui leur a permis d’établir ce document. </p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t2" id="toc-sec-contexte"><span class="w-t2-num">2-</span>Contexte du projet</div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <!-- Session 37/49 : phrase omise quand le domaine d'expertise est vide. Retour à la ligne après
+       « est le fait » : celui du modèle. -->
+  <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.domaineExpertise))}">
+    <p class="w-p">La raison qui motive la réponse d’<span class="w-up"><apex:outputText value="{!ptf.entite}" /></span> à cette prestation au travers de cette proposition est le fait&#160;<br/>qu’<span class="w-up"><apex:outputText value="{!ptf.entite}" /></span> possède un savoir-faire éprouvé dans le domaine<apex:outputText value=" {!ptf.domaineExpertise}" /></p>
+  </apex:outputPanel>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t2" id="toc-sec-prop"><span class="w-t2-num">3-</span>Proposition Technique et Qualité </div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">3.1 Besoins du Client</div>
+  <p class="w-e" style="height:10.35pt;"></p>
+  <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.contexte))}">
+    <p class="w-p w-pre"><apex:outputText value="{!ptf.contexte}" /></p>
+  </apex:outputPanel>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">3.2 Organisation des prestations par le Prestataire</div>
+  <div class="w-t4">3.2.1 Organisation matérielle </div>
+  <p class="w-p w-p3 w-j"><apex:outputText value="Lieu des Prestations : {0}"><apex:param value="{!ptf.lieuPrestation}" /></apex:outputText></p>
+  <p class="w-p w-p3 w-j"><apex:outputText value="Matériel informatique : {0}"><apex:param value="{!materielLabel}" /></apex:outputText></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t4">3.2.2 Relation Client- Prestataire </div>
+  <p class="w-p w-p3 w-j">
+    <apex:outputText value="Interlocuteur Client : {0}"><apex:param value="{!ptf.interNom}" /></apex:outputText>
+    <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.interFonction))}"><apex:param value="{!ptf.interFonction}" /></apex:outputText>
+  </p>
+  <p class="w-p w-p3 w-j">
+    <apex:outputText value="Interlocuteur Prestataire : {0}"><apex:param value="{!ptf.redacteurNom}" /></apex:outputText>
+    <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.redacteurFonction))}"><apex:param value="{!ptf.redacteurFonction}" /></apex:outputText>
+  </p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t4">3.2.3 Suivi des prestations </div>
+  <p class="w-p w-p3 w-j">Fréquence des réunions&#160;: <span class="w-b"><apex:outputText value="{!ptf.freqReunions}" /></span></p>
+  <p class="w-p w-p3 w-j">Nature des réunions&#160;: <span class="w-b">Suivi de projet</span></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">3.3 Calendrier </div>
+  <p class="w-p w-p3 w-j"><apex:outputText value="Démarrage des Prestations : {0}"><apex:param value="{!dateDebutLabel}" /></apex:outputText></p>
+  <p class="w-p w-p3 w-j"><apex:outputText value="Fin prévisionnelle des Prestations : {0} inclus"><apex:param value="{!dateFinLabel}" /></apex:outputText></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">3.4 Liste des livrables (si applicable) </div>
+  <!-- Modèle : un champ vide (une ligne 12 pt) quand il n'y a pas de livrable — plus de « Non applicable. ». -->
+  <apex:outputPanel layout="none" rendered="{!livrableLines.size = 0}"><p class="w-e" style="height:13.8pt;"></p></apex:outputPanel>
+  <apex:repeat value="{!livrableLines}" var="liv"><p class="w-p"><apex:outputText value="{!liv}" /></p></apex:repeat>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">3.5 Engagements du Client </div>
+  <p class="w-e" style="height:10.35pt;"></p>
+  <p class="w-p">Les obligations de collaboration et de suivi et les engagements du Client tels que décrits aux articles 5 et 6 des Conditions générales, sont structurants pour le projet et doivent être strictement appliqués pour permettre la réalisation des Prestations par le Prestataire dans les conditions des présentes.</p>
+  <p class="w-e" style="height:11.5pt;"></p>
+  <!-- Titre 4 + 4.1 + lignes de lots : un seul bloc insécable (équivalent du « paragraphe solidaire
+       du suivant » de Word), jamais de titre ou de lot orphelin en bas de page. -->
+  <div style="page-break-inside:avoid;">
+  <div class="w-t2" id="toc-sec-cond"><span class="w-t2-num">4-</span>Conditions financières</div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">4.1 Prix </div>
+  <p class="w-p w-p3 w-j">Le prix pour réaliser les Prestations s’élève à&#160;:</p>
+  <apex:outputPanel layout="none" rendered="{!hasSchedule}">
+    <apex:repeat value="{!lotsDisplay}" var="lot">
+      <p class="w-p w-p3 w-j"><span class="w-lot-lbl{!IF(lotsLibellesLarges, ' w-lot-lbl-l', '')}"><apex:outputText value="{!lot.libelle}:" /></span><apex:outputText value="{!lot.montantLabel} HT" />
+        <!-- Session 37 : mention de surcharge réservée à l'aperçu, jamais au PDF contractuel. -->
+        <apex:outputText value=" (surchargé — calculé : {0} HT)" rendered="{!AND(lot.isOverridden, ptf.isPreview)}"><apex:param value="{!lot.montantCalculeLabel}" /></apex:outputText>
+      </p>
+    </apex:repeat>
+  </apex:outputPanel>
+  </div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">4.2 Frais exposés pendant les prestations</div>
+  <p class="w-p w-p3 w-j">Les frais de déplacements exposés par le Prestataire pendant / à l’occasion des Prestations seront refacturés au Client au réel, mensuellement, sur présentation des justificatifs, en sus du prix susvisé. Les frais sont engagés par le Prestataire sous réserve de l’accord préalable du Client.</p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">4.3 Echéancier de facturation prévisionnelle du prix des Prestations </div>
+  <p class="w-p w-p3 w-j">Facturation mensuelle en fonction de l’avancement des Lots&#160;:</p>
+  <apex:outputPanel layout="none" rendered="{!hasSchedule}">
+    <table class="w-sch">
+      <tr><td class="hd" style="width:167.6pt;">Lots</td><td class="hd" style="width:139.8pt;">Montant</td><td class="hd">Echéancier</td></tr>
+      <apex:repeat value="{!lotsDisplay}" var="lot">
+        <tr>
+          <td class="row"><apex:outputText value="{!lot.libelle}" /></td>
+          <td class="row"><apex:outputText value="{!lot.montantLabel} HT" /></td>
+          <td class="row"><apex:outputText value="{!lot.echeanceLabel}" /></td>
+        </tr>
+      </apex:repeat>
+    </table>
+    <apex:outputPanel layout="none" rendered="{!AND(hasLotOverride, ptf.isPreview)}">
+      <p class="w-p w-p3"><apex:outputText value="Un ou plusieurs lots ont été surchargés — total théorique (avant surcharge) : {0} HT. C’est le total retenu ci-dessus qui est imprimé."><apex:param value="{!lotsTotalCalculeLabel}" /></apex:outputText></p>
+    </apex:outputPanel>
+  </apex:outputPanel>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">4.4 Evolution du prix des Prestations </div>
+  <p class="w-e" style="height:10.35pt;"></p>
+  <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.evolutionPrixSaisie))}">
+    <p class="w-p w-j"><apex:outputText value="{!ptf.evolutionPrixSaisie}" /></p>
+  </apex:outputPanel>
+  <apex:outputPanel rendered="{!ISBLANK(ptf.evolutionPrixSaisie)}">
+  <p class="w-p w-j">Le Prix de Prestations pourra être réévalué par accord des parties ou lors de la prolongation du Contrat.</p>
+  </apex:outputPanel>
+  <p class="w-e" style="height:10.35pt;"></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <div class="w-t3">4.5 Conditions de règlement </div>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <p class="w-p w-p3 w-j" style="margin-bottom:14pt;">
+    <apex:outputText value="Le Client s''engage à payer au Prestataire toute facture, en ce compris les factures de frais, à {0} à compter de la date d’émission de facture, par virement bancaire sur le compte du Prestataire suivant :">
+      <apex:param value="{!IF(ISBLANK(ptf.conditionsReglement), '30 jours fin de mois', ptf.conditionsReglement)}" />
+    </apex:outputText>
+  </p>
+  <!-- Coordonnées bancaires : bloc unique du référentiel (AR_Rib__c, session 63), en gras comme le modèle.
+       Jamais vide ici : missingBankDetailFields bloque la génération en amont. -->
+  <p class="w-p w-p3 w-b">Identification Nationale (RIB)</p>
+  <p class="w-p w-p3 w-b w-pre"><apex:outputText value="{!ptf.entiteInfo.rib}" /></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-p w-p3 w-j">Tout défaut ou retard de règlement entraîne de plein droit, sans mise en demeure préalable, la faculté pour le Prestataire de suspendre les Prestations jusqu’au complet paiement des sommes dues. Le défaut de paiement ou le retard de paiement de tout ou partie d’une facture entraîne de plein droit, sans mise en demeure préalable, l’application de pénalités de retard au taux d’intérêt appliqué par la BCE à son opération de refinancement la plus récente, majoré de 10 points, ainsi que, d’une indemnité forfaitaire de 40 Euros par facture pour frais de recouvrement, et l’exigibilité des autres factures même non échues. Constitue un paiement au sens du présent article, non pas la simple remise d'un effet de commerce ou d'un chèque, mais leur règlement à l'échéance convenue, sous réserve de leur parfait encaissement.</p>
+</div>
+
+<!-- ═══════════════════════ SECTION II — CONDITIONS GENERALES ═══════════════════════ -->
+<!-- GÉNÉRÉ depuis docs/gabarits/SIGMA__PTF_AT_v11_FR.docx par scripts/ptf/abylsen-v11/build.py —
+     ne pas éditer à la main : modifier le .docx ou le script, puis régénérer. -->
+<div>
+      <h1 class="w-t1" id="toc-sec-ii"><span class="w-t1-num">II-</span>CONDITIONS GENERALES</h1>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2" id="cg-art-1"><span class="w-t2-num">1-</span>Définitions</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">- «&#160;<span class="w-b">Calendrier</span>&#160;» désigne le calendrier fixé au sein de la Proposition Technique et Financière, lequel est indicatif<span class="w-fill"></span></span><span class="w-ln w-ln-last">sauf mention contraire au sein de la Proposition Technique et Financière&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs898">- «&#160;<span class="w-b">Contrat</span>&#160;» désigne la Proposition Technique et Financière décrite ci-avant, une fois acceptée par le Client, soit<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs889">par sa signature, soit par l’émission d’un bon de commande par ses soins, et les présentes Conditions Générales&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">- «&#160;<span class="w-b">Informations</span>&#160;» a le sens indiqué à l’article 9&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs892">- «&#160;<span class="w-b">Livrable</span>&#160;» désigne les livrables de toute nature, issus des Prestations et remis par le Prestataire<span class="w-b"> </span>tels que listés<span class="w-fill"></span></span><span class="w-ln w-ln-last">le cas échéant au sein de la Proposition Technique et Financière&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">- <span class="w-b">«&#160;Période initiale&#160;»</span> a le sens indiqué à l’article 3&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">- «&#160;<span class="w-b">Prestations</span>&#160;» désigne les prestations précisément décrites au sein de la Proposition Technique et Financière<span class="w-fill"></span></span><span class="w-ln w-ln-last">qui seront réalisées par le Prestataire<span class="w-b"> </span>en application des présentes.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2" id="cg-art-2"><span class="w-t2-num">2-</span>Force contractuelle</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le présent Contrat a pleine force contractuelle entre les Parties. Il ne pourra être modifié que par voie d’avenant<span class="w-fill"></span></span><span class="w-ln">signé entre les Parties. Les dispositions du présent Contrat expriment l’intégralité de l’accord conclu entre les<span class="w-fill"></span></span><span class="w-ln w-ln-last">Parties.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs876">Le Contrat prévaut sur toutes les propositions ou accords antérieurs, ainsi que sur toutes les autres communications<span class="w-fill"></span></span><span class="w-ln w-ln-last">entre les Parties se rapportant à l’objet du Contrat.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-fs893">En aucun cas, le bon de commande éventuellement émis par le Client pour accepter le Contrat ne pourra modifier<span class="w-fill"></span></span><span class="w-ln w-fs894">les conditions prévues audit Contrat. De même, les conditions générales d’achat du Client ou tout autre document<span class="w-fill"></span></span><span class="w-ln">équivalent ne pourront en aucun cas être applicables à la relation entre les Parties dès lors que leurs stipulations<span class="w-fill"></span></span><span class="w-ln w-ln-last">n’ont pas été reprises au sein d’un avenant dûment signé.</span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2" id="cg-art-3"><span class="w-t2-num">3-</span>Durée – Renouvellement</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j"><apex:outputText value="Le présent Contrat prend effet à la date de la signature par le Client et le Prestataire du présent document pour une durée de {0} mois (ci-après la « Période initiale »)."><apex:param value="{!dureeMoisLabel}" /></apex:outputText></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-fs896">Il pourra être ensuite renouvelé par périodes successives d’une durée identique à la Période initiale, sous réserve<span class="w-fill"></span></span><span class="w-ln">que le Client émette un bon de commande y faisant référence ou que les Parties signent un avenant de<span class="w-fill"></span></span><span class="w-ln">renouvellement. Dans un tel cas, le Prix des Prestations tel que prévu au sein de la Proposition Technique et<span class="w-fill"></span></span><span class="w-ln">Financière sera dû par le Client&#160;; le Prix des Prestations sera susceptible d’évoluer comme indiqué à l’article 4.4<span class="w-fill"></span></span><span class="w-ln w-ln-last">de la Proposition Technique et Financière.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2" id="cg-art-4"><span class="w-t2-num">4-</span>Engagement du Prestataire</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-fs897">Du fait de la nature des Prestations, le Prestataire est tenu à une obligation de moyens au titre de leur réalisation.<span class="w-fill"></span></span><span class="w-ln">Il mettra en œuvre toute son expertise et le soin raisonnablement possible pour réaliser les Prestations, et<span class="w-fill"></span></span><span class="w-ln w-ln-last">respectera les lois et réglementations applicables, normes et standards en vigueur. </span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Le Prestataire<span class="w-b"> </span>s'engage à remettre les éventuels Livrables en conformité avec le Calendrier stipulé ci-après, sous<span class="w-fill"></span></span><span class="w-ln">réserve que le Client lui remette, dans les délais convenus, ses contributions nécessaires aux Prestations. Le<span class="w-fill"></span></span><span class="w-ln">Prestataire ne pourra être tenu responsable de tout retard dans l’exécution des Prestations dont l’origine serait<span class="w-fill"></span></span><span class="w-ln w-ln-last">imputable au Client ou à ses préposés ou conseils.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Le Prestataire<span class="w-b"> </span>s’efforcera de donner tout conseil au Client, recommandation et avis dans le cadre de l’exécution<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs879">des Prestations, sous réserve que ces conseils, avis et recommandations soient dans le périmètre des Prestations. </span></p>
+      <p class="w-p w-lines"><span class="w-ln">Dans le cas où du matériel informatique serait remis au Prestataire pour les besoins des Prestations, ce matériel<span class="w-fill"></span></span><span class="w-ln">sera considéré comme mis en dépôt auprès du Prestataire, soumis aux articles 1915 et suivants du code civil. Le<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs898">Prestataire s’engage à le restituer dans les meilleurs délais à l’issue des Prestations et en état normal de vétusté.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2" id="cg-art-5" style="margin-top:0;"><span class="w-t2-num">5-</span>Obligation de collaboration et suivi</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Les Parties s’engagent à collaborer de bonne foi pendant toute la durée du Contrat afin de permettre la bonne<span class="w-fill"></span></span><span class="w-ln">exécution des Prestations et s’informeront respectivement de tout élément de nature à pouvoir affecter leurs<span class="w-fill"></span></span><span class="w-ln">obligations respectives. Dans un tel cas, elles décideront d’un commun accord des suites à donner à un tel<span class="w-fill"></span></span><span class="w-ln w-ln-last">évènement.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Afin d’assurer un suivi des Prestations, d’encadrer et de formaliser leurs éventuelles évolutions et de traiter les<span class="w-fill"></span></span><span class="w-ln">éventuelles difficultés rencontrées, les Parties conviennent d’instaurer des suivis de projets réguliers selon une<span class="w-fill"></span></span><span class="w-ln w-ln-last">fréquence convenue entre les Parties, a minima trimestriels. </span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Ce suivi de projet est réalisé en présence du responsable de la Prestation coté Client, du responsable projet du<span class="w-fill"></span></span><span class="w-ln w-ln-last">Prestataire et de toute personne dont la présence serait nécessaire.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-ln-last">Ce suivi de projet a pour objet de&#160;: </span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-fs896">-&#160;faire le point sur l’avancement des Prestations en cours, leur évolution, les problèmes rencontrés et les mesures<span class="w-fill"></span></span><span class="w-ln w-ln-last">techniques prises pour les résoudre&#160;;</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-ln-last">-&#160;faire le point sur la satisfaction Client et le cas échéant définir les actions à mener&#160;;</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln w-fs881">Si nécessaire au regard du type de Prestation, les réunions feront l'objet d'un compte-rendu établi par le Prestataire<span class="w-fill"></span></span><span class="w-ln">et communiqué au Client. Ce compte-rendu engage chacune des Parties sur les points évoqués sauf désaccord<span class="w-fill"></span></span><span class="w-ln w-ln-last">exprimé par le Client dans un délai de cinq (5) jours ouvrés suivant sa réception.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2" id="cg-art-6"><span class="w-t2-num">6-</span>Engagements du Client</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Afin de permettre au Prestataire<span class="w-b"> </span>d’accomplir ses Prestations, le Client s’engage à&#160;: </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-last w-ln-li">Fournir au Prestataire les éléments en sa possession nécessaires pour la réalisation des Prestations&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-last w-ln-li">Mettre en contact le Prestataire avec toutes les personnes du Client concernées par les Prestations&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Informer le Prestataire dans les meilleurs délais, de tout élément de nature à influer directement sur<span class="w-fill"></span></span><span class="w-ln w-ln-last">l'exécution du Contrat&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-last w-ln-li">Collaborer avec le Prestataire<span class="w-b"> </span>dans la mesure requise&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Définir un interlocuteur privilégié pour assurer le suivi des Prestations et répondre aux besoins du<span class="w-fill"></span></span><span class="w-ln w-ln-last">Prestataire<span class="w-b"> </span>;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Prendre toutes les dispositions nécessaires pour éviter la perte de ses données, et notamment, ne<span class="w-fill"></span></span><span class="w-ln">remettre au Prestataire que des copies des documents qui lui sont nécessaires pour les besoins des<span class="w-fill"></span></span><span class="w-ln w-ln-last">Prestations&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Fournir au Prestataire<span class="w-b"> </span>toute charte informatique ou informations en lien avec l’usage du matériel<span class="w-fill"></span></span><span class="w-ln w-ln-last">informatique éventuellement fourni.</span></p>
+      <p class="w-p w-lines"><span class="w-ln w-ln-last">Le Client s'engage à effectuer le paiement selon l’échéancier et les délais fixés au Contrat.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2" id="cg-art-7"><span class="w-t2-num">7-</span>Hygiène et sécurité</div>
+      <p class="w-e" style="height:16.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">En application des articles R4511-1 à R4515-11 du Code du Travail, lorsque le Prestataire<span class="w-b"> </span>intervient en tant<span class="w-fill"></span></span><span class="w-ln w-ln-last">qu’entreprise extérieure pour le site du Client et que&#160;: </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">-le nombre d’heures de travail dépasse la limite de 400 heures sur 12 mois,</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-ou que les travaux effectués par l’entreprise extérieure figurent dans la liste des travaux dangereux (Arrêté du<span class="w-fill"></span></span><span class="w-ln w-ln-last">19/03/1993), et ce quelle que soit la durée d’intervention (article R.4512-7 du Code du travail),</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">un plan de prévention doit être rédigé avant le commencement des travaux.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Dans tous les cas, le Client doit organiser une inspection commune des lieux d’intervention avec le Prestataire,<span class="w-fill"></span></span><span class="w-ln">l’objectif étant d’identifier et de prévenir les risques (en particulier d’interférence) par une coordination générale.<span class="w-fill"></span></span><span class="w-ln w-ln-last">L’analyse des risques réalisée conduit à la mise en place des mesures de prévention.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last w-fs884">Le Client aura la responsabilité de faire appliquer ses obligations nées de l’application des articles ci-dessus visés. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le personnel du Prestataire se conformera aux règles d’hygiène et de sécurité en vigueur chez le Client.</span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2" id="cg-art-8"><span class="w-t2-num">8-</span>Responsabilité, force majeure et assurance</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs896">Aucune garantie d'aucune sorte, qu'elle soit écrite, orale ou implicite (y compris les garanties de convenance à un<span class="w-fill"></span></span><span class="w-ln w-ln-last">usage particulier ou de performance) ne sera applicable.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs890">Les Parties sont responsables de la parfaite exécution des obligations mises à leur charge en vertu du Contrat. En<span class="w-fill"></span></span><span class="w-ln w-fs875">cas d'inexécution fautive par l’une des Parties<span class="w-b"> </span>des obligations à sa charge, l’autre Partie<span class="w-i"> </span>aura la faculté sous réserve<span class="w-fill"></span></span><span class="w-ln w-ln-last">de prouver cette inexécution de solliciter la réparation du préjudice direct dont elle apporterait la preuve.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Dans l'hypothèse où la responsabilité du Prestataire<span class="w-b"> </span>serait retenue, et ce sans préjudice des dispositions<span class="w-fill"></span></span><span class="w-ln w-fs893">impératives de la loi, le montant total des indemnités que le Prestataire<span class="w-b"> </span>pourrait être amené à verser au Client<span class="w-i"> </span>et à<span class="w-fill"></span></span><span class="w-ln w-fs896">ses assureurs, ne pourra excéder, pour la durée du Contrat, le montant hors taxes correspondant aux Prestations<span class="w-fill"></span></span><span class="w-ln">réalisées dans les douze (12) mois précédant la mise en jeu de sa responsabilité quelle que soit la cause du<span class="w-fill"></span></span><span class="w-ln w-ln-last">dommage, le fondement juridique de la réclamation et la procédure employée pour la faire aboutir.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">En aucun cas, la responsabilité du Prestataire<span class="w-b"> </span>ne saurait être engagée pour des dommages indirects, perte de<span class="w-fill"></span></span><span class="w-ln w-ln-last">chiffres d'affaires, perte d'exploitation, perte de données ou perte de bénéfices.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs889">Les Parties ne pourront être tenues responsables d’un manquement à leurs obligations contractuelles lorsqu’un tel<span class="w-fill"></span></span><span class="w-ln w-fs898">manquement résulterait d’une situation constitutive d’un cas de force majeure, répondant à la définition des cours<span class="w-fill"></span></span><span class="w-ln">et tribunaux français. Dans cette hypothèse chaque Partie devra immédiatement informer l’autre Partie de la<span class="w-fill"></span></span><span class="w-ln">survenance d’un éventuel cas de force majeure susceptible de l’empêcher d’exécuter ses obligations. Elles<span class="w-fill"></span></span><span class="w-ln">s’efforceront alors de tout faire pour tenter de pallier les conséquences de cet événement. En cas de persistance<span class="w-fill"></span></span><span class="w-ln">de cet événement au-delà de trente (30) jours, le présent Contrat pourra être résilié par la Partie la plus diligente,<span class="w-fill"></span></span><span class="w-ln w-ln-last">sans indemnité, par simple lettre recommandée avec avis de réception.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire<span class="w-b"> </span>déclare avoir souscrit une assurance couvrant sa responsabilité civile professionnelle pour les<span class="w-fill"></span></span><span class="w-ln">dommages qu’il pourrait causer à l’occasion de l’exécution de ses Prestations.Le Prestataire<span class="w-b"> </span>s’engage à remettre<span class="w-fill"></span></span><span class="w-ln">dans les plus brefs délais une copie de la police souscrite auprès d’une compagnie notoire solvable sur simple<span class="w-fill"></span></span><span class="w-ln w-ln-last">demande du Client. </span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2" id="cg-art-9"><span class="w-t2-num">9-</span>Confidentialité</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Sont considérées comme des Informations soumises à la confidentialité au titre du présent Contrat, toute<span class="w-fill"></span></span><span class="w-ln">information ou donnée parmi lesquelles peuvent figurer des Données à Caractère Personnel au sens de la loi<span class="w-fill"></span></span><span class="w-ln">Informatique et Liberté n°78-17 du 6 janvier 1978 modifiée, notamment technique, commerciale, financière,<span class="w-fill"></span></span><span class="w-ln w-fs887">stratégique, ou de toute autre nature, dont les Parties auraient pris connaissance ou qu’elles auraient pu consulter,<span class="w-fill"></span></span><span class="w-ln">de quelque manière que ce soit, à l’occasion de l’exécution des Prestations objet du Contrat (ci-après les<span class="w-fill"></span></span><span class="w-ln w-ln-last">«&#160;Informations »).</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">La Partie qui reçoit les Informations (ci-après la «&#160;Partie réceptrice&#160;») s'engage à ce que les Informations reçues<span class="w-fill"></span></span><span class="w-ln w-ln-last">de l’autre Partie (ci-après la «&#160;Partie émettrice&#160;») : </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Soient protégées et gardées strictement confidentielles et soient traitées avec le même degré de<span class="w-fill"></span></span><span class="w-ln w-ln-last">précaution et de protection qu'elle accorde à ses propres informations de même importance ; </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li w-fs889">Ne soient pas utilisées, totalement ou partiellement, dans un autre but que l’exécution du Contrat, sans le<span class="w-fill"></span></span><span class="w-ln w-ln-last">consentement préalable et écrit de la Partie émettrice&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li w-fs892">Ne soient ni communiquées ni susceptibles de l’être, soit directement, soit indirectement à tous tiers ou à<span class="w-fill"></span></span><span class="w-ln">toutes autres personnes que les membres de son personnel ou sous-traitants ayant à connaître les<span class="w-fill"></span></span><span class="w-ln w-fs890">Informations dans le cadre de l’exécution du Contrat &#160;; néanmoins en cas de divulgation aux membres du<span class="w-fill"></span></span><span class="w-ln">personnel ou aux sous-traitants, il conviendra que ces personnes aient été informées de la nature<span class="w-fill"></span></span><span class="w-ln">confidentielle des Informations en amont de la divulgation et acceptent d’être engagées par des<span class="w-fill"></span></span><span class="w-ln w-ln-last">dispositions au moins aussi contraignantes que celles de la présente clause.</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Ne soient ni copiées, ni reproduites, ni dupliquées totalement ou partiellement lorsque de telles copies,<span class="w-fill"></span></span><span class="w-ln">reproductions ou duplications n'ont pas été autorisées par la Partie émettrice, de manière spécifique et<span class="w-fill"></span></span><span class="w-ln w-ln-last">par écrit.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">L’obligation de confidentialité se maintiendra pendant toute la durée du Contrat et pour une durée de dix (10) ans<span class="w-fill"></span></span><span class="w-ln w-ln-last">à compter de la date de l’échéance ou de la résiliation du Contrat.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">La Partie réceptrice ne saurait être tenue responsable de la divulgation des Informations&#160;:</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Si lesdites Informations sont entrées dans le domaine public préalablement à leur transmission ou après<span class="w-fill"></span></span><span class="w-ln w-ln-last">celle-ci mais dans ce cas en l'absence de toute faute qui lui soit imputable ; ou</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Si lesdites Informations sont déjà connues de la Partie réceptrice, cette connaissance préalable pouvant<span class="w-fill"></span></span><span class="w-ln w-ln-last">être démontrée par l'existence de documents appropriés dans ses dossiers ; ou</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Si lesdites Informations ont été reçues d'un tiers de manière licite, sans restriction ni violation du Contrat<span class="w-fill"></span></span><span class="w-ln w-ln-last">; ou</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Si lesdites Informations sont le résultat de développements internes entrepris de bonne foi par des<span class="w-fill"></span></span><span class="w-ln w-ln-last">membres du personnel de la Partie réceptrice n'ayant pas eu accès à ces Informations.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">La Partie réceptrice se porte garant du strict respect par son personnel, ses sous-traitants, ses représentants et<span class="w-fill"></span></span><span class="w-ln w-ln-last">dirigeants de l’obligation de confidentialité ci-dessus.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Chaque Partie demeurera dans tous les cas responsable du respect par les personnes précitées de la présente<span class="w-fill"></span></span><span class="w-ln">obligation de confidentialité. Nonobstant son éventuelle responsabilité, la Partie ayant connaissance d’une<span class="w-fill"></span></span><span class="w-ln w-ln-last">divulgation en violation du présent article informera immédiatement l’autre Partie.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-10"><span class="w-t2-num">10-</span>Propriété intellectuelle</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">10.1 Propriété du Prestataire</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire reste propriétaire des moyens, connaissances, procédés, méthodes et savoir-faire qu’il met en<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs891">œuvre dans le cadre de l’exécution du Contrat, qu’ils soient ou non protégés par un titre de propriété intellectuelle.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">10.2 Droits sur les Livrables</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Sous réserve du paiement complet du prix des Prestations, le Prestataire cède au Client le droit de reproduire,<span class="w-fill"></span></span><span class="w-ln">représenter, utiliser, modifier et adapter, en toutes langues, sous tous formats et supports, les Livrables, et ce à<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs874">titre exclusif, à toutes fins et pour toutes exploitations, qu’elles soient internes ou externes, y compris commerciales. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs883">Cette cession est accordée au Client pour toute la durée légale de protection des Livrables au titre du droit d’auteur<span class="w-fill"></span></span><span class="w-ln w-ln-last">telle qu’elle résulte de la loi applicable, et est applicable dans le monde entier.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le prix de la présente cession est inclus dans le prix des Prestations déterminé au présent Contrat, le Prestataire<span class="w-fill"></span></span><span class="w-ln">renonçant volontairement à l’application de l’article L131-4 du code de la propriété intellectuelle de manière<span class="w-fill"></span></span><span class="w-ln w-ln-last">définitive. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Tous les supports sur lesquels les Livrables objet de la présente cession sont fournis par le Prestataire sont la<span class="w-fill"></span></span><span class="w-ln w-ln-last">propriété matérielle du Client dès leur remise, sous réserve du paiement du prix des Prestations par ce dernier. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Prestataire déclare et garantit au Client, à la date des présentes&#160;:</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li7">Être seul et valablement propriétaire et titulaire des droits de propriété intellectuelle sur les Livrables,</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">N’avoir grevé les droits de propriété intellectuelle afférents aux Livrables d’aucun privilège, nantissement,<span class="w-fill"></span></span><span class="w-ln w-ln-last w-fs883">sureté ou toutes autres charges de nature à restreindre les droits du Client découlant de la présente clause, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">N’être partie à aucun contentieux de quelque nature que ce soit relatif aux droits de propriété intellectuelle<span class="w-fill"></span></span><span class="w-ln w-ln-last">sur les Livrables pouvant porter atteinte aux droits du Client découlant de la présente clause,</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7 w-fs893">Qu’il n’existe, à sa connaissance, aucun fait ou aucune circonstance susceptible d’affecter ou restreindre la<span class="w-fill"></span></span><span class="w-ln w-hy w-fs892">validité des droits de propriété intellectuelle afférents aux Livrables et / ou la jouissance des droits cédés ci-<span class="w-fill"></span></span><span class="w-ln w-ln-last">avant, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">Faire son affaire personnelle de la rémunération éventuellement due à son personnel à titre de co-auteur,<span class="w-fill"></span></span><span class="w-ln w-ln-last">d’auteur, d’inventeur ou de co-inventeur.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">En conséquence, le Prestataire garantit le Client contre toute action, réclamation, revendication, éviction<span class="w-fill"></span></span><span class="w-ln w-fs898">quelconque, formulée contre le Client et qui se rattacherait directement ou indirectement aux Livrables objet de la<span class="w-fill"></span></span><span class="w-ln w-ln-last">cession susvisée, y compris si ces réclamations ou procédures sont formulées par ses salariés ou employés. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Client prend l’engagement&#160;:</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">D’informer sans délai le Prestataire<span class="w-b"> </span>en cas d’invention réalisée par ses soins dont les Prestations ou<span class="w-fill"></span></span><span class="w-ln w-ln-last">Livrables auraient été à l’origine ou auraient participé à cette mise au point&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">D’informer sans délai le Prestataire<span class="w-b"> </span>des noms des inventeurs concernés, en particulier si des salariés du<span class="w-fill"></span></span><span class="w-ln w-ln-last">Prestataire sont concernés&#160;;</span></p>
+      <p class="w-p w-j w-lines w-li w-li-dash27" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-li7">D’informer régulièrement des suites d’exploitation de ces inventions afin que le Prestataire soit en mesure<span class="w-fill"></span></span><span class="w-ln w-ln-last">de remplir ses obligations le cas échéant vis à vis de ses salariés.  </span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">10.3 Propriété du Client</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Client est et demeure propriétaire des informations, données ou connaissances fournies au Prestataire pour<span class="w-fill"></span></span><span class="w-ln w-ln-last">l’exécution des Prestations, et de tous les droits de propriété intellectuelle y afférents. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Sur demande écrite du Client, ces informations, données ou connaissances seront retournées au Client aux frais<span class="w-fill"></span></span><span class="w-ln w-ln-last">du Prestataire.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs897">A défaut d’une telle demande formulée par le Client, les informations, données ou connaissances seront détruites<span class="w-fill"></span></span><span class="w-ln">par le Prestataire<span class="w-b"> </span>à la fin de la réalisation des Prestations. Le Client pourra solliciter auprès du Prestataire une<span class="w-fill"></span></span><span class="w-ln w-ln-last">attestation de destruction. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs877">En aucun cas le Prestataire ne pourra utiliser ces informations, données ou connaissances en dehors de l’exécution<span class="w-fill"></span></span><span class="w-ln w-ln-last">du présent Contrat ni postérieurement au présent Contrat.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-11"><span class="w-t2-num">11-</span>Suspension – Résiliation</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">11.1 Suspension</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">En cas de retard de paiement, les Parties conviennent que, sans préjudice de la possibilité pour le Prestataire<span class="w-fill"></span></span><span class="w-ln">d’user de la faculté de résiliation de plein droit du Contrat stipulée ci-après, le Prestataire<span class="w-b"> </span>pourra suspendre<span class="w-fill"></span></span><span class="w-ln">unilatéralement, de plein droit, l’ensemble de ses Prestations en l’absence de paiement des sommes dues dans<span class="w-fill"></span></span><span class="w-ln w-fs893">un délai de sept (7) jours calendaires suivant l’envoi d’une mise en demeure par lettre recommandée avec accusé<span class="w-fill"></span></span><span class="w-ln w-ln-last">de réception, quel que soit le montant des sommes dues, et ce jusqu’à leur complet paiement. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">La responsabilité du Prestataire ne pourra, en aucun cas, être valablement engagée pour tout manquement qui<span class="w-fill"></span></span><span class="w-ln">interviendrait alors que le Client serait en retard de paiement de sommes dues au Prestataire, pour la Prestation<span class="w-fill"></span></span><span class="w-ln w-ln-last">concernée.</span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">11.2 Résiliation</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Chaque Partie peut résilier de plein droit, à tout moment le présent Contrat, en cas d’inexécution grave par l’une<span class="w-fill"></span></span><span class="w-ln w-ln-last">des Parties d’une ou plusieurs obligations stipulées dans le cadre du présent Contrat. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Cette résiliation ne devient effective que vingt (20) jours après l’envoi par la Partie plaignante d’une lettre<span class="w-fill"></span></span><span class="w-ln w-fs887">recommandée avec accusé de réception, exposant les motifs de la résiliation, à moins que, dans ce délai, la Partie<span class="w-fill"></span></span><span class="w-ln w-fs880">défaillante n’ait satisfait à ses obligations ou n’ait apporté la preuve d’un empêchement consécutif à un cas de force<span class="w-fill"></span></span><span class="w-ln w-ln-last">majeure.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-12"><span class="w-t2-num">12-</span>Non-sollicitation du personnel</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-lines"><span class="w-ln w-hy">Le Client s’engage à ne pas procéder directement ou indirectement à l’embauche d’un des salariés ou sous-<span class="w-fill"></span></span><span class="w-ln">traitants du Prestataire impliqués sur les Prestations, que ce soit à la demande du salarié ou du sous-traitant ou<span class="w-fill"></span></span><span class="w-ln w-ln-last">non, pendant la durée d’exécution du présent Contrat et douze mois après son achèvement. </span></p>
+      <p class="w-p w-lines"><span class="w-ln">Dans le cas où le Client ne respecterait pas cet engagement, il se rendra automatiquement redevable envers le<span class="w-fill"></span></span><span class="w-ln">Prestataire d’une pénalité fixée forfaitairement à un montant de cinquante mille (50 000) euros par salarié ou<span class="w-fill"></span></span><span class="w-ln w-ln-last">sous-traitant concerné, sans préjudice de tous autres droits à actions et indemnités.</span></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-13"><span class="w-t2-num">13-</span>Indépendance des parties – personnel</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Les Parties déclarent qu’elles n’entendent pas constituer une société ou une entité juridique quelconque et que<span class="w-fill"></span></span><span class="w-ln">toute forme «&#160;d’affectio societatis&#160;», comme tout partage de résultats, sont formellement exclus. Les Parties sont<span class="w-fill"></span></span><span class="w-ln w-fs885">des co-contractants indépendants l’un et l’autre, et aucune d’elles n’a le pouvoir d’agir en tant qu’agent ou employé<span class="w-fill"></span></span><span class="w-ln">de l’autre ou sous tout autre statut, ni n’a le droit, exprès ou tacite, d’engager l’autre Partie d’une quelconque<span class="w-fill"></span></span><span class="w-ln">manière que ce soit. Chaque Partie assumera seule le coût des charges et dépenses relatives aux tâches et<span class="w-fill"></span></span><span class="w-ln">responsabilités qui lui incombent dans le cadre du Contrat. Chacune des Parties fera son affaire personnelle de<span class="w-fill"></span></span><span class="w-ln w-fs893">tout impôt, cotisation, frais, droit dont elle est redevable en tant que commerçant indépendant, de sorte que l’autre<span class="w-fill"></span></span><span class="w-ln w-ln-last">Partie ne sera jamais recherchée à ce titre. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Prestataire<span class="w-b"> </span>réalisera les Prestations sans être placé dans un état de subordination. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Aucun personnel du Prestataire affecté à la réalisation des Prestations ne pourra être assimilé à un salarié du<span class="w-fill"></span></span><span class="w-ln w-fs884">Client, le Prestataire<span class="w-b"> </span>détenant l’intégralité des droits et obligations attachés à la qualité d’employeur le cas échéant.<span class="w-fill"></span></span><span class="w-ln">Le Prestataire<span class="w-b"> </span>procèdera à toute inscription auprès de tous organismes, imposée par les textes en vigueur,<span class="w-fill"></span></span><span class="w-ln">concernant ses propres salariés. Il cotisera auprès des organismes sociaux et devra être en règle concernant les<span class="w-fill"></span></span><span class="w-ln w-ln-last">formalités nécessaires à l’emploi de travailleurs salariés.</span></p>
+      <p class="w-p w-j w-lines"><span class="w-ln">Le Prestataire<span class="w-b"> </span>s’efforcera d’affecter aux Prestations un personnel suffisant, dont le profil, les connaissances<span class="w-fill"></span></span><span class="w-ln">techniques et organisationnelles sont adaptées auxdites Prestations et, le cas échéant, au secteur du Client. Il<span class="w-fill"></span></span><span class="w-ln">prendra toutefois seule toute décision de modification d’un membre de son personnel affecté aux Prestations, en<span class="w-fill"></span></span><span class="w-ln w-fs895">s’efforçant de réduire tout impact sur les conditions de réalisation des Prestations et d’assurer la continuité de ces<span class="w-fill"></span></span><span class="w-ln">dernières. Il désignera un responsable au sein de son équipe, qui sera l’interlocuteur privilégié du Client pour les<span class="w-fill"></span></span><span class="w-ln w-ln-last">Prestations.</span></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <p class="w-e" style="height:10.35pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-14"><span class="w-t2-num">14-</span>Cession – Sous-Traitance</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire s’interdit formellement de céder ou de transmettre, de quelque façon que ce soit, tout ou partie du<span class="w-fill"></span></span><span class="w-ln w-ln-last">Contrat sans l’accord préalable écrit du Client.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Prestataire<span class="w-b"> </span>est libre de sous-traiter tout ou partie de l’exécution du Contrat.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs878">En tout état de cause, le Prestataire<span class="w-b"> </span>demeure responsable vis-à-vis du Client de la bonne exécution des Prestations<span class="w-fill"></span></span><span class="w-ln w-ln-last">sous-traitées.</span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-15"><span class="w-t2-num">15-</span>Données à caractère personnel</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t3">15.1 Collecte de données à caractère personnel&#160;</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Les Données à Caractère Personnel que les équipes du Prestataire seraient amenées à collecter et/ou à utiliser<span class="w-fill"></span></span><span class="w-ln">pour les besoins des Prestations leur sont communiquées exclusivement par le Client et/ou collectées<span class="w-fill"></span></span><span class="w-ln w-ln-last">exclusivement à son initiative et pour son compte.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Client est, à ce titre, seul responsable de traitement au sens du Règlement Général sur la Protection des<span class="w-fill"></span></span><span class="w-ln w-ln-last">Données à Caractère Personnel (RGPD) n°2016/679 et de la loi n°2018-493 du 20 juin 2018.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3">15.2 Traitement de données à caractère personnel</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">&#160;Lorsque le Prestataire<span class="w-b"> </span>est amené à traiter des Données à Caractère Personnel qui lui sont confiées par le Client,<span class="w-fill"></span></span><span class="w-ln">ce dernier garantit que ce traitement a lieu en conformité avec le RGPD et que&#160;les titulaires de ces Données à<span class="w-fill"></span></span><span class="w-ln w-fs884">Caractère Personnel ont expressément autorisé le traitement dont le Client confie la réalisation au Prestataire dans<span class="w-fill"></span></span><span class="w-ln">les conditions du Contrat, à moins que leur collecte et leur traitement dans le cadre des Prestations objets des<span class="w-fill"></span></span><span class="w-ln">présentes soient nécessaires à l’exécution d’un contrat auquel la personne concernée est partie ou à l’exécution<span class="w-fill"></span></span><span class="w-ln w-ln-last">de mesures précontractuelles prises à la demande de ce titulaire. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Il appartiendra le cas échéant au Client, préalablement à la communication de ses données au Prestataire de<span class="w-fill"></span></span><span class="w-ln w-fs882">supprimer, anonymiser ou pseudonymiser toutes autres Données à Caractère Personnel qui figureraient dans cette<span class="w-fill"></span></span><span class="w-ln w-ln-last">base de données. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Client garantit le Prestataire<span class="w-b"> </span>contre les conséquences notamment pécuniaires et d’image résultant de toute<span class="w-fill"></span></span><span class="w-ln">action et/ou réclamation de toute autorité et/ou de tout tiers fondé sur l’exploitation, dans le cadre des Prestations<span class="w-fill"></span></span><span class="w-ln w-ln-last">objets des présentes, des Données à Caractère Personnel communiquées par le Client.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3">15.3&#160;Sécurisation des Données à Caractère Personnel</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs879">Les Données à Caractère Personnel éventuellement collectées par les collaborateurs du Prestataire pour le compte<span class="w-fill"></span></span><span class="w-ln">du Client sont, sauf mention spécifique contraire visée au Contrat, directement enregistrées et conservées aux<span class="w-fill"></span></span><span class="w-ln w-ln-last">moyens des outils informatiques du Client. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Ce dernier est dès lors seul responsable de leur sécurisation et de leur sauvegarde. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3">15.4&#160;Dispositions générales</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Pour l’ensemble des Prestations réalisées dans le cadre des présentes, le Prestataire<span class="w-b"> </span>s’engage à : </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-&#160;ce que les contrats de travail de ses salariés amenés à gérer des Données à Caractère Personnel comportent<span class="w-fill"></span></span><span class="w-ln w-ln-last">une clause de stricte confidentialité quant aux données auxquels ils auraient accès ;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-&#160;informer le Client sous 48 heures ouvrées de toute faille de sécurité constatée et des conséquences possibles<span class="w-fill"></span></span><span class="w-ln w-ln-last">et/ou constatées sur les Données à Caractère Personnel du Client&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-&#160;ne procéder à aucune collecte et/ou traitement autre que ceux expressément sollicités par le Client aux termes<span class="w-fill"></span></span><span class="w-ln w-ln-last">du Contrat&#160;;</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-&#160;à ne copier, exploiter, utiliser, transférer les Données à Caractère Personnel qui lui auront été remises par le<span class="w-fill"></span></span><span class="w-ln">Client que sur instruction expresse de ce dernier et/ou dans le strict cadre des Prestations commandées par le<span class="w-fill"></span></span><span class="w-ln w-ln-last">Client et décrites au Contrat. Le Prestataire se porte fort du respect de cet engagement par ses équipes. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">-&#160;à participer à tout audit que le Client souhaiterait opérer étant précisé que toute demande d’audit devra être<span class="w-fill"></span></span><span class="w-ln w-fs885">formulée par écrit au plus tard quinze (15) jours ouvrés avant la date souhaitée de réalisation effective de cet audit,<span class="w-fill"></span></span><span class="w-ln">le Client s’interdisant de mandater un tiers qui serait directement ou indirectement concurrent du Prestataire.<span class="w-fill"></span></span><span class="w-ln w-ln-last">L’auditeur devra être soumis à un engagement de confidentialité similaire à celui prévu au présent Contrat.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Dans le cas où le Client viendrait à confier au Prestataire des Prestations impliquant une intervention quelconque<span class="w-fill"></span></span><span class="w-ln">sur des Données à Caractère Personnel excédant celles décrites ci-dessus, les Parties se rapprocheront afin de<span class="w-fill"></span></span><span class="w-ln w-fs891">conclure un avenant aux présentes conformes aux dispositions de l’article 28 du règlement européen 2016/679 du<span class="w-fill"></span></span><span class="w-ln w-ln-last">27 avril 2016.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Chacune des Parties s’engage à coopérer activement avec l’autre Partie en cas de contrôle et/ou demande de(s)<span class="w-fill"></span></span><span class="w-ln w-ln-last">autorité(s) de contrôle.</span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3">15.5&#160;Collectes de Données à Caractère Personnel de salariés du Client</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Pour les besoins du présent Contrat, le Prestataire<span class="w-b"> </span>collecte les Données à Caractère Personnel des salariés et<span class="w-fill"></span></span><span class="w-ln">intervenants du Client et de ses filiales entrant directement en contact avec le Prestataire, qui font l’objet d’un<span class="w-fill"></span></span><span class="w-ln">traitement automatisé, dans les conditions prévues par le RGPD, à des fins de gestion de la relation Client<span class="w-fill"></span></span><span class="w-ln">(facturation, assistance et maintenance, gestion commerciale, archivage, suivi de la réalisation des Prestations,<span class="w-fill"></span></span><span class="w-ln w-ln-last">recouvrement et traitement des éventuels litiges).</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Les Données à Caractère Personnel ainsi collectées sont constituées d’informations telles que nom, prénom,<span class="w-fill"></span></span><span class="w-ln w-fs885">adresse postale professionnelle, adresse email et contenus échangés, numéros des téléphones des collaborateurs<span class="w-fill"></span></span><span class="w-ln w-ln-last">du Client.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Ces Données à Caractère Personnel sont conservées pendant trois (3) ans suivant la fin du Contrat sauf à ce<span class="w-fill"></span></span><span class="w-ln w-ln-last">qu’elles soient nécessaires pour respecter ses obligations légales. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Client accepte et se porte fort de l’acceptation par ses collaborateurs, ses filiales et les collaborateurs de ses<span class="w-fill"></span></span><span class="w-ln">filiales de la collecte, du traitement et de la conservation des Données à Caractère Personnel pour les seules<span class="w-fill"></span></span><span class="w-ln w-ln-last">finalités visées ci-dessus. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Client, ses filiales et leurs collaborateurs bénéficient d’un droit d’accès, de rectification et de suppression des<span class="w-fill"></span></span><span class="w-ln">Données à Caractère Personnel les concernant. Ils peuvent exercer ces droits directement auprès du Prestataire<span class="w-fill"></span></span><span class="w-ln">à l’adresse email suivante&#160;: dataprotection@abylsen.com. Le Client s’engage à informer ses filiales et leurs<span class="w-fill"></span></span><span class="w-ln w-ln-last">collaborateurs concernés de ce droit et des modalités de son exercice.</span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-16"><span class="w-t2-num">16-</span>Dispositives diverses</div>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs898">De manière générale, si une ou plusieurs stipulations sont tenues pour non valides ou déclarées comme telles en<span class="w-fill"></span></span><span class="w-ln">application d'une loi, d'un règlement ou à la suite d'une décision définitive d'une juridiction compétente, les autres<span class="w-fill"></span></span><span class="w-ln w-ln-last">stipulations garderont toute leur force et leur portée. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs890">Les Parties conviennent alors de remplacer la clause déclarée nulle et non valide par une clause qui se rapportera<span class="w-fill"></span></span><span class="w-ln">le plus quant à son contenu de la clause initialement arrêtée, et vu l’intention initiale des Parties, de manière<span class="w-fill"></span></span><span class="w-ln">notamment à maintenir l'équilibre économique du Contrat. Les mêmes principes s’appliqueront en cas de<span class="w-fill"></span></span><span class="w-ln w-ln-last">dispositions incomplètes.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Chacune des Parties déclare&#160;:</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li w-fs883">Qu’elle est légalement et valablement constituée, qu’elle a la capacité de conclure le Contrat et d'exécuter<span class="w-fill"></span></span><span class="w-ln w-ln-last">toutes les obligations en découlant,</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li">Qu’elle exerce ses activités dans le strict respect de la législation et de la réglementation qui lui est<span class="w-fill"></span></span><span class="w-ln w-fs876">applicable, que ni la signature du Contrat, ni l'exécution des obligations qui en découlent ne sont contraires<span class="w-fill"></span></span><span class="w-ln">ou violent une disposition quelconque de ses statuts, une disposition législative ou réglementaire qui lui<span class="w-fill"></span></span><span class="w-ln">est applicable, une stipulation d'un contrat ou un engagement auquel elle est partie ou une décision<span class="w-fill"></span></span><span class="w-ln w-ln-last">judiciaire définitive qui la lie,</span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">&#8226;</span><span class="w-ln w-ln-li w-fs894">Qu’il n'existe à ce jour, à sa connaissance, aucune procédure en cours, dont elle serait menacée, devant<span class="w-fill"></span></span><span class="w-ln">toute juridiction ou autorité quelle qu'elle soit et notamment fiscale, dont le résultat pourrait affecter de<span class="w-fill"></span></span><span class="w-ln w-ln-last">manière défavorable et significative sa situation financière ou ses activités.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le fait pour l’une des Parties de ne pas se prévaloir d’un manquement par l’autre Partie à l’une quelconque des<span class="w-fill"></span></span><span class="w-ln">obligations visées aux présentes, ne saurait être interprété pour l’avenir comme une renonciation à l’obligation en<span class="w-fill"></span></span><span class="w-ln w-ln-last">cause. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Toute notification doit être effectuée par écrit, se référer au présent Contrat et être remise en main propre ou par<span class="w-fill"></span></span><span class="w-ln w-ln-last">coursier, ou lettre recommandée avec accusé de réception à l’adresse indiquée en tête du présent Contrat. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Les Parties élisent domicile aux adresses figurant en tête du Contrat. Elles pourront modifier leur adresse sous<span class="w-fill"></span></span><span class="w-ln w-ln-last">réserve d’en informer l’autre Partie par écrit. </span></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <p class="w-e" style="height:13.8pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-17" style="margin-top:0;"><span class="w-t2-num">17-</span>Droit applicable et juridiction compétente</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Contrat est régi par la loi française.</span></p>
+      <p class="w-p w-j" style="margin-top:3.0pt;"><apex:outputText value="Sous réserve des dispositions légales d’ordre public applicables, toutes les difficultés relatives à la validité, à l’interprétation, à l’exécution ou à l’inexécution du présent contrat seront soumises à la compétence exclusive du {0}. "><apex:param value="{!ptf.tribunalCompetent}" /></apex:outputText></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t2 w-t2-wide" id="cg-art-18"><span class="w-t2-num">18-</span>Sécurité de l’information</div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs895">Dans le cadre de l’exécution des prestations, lorsque le Prestataire est amené à accéder, traiter ou manipuler des<span class="w-fill"></span></span><span class="w-ln">informations et/ou données communiquées par le Client (ci-après les «&#160;<span class="w-i">Informations Client</span>&#160;»), les Parties<span class="w-fill"></span></span><span class="w-ln w-ln-last">conviennent des dispositions suivantes. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.1. Principes généraux</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs877">Le Prestataire s’engage à assurer la confidentialité, l’intégrité, la disponibilité et la traçabilité des <span class="w-i">Informations Client</span>,<span class="w-fill"></span></span><span class="w-ln w-fs892">conformément aux bonnes pratiques de sécurité de l’information, à sa politique interne de sécurité de l’information<span class="w-fill"></span></span><span class="w-ln w-ln-last">et, le cas échéant, aux exigences de sécurité communiquées par le Client. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.2. Mesures de sécurité de l’information</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Le Prestataire met en œuvre des mesures techniques et organisationnelles appropriées afin de&#160;: </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Prévenir les accès non autorisés aux <span class="w-i">Informations Client</span>, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Limiter les risques de perte, d’altération ou de divulgation non autorisée, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Garantir la disponibilité des informations nécessaires à l’exécution des prestations, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Assurer la traçabilité des accès et des opérations sensibles lorsque requis.</span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-fs887">Ces mesures sont proportionnées aux risques identifiés, régulièrement réévalués, et s’appuient sur un Système de<span class="w-fill"></span></span><span class="w-ln">Management de la Sécurité de l’Information (SMSI) structuré sur les principes de la norme ISO/IEC 27001 ou sur<span class="w-fill"></span></span><span class="w-ln w-ln-last">un référentiel de sécurité équivalent reconnu.  </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.3. Accès et usage des </span><span class="w-bi">Informations Client</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln w-ln-last">Les <span class="w-i">Informations Client</span> sont&#160;: </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Utilisées exclusivement dans le cadre des prestations contractuelles, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Accessibles uniquement aux collaborateurs habilités selon le principe du besoin d’en connaître, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Non copiées, transférées ou exploitées en dehors de ce cadre sans instruction expresse du Client, </span></p>
+      <p class="w-p w-j w-lines w-li w-li-std" style="margin-top:3.0pt;"><span class="w-bul">-</span><span class="w-ln w-ln-last w-ln-li11">Restituées ou supprimées à l’issue des prestations, selon les modalités définies contractuellement. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.4. Engagement des collaborateurs</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire garantit que les collaborateurs amenés à intervenir sur les prestations sont soumis à des<span class="w-fill"></span></span><span class="w-ln">engagements contractuels de confidentialité, sensibilisés aux règles de sécurité de l’information applicables et<span class="w-fill"></span></span><span class="w-ln w-ln-last">respectent les politiques et procédures de sécurité de l’information. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.5. Gestion des incidents de sécurité</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire dispose d’un processus formalisé de gestion des incidents de sécurité de l’information, inspiré des<span class="w-fill"></span></span><span class="w-ln w-ln-last">bonnes pratiques de la norme ISO/IEC 27001. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Tout incident de sécurité affectant ou susceptible d’affecter les <span class="w-i">Informations Client</span> est notifié au Client dans les<span class="w-fill"></span></span><span class="w-ln">meilleurs délais et au plus tard dans un délai maximal de vingt-quatre (24) heures ouvrées après détection,<span class="w-fill"></span></span><span class="w-ln w-fs877">accompagné des informations disponibles sur la nature de l’incident, son impact potentiel et les mesures correctives<span class="w-fill"></span></span><span class="w-ln w-ln-last">mises en œuvre. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.6. Audits et contrôles</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Le Prestataire s’engage à maintenir ses politiques, procédures et mesures de sécurité existantes en matière de<span class="w-fill"></span></span><span class="w-ln">sécurité de l’information tout au long de la prestation et à coopérer à toute demande d’audit de sécurité formulée<span class="w-fill"></span></span><span class="w-ln">par le Client, sous réserve d’un préavis formulé par écrit au plus tard quinze (15) jours ouvrés avant la date<span class="w-fill"></span></span><span class="w-ln w-ln-last">souhaitée de réalisation effective de cet audit et du respect des obligations de confidentialité applicables. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:0pt;"><span class="w-b">18.7. Responsabilités respectives</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Chaque Partie demeure responsable de la sécurité des systèmes, infrastructures et moyens qu’elle contrôle. Le<span class="w-fill"></span></span><span class="w-ln">Prestataire applique, le cas échéant, les exigences de sécurité spécifiques communiquées par le Client pour<span class="w-fill"></span></span><span class="w-ln w-ln-last">l’exécution des prestations. </span></p>
+      <p class="w-e" style="height:13.35pt;"></p>
+      <div class="w-t3b" style="margin-top:3.0pt;"><span class="w-b">18.8. Manquement aux obligations de sécurité</span></div>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Tout manquement grave et avéré aux obligations de sécurité de l’information pourra entraîner la résiliation du<span class="w-fill"></span></span><span class="w-ln w-ln-last">contrat. </span></p>
+      <p class="w-p w-j w-lines" style="margin-top:3.0pt;"><span class="w-ln">Tout manquement non intentionnel fera l’objet d’une notification et de la mise en œuvre d’actions correctives<span class="w-fill"></span></span><span class="w-ln w-ln-last">appropriées. </span></p>
+</div>
+
+<!-- ═══ Bloc signature (paragraphes 446-467 du .docx) ═══ -->
+<div>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:10.35pt;"></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <p class="w-e" style="height:13.8pt;"></p>
+  <p class="w-p w-p3 w-j">
+    <apex:outputText value="Fait à {0}, le {1}" rendered="{!NOT(ISBLANK(ptf.entiteInfo.ville))}"><apex:param value="{!ptf.entiteInfo.ville}" /><apex:param value="{!generatedAtLabel}" /></apex:outputText>
+    <apex:outputText value="Fait le {0}" rendered="{!ISBLANK(ptf.entiteInfo.ville)}"><apex:param value="{!generatedAtLabel}" /></apex:outputText>
+  </p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <table class="w-sig">
+    <tr><td style="width:297.8pt;">Pour le Client*</td><td>Pour le Prestataire</td></tr>
+    <tr><td>&#160;</td><td>&#160;</td></tr>
+    <tr>
+      <td><apex:outputText value="Nom : {0}"><apex:param value="{!ptf.interNom}" /></apex:outputText></td>
+      <td><apex:outputText value="Nom : {0}"><apex:param value="{!ptf.valideurNom}" /></apex:outputText></td>
+    </tr>
+    <tr>
+      <td><apex:outputText value="Qualité : {0}"><apex:param value="{!ptf.interFonction}" /></apex:outputText></td>
+      <td><apex:outputText value="Qualité : {0}"><apex:param value="{!ptf.valideurFonction}" /></apex:outputText></td>
+    </tr>
+  </table>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-p w-p3 w-j">*Faire précéder la signature de la mention «&#160;Lu et approuvé, Bon pour accord&#160;»</p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-e" style="height:13.35pt;"></p>
+  <p class="w-p w-j w-lines"><span class="w-ln w-fs891">Merci de retourner le présent contrat par courrier ou email dès acceptation à l’interlocuteur mentionné en première<span class="w-fill"></span></span><span class="w-ln w-ln-last">page</span></p>
+</div>
+
+</div><!-- /abyv-content -->
+
+</body>
+</html>
+</apex:page>

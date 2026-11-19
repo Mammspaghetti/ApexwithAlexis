@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TP_Action__c</fullName>
+    <label>Action</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>true</sorted>
+            <value>
+                <fullName>E1</fullName>
+                <default>false</default>
+                <label>E1</label>
+            </value>
+            <value>
+                <fullName>E2</fullName>
+                <default>false</default>
+                <label>E2</label>
+            </value>
+            <value>
+                <fullName>Entretien</fullName>
+                <default>false</default>
+                <label>Entretien</label>
+            </value>
+            <value>
+                <fullName>Pré-qualification</fullName>
+                <default>false</default>
+                <label>Pré-qualification</label>
+            </value>
+            <value>
+                <fullName>Prospection</fullName>
+                <default>false</default>
+                <label>Prospection</label>
+            </value>
+            <value>
+                <fullName>Qualification</fullName>
+                <default>false</default>
+                <label>Qualification</label>
+            </value>
+            <value>
+                <fullName>Signature</fullName>
+                <default>false</default>
+                <label>Signature</label>
+            </value>
+            <value>
+                <fullName>Signature RTI</fullName>
+                <default>false</default>
+                <label>Signature RTI</label>
+            </value>
+            <value>
+                <fullName>Suivi de projet</fullName>
+                <default>false</default>
+                <label>Suivi de projet</label>
+            </value>
+            <value>
+                <fullName>Suivi de projet client</fullName>
+                <default>false</default>
+                <label>Suivi de projet client</label>
+            </value>
+            <value>
+                <fullName>Suivi de projet consultant</fullName>
+                <default>false</default>
+                <label>Suivi de projet consultant</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

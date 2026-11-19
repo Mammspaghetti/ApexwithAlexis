@@ -1,0 +1,46 @@
+<template>
+    <div class={classBol}>
+        <div class="gamelle">
+
+            <!-- La gamelle -->
+            <div class={gamelleClass}>
+                <div class="tas">
+                    <template for:each={croquettes} for:item="c">
+                        <span key={c.id} class="croquette" style={c.style}></span>
+                    </template>
+                </div>
+                <div class="bol">
+                    <span class="bol-nom">GP</span>
+                    <span class="bol-os">🦴</span>
+                </div>
+                <div class="bol-ombre"></div>
+            </div>
+
+            <div class="gamelle-etiquette">{message}</div>
+
+            <!-- Actions -->
+            <div class="gamelle-actions">
+                <lightning-button
+                    label="Nourrir 🍖"
+                    variant="brand"
+                    disabled={nourrirDesactive}
+                    onclick={nourrir}>
+                </lightning-button>
+
+                <lightning-button
+                    label="Remplir 🥣"
+                    variant="neutral"
+                    disabled={estPleine}
+                    onclick={remplir}>
+                </lightning-button>
+
+                <lightning-button
+                    label="Voler sa nourriture 💢"
+                    variant="destructive"
+                    disabled={estVide}
+                    onclick={voler}>
+                </lightning-button>
+            </div>
+        </div>
+    </div>
+</template>

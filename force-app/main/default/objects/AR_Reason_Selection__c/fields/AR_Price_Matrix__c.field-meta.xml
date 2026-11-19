@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Price_Matrix__c</fullName>
+    <deleteConstraint>Cascade</deleteConstraint>
+    <description>Renseigné pour un motif de changement de version ; null pour un motif de dérogation. Exactement un des deux lookups parent est renseigné : contrôlé en beforeInsert par AR_ReasonSelectionTriggerHandler.</description>
+    <label>Matrice de prix</label>
+    <referenceTo>AR_Price_Matrix__c</referenceTo>
+    <relationshipLabel>Sélections de motif</relationshipLabel>
+    <relationshipName>AR_Reason_Selections</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

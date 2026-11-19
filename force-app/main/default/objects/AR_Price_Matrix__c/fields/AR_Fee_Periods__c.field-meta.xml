@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Fee_Periods__c</fullName>
+    <description>Périodes de frais OM ajoutées à la période 1 (JSON : days, feeIk, feeMeals, feeLodging, feeOmOther par période). Vide = aucune période. Lu par AR_PricingCalculator (frais OM lissés).</description>
+    <label>Périodes de frais OM</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Avenant_Number__c</fullName>
+    <description>Renseigné uniquement quand AR_Document_Type__c = Avenant : 1 pour le premier avenant rattaché à cette PTF d&apos;origine (AR_Parent_PTF__c), 2 pour le second, etc., compteur indépendant d&apos;AR_Version_Number__c.</description>
+    <externalId>false</externalId>
+    <label>Numéro d&apos;avenant</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,362 @@
+<template>
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={hasSettings}>
+    <div class="admin-form-card">
+      <h2 class="admin-section-title">{i18n.AR_AGS_ThresholdsAndMarkup}</h2>
+      <template if:true={settings.lastModifiedByName}>
+        <p class="admin-traceability">{lastModifiedLabel}</p>
+      </template>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_FloorPercentDefault}
+          step="0.01"
+          min="0"
+          value={floorPercentDefault}
+          onchange={handleFloorChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_TargetPercentDefault}
+          step="0.01"
+          min="0"
+          value={targetPercentDefault}
+          onchange={handleTargetChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_IdealPercentDefault}
+          step="0.01"
+          min="0"
+          value={idealPercentDefault}
+          onchange={handleIdealChange}
+        ></lightning-input>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          label={i18n.AR_Common_WorkingDaysPerYear}
+          step="1"
+          min="0"
+          value={workingDaysPerYear}
+          onchange={handleWorkingDaysChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_MarkupPercent}
+          step="0.01"
+          min="0"
+          value={markupPercent}
+          onchange={handleMarkupPercentChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_MarkupMax}
+          step="0.01"
+          min="0"
+          value={markupMax}
+          onchange={handleMarkupMaxChange}
+        ></lightning-input>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_DerogationWaiver}
+          step="0.01"
+          min="0"
+          value={derogationWaiverAmount}
+          field-level-help={i18n.AR_AGS_DerogationWaiverHelp}
+          onchange={handleDerogationWaiverAmountChange}
+        ></lightning-input>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          class="dashboard-bands-input"
+          type="text"
+          label={i18n.AR_AGS_DashboardMc2Bands}
+          value={dashboardMc2Bands}
+          field-level-help={i18n.AR_AGS_DashboardMc2BandsHelp}
+          onchange={handleDashboardMc2BandsChange}
+        ></lightning-input>
+        <p class="slds-text-body_small slds-text-color_weak">
+          {i18n.AR_AGS_DashboardMc2BandsEmpty}
+        </p>
+      </div>
+      <!--
+        Coefficients CDI/CDD (session 28) : écran RETIRÉ temporairement (incident post-livraison,
+        cf. docs/28-ecarts-contractuels.md) — AR_General_Setting__c.AR_CDI_Coefficient__c/
+        AR_CDD_Coefficient__c existent en métadonnées mais restent invisibles en SOQL/DML, donc
+        toute valeur saisie ici serait silencieusement perdue à l'enregistrement (JSON.deserialize
+        ignore les propriétés inconnues) — pire qu'une fonctionnalité absente. Le moteur retombe sur
+        son défaut 2,02 (CDI et CDD) tant que l'écran n'est pas rétabli.
+      -->
+      <!--
+        Session 26 §5 : « % Pénalité max dérogation » retiré de l'écran. Le champ
+        AR_General_Setting__c.AR_Max_Derogation_Penalty__c existe toujours en base (valeur
+        conservée, round-trip silencieux via handleSaveSettings) mais n'est lu par aucune classe du
+        moteur (AR_PricingCalculator, AR_PricingMatrixService, AR_DerogationService) — un
+        administrateur qui le modifiait constatait qu'il ne changeait rien, cf.
+        docs/architecture-technique.md §5.2. La règle de pénalité de la spécification v0.6 n'a
+        jamais été implémentée (seul le markup de la maquette l'a été) ; arbitrage en attente avec
+        Matthieu Szczesny. Remettre ce champ à l'écran le jour où le moteur le consomme réellement.
+      -->
+
+      <h2 class="admin-section-title">{i18n.AR_PMS_RecapFeeOfiiTax}</h2>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_OfiiTaxRate}
+          step="0.01"
+          min="0"
+          max="100"
+          value={ofiiTaxRate}
+          field-level-help={i18n.AR_AGS_OfiiTaxRateHelp}
+          onchange={handleOfiiTaxRateChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_OfiiTaxCap}
+          step="0.01"
+          min="0"
+          value={ofiiTaxCap}
+          field-level-help={i18n.AR_AGS_OfiiTaxCapHelp}
+          onchange={handleOfiiTaxCapChange}
+        ></lightning-input>
+      </div>
+
+      <h2 class="admin-section-title">{i18n.AR_AGS_DraftPurgeSection}</h2>
+      <div class="admin-form-row">
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_AGS_PurgeEnabled}
+          checked={draftPurgeEnabled}
+          onchange={handleDraftPurgeEnabledChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_PurgeDays}
+          step="1"
+          min="0"
+          value={draftPurgeDays}
+          onchange={handleDraftPurgeDaysChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_WarningDaysBefore}
+          step="1"
+          min="0"
+          value={draftPurgeWarningDays}
+          onchange={handleDraftPurgeWarningDaysChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_MaxPerRun}
+          step="1"
+          min="0"
+          value={draftPurgeMaxPerRun}
+          onchange={handleDraftPurgeMaxPerRunChange}
+        ></lightning-input>
+      </div>
+
+      <h2 class="admin-section-title">{i18n.AR_AGS_ValidatedInPopupSection}</h2>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_LifetimeDays}
+          step="1"
+          min="1"
+          value={validatedMatrixLifetimeDays}
+          onchange={handleValidatedMatrixLifetimeDaysChange}
+        ></lightning-input>
+      </div>
+
+      <h2 class="admin-section-title">
+        {i18n.AR_AGS_ReminderEscalationSection}
+      </h2>
+      <div class="admin-form-row">
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_AGS_ReminderEnabled}
+          checked={derogationReminderEnabled}
+          onchange={handleDerogationReminderEnabledChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_ReminderHours}
+          step="1"
+          min="0"
+          value={derogationReminderHours}
+          onchange={handleDerogationReminderHoursChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_EscalationHours}
+          step="1"
+          min="0"
+          value={derogationEscalationHours}
+          onchange={handleDerogationEscalationHoursChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_MaxPerRun}
+          step="1"
+          min="0"
+          value={derogationReminderMaxPerRun}
+          onchange={handleDerogationReminderMaxPerRunChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AGS_MaxRecipientsPerEscalation}
+          step="1"
+          min="0"
+          value={derogationEscalationMaxRecipients}
+          onchange={handleDerogationEscalationMaxRecipientsChange}
+        ></lightning-input>
+      </div>
+
+      <h2 class="admin-section-title">
+        {i18n.AR_AGS_HierarchyNotificationSection}
+      </h2>
+      <div class="admin-form-row">
+        <lightning-combobox
+          label={i18n.AR_AGS_Frequency}
+          value={hierarchyNotificationFrequency}
+          options={hierarchyNotificationFrequencyOptions}
+          onchange={handleHierarchyNotificationFrequencyChange}
+        ></lightning-combobox>
+      </div>
+
+      <h2 class="admin-section-title">{i18n.AR_AGS_NotificationsSection}</h2>
+      <div class="admin-form-row">
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_AGS_InAppNotificationsEnabled}
+          checked={inAppNotificationEnabled}
+          onchange={handleInAppNotificationEnabledChange}
+        ></lightning-input>
+      </div>
+
+      <!--
+        Session 35 : un paramètre jamais enregistré n'affiche plus une case vide. L'écran montre la
+        constante que le moteur applique réellement et la nomme comme telle — sans ça, en
+        production, l'administrateur voyait un formulaire vide et concluait que rien n'était
+        paramétré pendant que le corridor 20/25/30 s'appliquait depuis le code.
+      -->
+      <template if:true={hasEngineDefaults}>
+        <p class="admin-engine-default-notice">{engineDefaultsNotice}</p>
+      </template>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        disabled={isSaving}
+        onclick={handleSaveSettings}
+      >
+        {i18n.AR_Common_Save}
+      </button>
+    </div>
+
+    <div class="admin-list-header">
+      <div>
+        <h2 class="admin-section-title">{i18n.AR_AGS_WorkingDaysExceptions}</h2>
+        <p class="admin-list-subtitle">
+          {i18n.AR_AGS_WorkingDaysExceptionsHelp}
+        </p>
+      </div>
+      <button
+        class="btn btn-primary"
+        type="button"
+        onclick={handleAddException}
+      >
+        {i18n.AR_AGS_AddException}
+      </button>
+    </div>
+
+    <template if:true={showExceptionForm}>
+      <c-ar-admin-form-modal
+        heading={i18n.AR_AGS_ExceptionHeading}
+        save-label="Enregistrer l'exception"
+        saving={isSaving}
+        onsave={handleSaveException}
+        oncancel={handleCancelException}
+      >
+        <div class="admin-form-row">
+          <lightning-combobox
+            label={i18n.AR_Common_Entity}
+            value={exceptionEntity}
+            options={filterEntityOptionsForException}
+            onchange={handleExceptionEntityChange}
+            disabled={isEditingException}
+          ></lightning-combobox>
+          <lightning-input
+            type="number"
+            label={i18n.AR_Common_WorkingDaysPerYear}
+            step="1"
+            min="1"
+            max="366"
+            value={exceptionWorkingDays}
+            onchange={handleExceptionWorkingDaysChange}
+          ></lightning-input>
+        </div>
+      </c-ar-admin-form-modal>
+    </template>
+
+    <template if:true={isExceptionsEmpty}>
+      <div class="empty-state">{i18n.AR_AGS_NoExceptionYet}</div>
+    </template>
+
+    <template if:false={isExceptionsEmpty}>
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>{i18n.AR_Common_Entity}</th>
+              <th>{i18n.AR_AGS_DaysPerYear}</th>
+              <th>{i18n.AR_Common_LastModified}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={exceptions} for:item="row">
+              <tr key={row.id}>
+                <td>{row.entityName}</td>
+                <td>{row.workingDays}</td>
+                <td>{row.formattedLastModifiedDate}</td>
+                <td class="admin-table-actions">
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    data-entity-id={row.entityId}
+                    data-working-days={row.workingDays}
+                    onclick={handleEditException}
+                  >
+                    {i18n.AR_Common_Edit}
+                  </button>
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleDeleteException}
+                  >
+                    {i18n.AR_Common_Remove}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+  </template>
+</template>

@@ -1,0 +1,143 @@
+<template>
+  <div class="admin-list-header">
+    <div>
+      <h2 class="admin-section-title">{i18n.AR_ACO_Title}</h2>
+      <p class="admin-list-subtitle">{countLabel}</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick={handleAdd}>
+      {i18n.AR_ACO_AddKeyAccount}
+    </button>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={showForm}>
+    <c-ar-admin-form-modal
+      heading={i18n.AR_ACO_Heading}
+      saving={isSaving}
+      onsave={handleSave}
+      oncancel={handleCancel}
+    >
+      <div class="admin-form-row">
+        <div class="account-search-wrap">
+          <lightning-input
+            type="search"
+            label={i18n.AR_Common_Account}
+            placeholder={i18n.AR_Common_SearchAccount}
+            value={accountSearchTerm}
+            onchange={handleAccountSearchChange}
+          ></lightning-input>
+          <p class="account-selected-label">
+            {formAccountLabel}<template if:true={formAccountCity}
+              ><span class="account-city"> — {formAccountCity}</span></template
+            >
+          </p>
+          <template if:true={hasAccountResults}>
+            <ul class="account-results">
+              <template for:each={accountResults} for:item="opt">
+                <li key={opt.accountId}>
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={opt.accountId}
+                    onclick={handleSelectAccount}
+                  >
+                    {opt.label}<template if:true={opt.city}
+                      ><span class="account-city"> — {opt.city}</span></template
+                    >
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </template>
+        </div>
+        <lightning-input
+          type="number"
+          label={i18n.AR_Common_FloorPercent}
+          step="0.01"
+          min="0"
+          value={formFloor}
+          onchange={handleFloorChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_Common_TargetPercent}
+          step="0.01"
+          min="0"
+          value={formTarget}
+          onchange={handleTargetChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_Common_IdealPercent}
+          step="0.01"
+          min="0"
+          value={formIdeal}
+          onchange={handleIdealChange}
+        ></lightning-input>
+      </div>
+    </c-ar-admin-form-modal>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">{i18n.AR_ACO_Empty}</div>
+  </template>
+
+  <template if:false={isEmpty}>
+    <template if:false={isLoading}>
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>{i18n.AR_Common_Account}</th>
+              <th>{i18n.AR_Common_FloorPercent}</th>
+              <th>{i18n.AR_Common_TargetPercent}</th>
+              <th>{i18n.AR_Common_IdealPercent}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={corridors} for:item="row">
+              <tr key={row.id}>
+                <td>
+                  {row.accountName}
+                  <div class="row-meta">{row.modifiedLine}</div>
+                </td>
+                <td>{row.floorPercent}</td>
+                <td>{row.targetPercent}</td>
+                <td>{row.idealPercent}</td>
+                <td class="admin-table-actions">
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleEdit}
+                  >
+                    {i18n.AR_Common_Edit}
+                  </button>
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleDelete}
+                  >
+                    {i18n.AR_Common_Delete}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+  </template>
+</template>

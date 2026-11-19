@@ -1,0 +1,29 @@
+<aura:component >
+    
+    <aura:attribute name="nodes" type="Object[]" required="true" />
+    
+    <aura:attribute name="selectedValues" type="String[]" default="[]" />
+    <aura:attribute name="selectedNodes" type="Object[]" default="[]"/>
+    <aura:attribute name="selectOnlyHigherLevel" type="Boolean" default="false" />
+    <aura:attribute name="selectOnlyLastLevel" type="Boolean" default="false" />
+    <aura:attribute name="toggleNodesRecursively" type="Boolean" default="true"/>
+    <aura:attribute name="startExpended" type="String" default="auto" description="true/false/auto"/>
+    <aura:attribute name="class" type="String" default=""/>
+    
+    <aura:attribute name="_initedNodes" type="Object[]" />
+    <aura:attribute name="_prevSelectedValues" type="String[]" default="[]" description="Sert à pouvoir savoir si la modif de selectedValues vient d'un composant parent ou de ce propre composant"/>
+    <aura:attribute name="_prevSelectedNodes" type="Object[]" default="[]" description="Sert à pouvoir savoir si la modif de selectedNodes vient d'un composant parent ou de ce propre composant"/>
+    
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+    <aura:handler name="change" action="{!c.doInit}" value="{!v.nodes}"/>
+    <aura:handler name="change" action="{!c.handleChangeSelectedValues}" value="{!v.selectedValues}"/>
+    <aura:handler name="change" action="{!c.handleChangeSelectedNodes}" value="{!v.selectedNodes}"/>
+    <aura:handler name="refreshSelectedValues" event="c:EVT_HierarchyNodeEvent" action="{!c.refreshSelectedValues}" />
+    
+    
+    <ul class="{!v.class + ' hierarchyTopLevel'}" style="width: 100%">
+        <aura:iteration items="{!v._initedNodes}" var="node">
+            <c:HierarchyNode node="{!node}" toggleNodesRecursively="{!v.toggleNodesRecursively}" startExpended="{!v.startExpended}"/>
+        </aura:iteration>
+    </ul>
+</aura:component>

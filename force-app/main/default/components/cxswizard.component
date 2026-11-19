@@ -1,0 +1,16 @@
+<apex:component >
+    <apex:attribute name="locationfield" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="usesweight" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="candidate" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="blocks" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="criteria" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="mandatoryids" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="criteriumtypeids" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="hardcriteriatree" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="competencestree" type="String" description="TODO: Describe me"/>
+    <apex:attribute name="kind" type="String" description="TODO: Describe me"/>
+  <!-- Begin Default Content REMOVE THIS -->
+  <h1>Congratulations</h1>
+  This is your new Component: cxswizard
+  <!-- End Default Content REMOVE THIS -->
+</apex:component>

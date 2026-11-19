@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AB_Work_experience__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Work experience</label>
+    <referenceTo>cxsrec__cxsWork_Experience__c</referenceTo>
+    <relationshipLabel>Work Experience Skills</relationshipLabel>
+    <relationshipName>Work_Experience_Skills1</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

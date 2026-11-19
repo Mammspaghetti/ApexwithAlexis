@@ -1,0 +1,20 @@
+<aura:event type="APPLICATION" >
+    
+    <aura:attribute name="title" type="String" />
+    <aura:attribute name="duration" type="Integer"  />
+    
+    <aura:attribute name="forceCustomToast" type="Boolean" default="false"  />
+    
+    <!-- On appel cet event de 2 manière différentes: -->
+        
+        <!-- Soit avec type et message -->
+        <aura:attribute name="type" type="String" description="success/error/warning/info" default="error"/>
+        <aura:attribute name="message" type="String" />    
+        
+        
+        <!-- Soit uniquement avec le résultat "response.getError()" d'un appel Ajax en échec -->
+        <aura:attribute name="serverError" type="Object" />
+        
+    
+    
+</aura:event>

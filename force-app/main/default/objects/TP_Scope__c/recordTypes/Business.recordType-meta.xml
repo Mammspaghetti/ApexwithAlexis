@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Business</fullName>
+    <active>true</active>
+    <label>Business</label>
+    <picklistValues>
+        <picklist>Job_Title__c</picklist>
+        <values>
+            <fullName>Admin</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Analyste 3SI</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Analyste Brussels</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Analyste Flanders</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Consultant Externe</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Directeur Autre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Directeur Développement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Directeur Recrutement Consultant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Directeur d%27Activité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HTA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ingénieur d%27Affaires</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Manager</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Manager Coach</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Marketing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Responsable d%27Activité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Support</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TA NEWCO</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TAM</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TAM NEWCO</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TAO</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TAS</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>TP_Action__c</picklist>
+        <values>
+            <fullName>E1</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>E2</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Prospection</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pré-qualification</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Qualification</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Signature</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Suivi de projet</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Suivi de projet client</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Suivi de projet consultant</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

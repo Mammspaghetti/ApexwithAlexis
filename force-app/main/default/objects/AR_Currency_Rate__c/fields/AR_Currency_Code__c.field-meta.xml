@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Currency_Code__c</fullName>
+    <description>Code de la devise dont le taux de conversion vers l&apos;euro est renseigné. Les devises prises en charge sont GBP, CHF, CAD et MAD.</description>
+    <label>Devise</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>GBP</fullName>
+                <default>false</default>
+                <label>GBP</label>
+            </value>
+            <value>
+                <fullName>CHF</fullName>
+                <default>false</default>
+                <label>CHF</label>
+            </value>
+            <value>
+                <fullName>CAD</fullName>
+                <default>false</default>
+                <label>CAD</label>
+            </value>
+            <value>
+                <fullName>MAD</fullName>
+                <default>false</default>
+                <label>MAD</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

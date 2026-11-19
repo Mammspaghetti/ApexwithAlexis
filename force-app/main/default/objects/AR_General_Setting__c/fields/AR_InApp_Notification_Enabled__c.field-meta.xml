@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_InApp_Notification_Enabled__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Interrupteur général des notifications Salesforce dans l&apos;application pour les événements du workflow de dérogation. N&apos;affecte pas l&apos;envoi des e-mails.</description>
+    <label>Notifications in-app activées</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

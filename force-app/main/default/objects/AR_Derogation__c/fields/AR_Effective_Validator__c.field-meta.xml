@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Effective_Validator__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Utilisateur habilité ayant réellement traité la dérogation.</description>
+    <label>Valideur effectif</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Valideur effectif</relationshipLabel>
+    <relationshipName>AR_Derogations_Effective_Validator</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

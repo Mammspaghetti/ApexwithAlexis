@@ -1,0 +1,493 @@
+.container {
+    text-align: center;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+}
+
+.mascot {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: auto;
+    animation: float 3s ease-in-out infinite;
+}
+
+.cloud {
+    position: absolute;
+    width: 220px;
+    height: 145px;
+    background: #1798d4;
+    border-radius: 80px;
+    top: 55px;
+    left: 30px;
+    box-shadow: 0 12px 0 #087bb5;
+}
+
+.cloud::before,
+.cloud::after {
+    content: "";
+    position: absolute;
+    background: #1798d4;
+    border-radius: 50%;
+}
+
+.cloud::before {
+    width: 115px;
+    height: 115px;
+    top: -48px;
+    left: 45px;
+}
+
+.cloud::after {
+    width: 85px;
+    height: 85px;
+    top: -25px;
+    right: 15px;
+}
+
+.face {
+    position: absolute;
+    z-index: 2;
+    top: 90px;
+    left: 75px;
+    width: 130px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.eye {
+    width: 13px;
+    height: 19px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 4s infinite;
+}
+
+.mouth {
+    position: absolute;
+    width: 35px;
+    height: 18px;
+    border-bottom: 4px solid white;
+    border-radius: 50%;
+    top: 35px;
+    left: 48px;
+}
+
+.cheek {
+    position: absolute;
+    top: 30px;
+    width: 17px;
+    height: 9px;
+    background: #ff9caa;
+    border-radius: 50%;
+}
+
+.left-cheek {
+    left: 12px;
+}
+
+.right-cheek {
+    right: 12px;
+}
+
+.arm {
+    position: absolute;
+    width: 13px;
+    height: 65px;
+    background: #087bb5;
+    border-radius: 20px;
+    top: 130px;
+}
+
+.arm.left {
+    left: 15px;
+    transform: rotate(35deg);
+}
+
+.arm.right {
+    right: 15px;
+    animation: wave 1s infinite alternate;
+}
+
+.legs {
+    position: absolute;
+    top: 190px;
+    left: 95px;
+    display: flex;
+    gap: 35px;
+}
+
+.leg {
+    width: 13px;
+    height: 45px;
+    background: #087bb5;
+    border-radius: 20px;
+}
+
+.emoji {
+    position: absolute;
+    z-index: 3;
+    font-size: 30px;
+}
+
+.emoji-top {
+    top: 0;
+    left: 120px;
+    animation: spin 4s infinite linear;
+}
+
+.emoji-left {
+    top: 100px;
+    left: -15px;
+    animation: bounce 1.5s infinite;
+}
+
+.emoji-right {
+    top: 100px;
+    right: -15px;
+    animation: bounce 1.8s infinite;
+}
+
+h1 {
+    color: #1798d4;
+    font-size: 30px;
+}
+
+.subtitle {
+    color: #607d8b;
+}
+
+.speech {
+    margin: 20px auto;
+    padding: 15px;
+    background: white;
+    border-radius: 20px;
+    max-width: 320px;
+    box-shadow: 0 4px 15px #00000012;
+    color: #087bb5;
+    font-weight: bold;
+}
+
+button,lightning-button  {
+    background: #1798d4;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #087bb5;
+    transform: scale(1.08);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes blink {
+    0%, 45%, 50%, 100% { transform: scaleY(1); }
+    47%, 49% { transform: scaleY(.1); }
+}
+
+@keyframes wave {
+    from { transform: rotate(-35deg); }
+    to { transform: rotate(-75deg); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+
+
+/* CONTAINER PRINCIPAL */
+.christmas-container {
+    padding: 30px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #fff5f0, #fffaf0);
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.christmas-header {
+    text-align: center;
+    padding: 35px 20px;
+    border-radius: 20px;
+    color: white;
+    background: linear-gradient(135deg, #8e1027, #d62839, #a4133c);
+    box-shadow: 0 8px 25px rgba(142, 16, 39, 0.25);
+    margin-bottom: 25px;
+}
+
+.christmas-header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 15px 0;
+    letter-spacing: 1px;
+}
+
+.christmas-header p {
+    font-size: 15px;
+    color: #ffe8c2;
+}
+
+.snowflakes {
+    font-size: 30px;
+    letter-spacing: 12px;
+}
+
+.header-badge {
+    display: inline-block;
+    background: #ffd166;
+    color: #79202c;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* STATISTIQUES */
+.gift-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px 10px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+    border-bottom: 4px solid #d62839;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+}
+
+.stat-card span {
+    font-size: 30px;
+}
+
+.stat-card h2 {
+    color: #a4133c;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 8px 0;
+}
+
+.stat-card p {
+    color: #777;
+    font-size: 12px;
+}
+
+/* TABLEAU */
+.gift-table-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.table-title {
+    padding: 22px;
+    background: #fff0e5;
+    text-align: center;
+    border-bottom: 2px solid #f4d4b4;
+}
+
+.table-title h2 {
+    color: #a4133c;
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.table-title span {
+    color: #b17a25;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* TABLE RESPONSIVE */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.gift-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+.gift-table thead {
+    background: #a4133c;
+    color: white;
+}
+
+.gift-table th {
+    padding: 16px 12px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.gift-table td {
+    padding: 18px 12px;
+    text-align: center;
+    border-bottom: 1px solid #f1e5e0;
+    color: #444;
+    font-size: 13px;
+}
+
+.gift-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.gift-table tbody tr:hover {
+    background: #fff5e9;
+    transform: scale(1.005);
+}
+
+.gift-name {
+    font-weight: 800;
+    color: #9e1838 !important;
+}
+
+/* MÉDAILLES */
+.medal {
+    font-size: 23px;
+}
+
+.gold {
+    filter: drop-shadow(0 2px 3px #ffd700);
+}
+
+.silver {
+    filter: drop-shadow(0 2px 3px #aaa);
+}
+
+.bronze {
+    filter: drop-shadow(0 2px 3px #cd7f32);
+}
+
+/* BADGES */
+.tag {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.premium {
+    background: #ffe4b5;
+    color: #a65a00;
+}
+
+.luxury {
+    background: #eee0ff;
+    color: #7539a7;
+}
+
+.funny {
+    background: #e0f5e9;
+    color: #237447;
+}
+
+.home {
+    background: #dceeff;
+    color: #23649c;
+}
+
+.sweet {
+    background: #ffe1e8;
+    color: #b52c57;
+}
+
+/* FOOTER TABLEAU */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 18px;
+    background: #fff7ef;
+    color: #a4133c;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* MESSAGE FINAL */
+.christmas-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #166534, #23834b);
+    color: white;
+    box-shadow: 0 7px 20px rgba(22,101,52,0.2);
+}
+
+.christmas-message h2 {
+    font-size: 19px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.christmas-message p {
+    font-size: 13px;
+    color: #e2f8e8;
+}
+
+.message-icon {
+    font-size: 35px;
+}
+
+/* RESPONSIVE */
+@media screen and (max-width: 600px) {
+    .christmas-container {
+        padding: 12px;
+    }
+
+    .christmas-header h1 {
+        font-size: 20px;
+    }
+
+    .gift-stats {
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 15px 5px;
+    }
+
+    .stat-card h2 {
+        font-size: 18px;
+    }
+
+    .table-footer {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .christmas-message h2 {
+        font-size: 15px;
+    }
+}

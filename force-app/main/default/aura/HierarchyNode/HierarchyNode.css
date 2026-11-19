@@ -1,0 +1,64 @@
+.THIS.hierarchieNode{
+	vertical-align: top;
+    position: relative;
+    padding-left: 20px;
+}
+
+.THIS.hierarchieNode > .slds-button{
+	vertical-align: top;    
+	padding-top: 3px;    
+}
+
+.THIS ul.collapse{
+    display: none;
+}
+
+.THIS .hierarchieCheckbox{
+    display: inline-block !important;
+    width: 80%;
+}
+
+.THIS .hierarchieCheckbox .slds-form-element__control{
+    width: 100%;
+}
+
+
+.THIS .hasCheckedChildren .slds-checkbox input[type=checkbox]:not(:checked)+.slds-checkbox__label .slds-checkbox_faux:after{
+    content: '';
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    background-color: #8bb9e0;
+    margin: 2px;
+}
+
+.THIS .slds-button:focus{
+    box-shadow: none !important;
+}
+
+.THIS .hierarchieNode::before{
+    content: ' ';
+    position: absolute;
+    left: 8px;
+    height: 13px;
+    width: 12px;
+    top: -2px;
+    border-color: #CCC;
+    border-style: solid;
+    border-width: 0 0 1px 1px;
+}
+
+.THIS .hierarchieNode::after{
+    content: ' ';
+    position: absolute;
+    left: 8px;
+    height: 100%;
+    top: -2px;
+    border-color: #CCC;
+    border-style: solid;
+    border-width: 0 0 0 1px;
+}
+
+.THIS ul .hierarchieNode:last-child::after{
+    display: none;
+}

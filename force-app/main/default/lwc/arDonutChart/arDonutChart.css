@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.donut {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.center {
+  font-size: 14px;
+  font-weight: 900;
+  fill: #111111;
+}

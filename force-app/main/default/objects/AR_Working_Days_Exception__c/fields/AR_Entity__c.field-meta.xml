@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Entity__c</fullName>
+    <description>Entité juridique concernée par l&apos;exception. Ce champ n&apos;est plus utilisé pour définir les jours travaillés ; renseigner le référentiel des entités PTF.</description>
+    <label>Entité House of ABY</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Companies_Abylsen</valueSetName>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,10 @@
+@import "c/arDashboardStyles";
+
+.month-table th,
+.month-table td {
+  min-width: 52px;
+}
+
+.levels-bar {
+  min-width: 140px;
+}

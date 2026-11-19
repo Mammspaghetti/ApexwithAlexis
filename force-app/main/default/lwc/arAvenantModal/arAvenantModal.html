@@ -1,0 +1,301 @@
+<template>
+  <template if:true={open}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      class="slds-modal slds-fade-in-open av-modal"
+      aria-modal="true"
+      aria-labelledby="avenant-modal-heading"
+    >
+      <div class="slds-modal__container av-container">
+        <header class="av-header">
+          <div class="av-header-icon">
+            <lightning-icon
+              icon-name="utility:edit_form"
+              size="small"
+            ></lightning-icon>
+          </div>
+          <div class="av-header-text">
+            <h2 id="avenant-modal-heading" class="av-title">{modalTitle}</h2>
+            <p class="av-subtitle">{i18n.AR_AVN_ModalIntro}</p>
+          </div>
+        </header>
+
+        <div class="av-body">
+          <template if:true={isLoading}>
+            <p class="av-muted" data-id="loading">
+              {i18n.AR_Common_LoadingEllipsis}
+            </p>
+          </template>
+
+          <template if:true={hasLoadError}>
+            <div class="av-error" role="alert" data-id="load-error">
+              {loadError}
+            </div>
+          </template>
+
+          <template if:true={hasContext}>
+            <lightning-combobox
+              name="ptf"
+              label={i18n.AR_AVN_AmendedPtf}
+              data-id="ptf"
+              options={ptfSelectOptions}
+              value={selectedPtfId}
+              onchange={handlePtfChange}
+            ></lightning-combobox>
+
+            <!-- Question 1 : nouveau tarif -->
+            <div class="av-question" data-id="q-tarif">
+              <lightning-radio-group
+                name="tarif"
+                data-id="radio-tarif"
+                label={i18n.AR_AVN_Q1NewRate}
+                options={yesNoOptions}
+                value={tarif}
+                type="button"
+                onchange={handleTarifChange}
+              ></lightning-radio-group>
+              <template if:true={isTarif}>
+                <div class="av-fields">
+                  <lightning-input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    label={i18n.AR_PTF_NewDailyRate}
+                    data-id="new-tjm"
+                    value={newTjm}
+                    onchange={handleNewTjmChange}
+                  ></lightning-input>
+                  <p class="av-muted">{currentTjmText}</p>
+                  <template if:true={effectiveDateInTarif}>
+                    <lightning-input
+                      type="date"
+                      label={i18n.AR_AVN_EffectiveDate}
+                      data-id="effective-date"
+                      required
+                      value={effectiveDateValue}
+                      onchange={handleEffectiveDateChange}
+                    ></lightning-input>
+                  </template>
+                </div>
+              </template>
+            </div>
+
+            <!-- Question 2 : nouvelle période -->
+            <div class="av-question" data-id="q-periode">
+              <lightning-radio-group
+                name="periode"
+                data-id="radio-periode"
+                label={i18n.AR_AVN_Q2NewPeriod}
+                options={yesNoOptions}
+                value={periode}
+                type="button"
+                onchange={handlePeriodeChange}
+              ></lightning-radio-group>
+              <template if:true={isPeriode}>
+                <div class="av-fields" data-id="period-fields">
+                  <lightning-input
+                    type="date"
+                    label={i18n.AR_AVN_NewEndDate}
+                    data-id="new-end"
+                    value={newEndDate}
+                    onchange={handleNewEndDateChange}
+                  ></lightning-input>
+                  <p class="av-muted">{currentEndText}</p>
+                  <template if:true={hasPeriodSummary}>
+                    <p class="av-muted" data-id="period-summary">
+                      {periodSummary}
+                    </p>
+                  </template>
+                  <template if:true={effectiveDateInPeriod}>
+                    <lightning-input
+                      type="date"
+                      label={i18n.AR_AVN_EffectiveDate}
+                      data-id="effective-date"
+                      required
+                      value={effectiveDateValue}
+                      onchange={handleEffectiveDateChange}
+                    ></lightning-input>
+                  </template>
+                </div>
+              </template>
+            </div>
+
+            <!-- Question 3 : conditions financières (champs filtrés par statut de contrat) -->
+            <div class="av-question" data-id="q-conditions">
+              <lightning-radio-group
+                name="conditions"
+                data-id="radio-conditions"
+                label={i18n.AR_AVN_Q3FinancialTerms}
+                options={yesNoOptions}
+                value={conditions}
+                type="button"
+                onchange={handleConditionsChange}
+              ></lightning-radio-group>
+              <template if:true={isConditions}>
+                <div class="av-fields" data-id="cost-fields">
+                  <template if:true={hasCostFields}>
+                    <div class="av-grid">
+                      <template for:each={costFields} for:item="f">
+                        <lightning-input
+                          key={f.key}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          label={f.label}
+                          data-field={f.key}
+                          value={f.value}
+                          onchange={handleCostChange}
+                        ></lightning-input>
+                      </template>
+                    </div>
+                    <template if:true={isIndep}>
+                      <p class="av-muted" data-id="indep-note">
+                        {i18n.AR_AVN_FreelanceEditableHint}
+                      </p>
+                    </template>
+                  </template>
+                  <template if:true={hasOmFields}>
+                    <p class="av-group-label">{i18n.AR_AVN_DailyFees}</p>
+                    <div class="av-grid">
+                      <template for:each={omFields} for:item="f">
+                        <lightning-input
+                          key={f.key}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          label={f.label}
+                          data-field={f.key}
+                          value={f.value}
+                          onchange={handleCostChange}
+                        ></lightning-input>
+                      </template>
+                    </div>
+                  </template>
+                  <template if:true={hasOneShotFields}>
+                    <p class="av-group-label">
+                      {i18n.AR_AVN_OneTimeFeesReamortized}
+                    </p>
+                    <div class="av-grid">
+                      <template for:each={oneShotFields} for:item="f">
+                        <lightning-input
+                          key={f.key}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          label={f.label}
+                          data-field={f.key}
+                          value={f.value}
+                          onchange={handleCostChange}
+                        ></lightning-input>
+                      </template>
+                    </div>
+                  </template>
+                  <template if:true={effectiveDateInConditions}>
+                    <lightning-input
+                      type="date"
+                      label={i18n.AR_AVN_EffectiveDate}
+                      data-id="effective-date"
+                      required
+                      value={effectiveDateValue}
+                      onchange={handleEffectiveDateChange}
+                    ></lightning-input>
+                  </template>
+                </div>
+              </template>
+            </div>
+
+            <c-ar-reason-multi-select
+              usage="version"
+              label={i18n.AR_AVN_Reasons}
+              required="true"
+              selected-ids={selectedReasonIds}
+              onchange={handleReasonsChange}
+            ></c-ar-reason-multi-select>
+            <template if:true={showReasonHint}>
+              <p class="av-muted" data-id="reason-hint">
+                {i18n.AR_AVN_ChooseAtLeastOneReason}
+              </p>
+            </template>
+
+            <!-- Impact -->
+            <div class="av-impact" data-id="impact">
+              <template if:true={hasImpact}>
+                <p class="av-group-label" data-id="impact-title">
+                  {impactTitle}
+                </p>
+                <table class="av-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>{i18n.AR_AVN_CurrentTerms}</th>
+                      <th>{i18n.AR_AVN_Avenant}</th>
+                      <th>{i18n.AR_AVN_Gap}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={impactRows} for:item="row">
+                      <tr key={row.key} data-row={row.key}>
+                        <th scope="row">{row.label}</th>
+                        <td data-cell="before">
+                          <span class="av-val">{row.before}</span>
+                          <template if:true={row.hasSegment}>
+                            <span class={row.beforeSegmentClass}
+                              >{row.beforeSegmentLabel}</span
+                            >
+                          </template>
+                        </td>
+                        <td data-cell="after">
+                          <span class="av-val">{row.after}</span>
+                          <template if:true={row.hasSegment}>
+                            <span class={row.afterSegmentClass}
+                              >{row.afterSegmentLabel}</span
+                            >
+                          </template>
+                        </td>
+                        <td data-cell="delta">{row.delta}</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+                <p class="av-note" data-id="stored-note">{storedMc2Note}</p>
+                <p class={decisionClass} data-id="decision">{decisionText}</p>
+              </template>
+              <template if:false={hasImpact}>
+                <p class="av-muted" data-id="impact-hint">{impactHint}</p>
+              </template>
+            </div>
+          </template>
+
+          <template if:true={saveError}>
+            <div class="av-error" role="alert" data-id="save-error">
+              {saveError}
+            </div>
+          </template>
+        </div>
+
+        <footer class="av-footer">
+          <button
+            class="btn btn-secondary"
+            type="button"
+            data-id="cancel"
+            onclick={handleCancel}
+            disabled={isSaving}
+          >
+            {i18n.AR_Common_Cancel}
+          </button>
+          <button
+            class="btn btn-primary"
+            type="button"
+            data-id="submit"
+            onclick={handleSubmit}
+            disabled={isSubmitDisabled}
+          >
+            {submitLabel}
+          </button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open av-backdrop"></div>
+  </template>
+</template>

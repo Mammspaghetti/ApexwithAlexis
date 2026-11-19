@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Address__c</fullName>
+    <description>Adresse postale complète de l&apos;entité (voie, CP/ville, pays, mention légale SIREN/TVA/NIC) : bloc multi-lignes tel qu&apos;imprimé sur la PTF.</description>
+    <label>Adresse</label>
+    <length>4096</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>6</visibleLines>
+</CustomField>

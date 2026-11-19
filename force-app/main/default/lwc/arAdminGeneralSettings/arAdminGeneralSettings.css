@@ -1,0 +1,124 @@
+.admin-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px;
+}
+
+.admin-traceability {
+  font-size: 12px;
+  color: #888;
+  margin: -8px 0 12px;
+}
+
+/* Origine d'un paramètre non enregistré (session 35) — informatif, pas une erreur : le moteur
+   applique bien une valeur, elle n'est simplement pas encore figée en base. */
+.admin-engine-default-notice {
+  font-size: 12px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 16px;
+}
+
+.admin-form-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-form-row > * {
+  flex: 1 1 180px;
+  min-width: 160px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #fff;
+}
+
+.btn-text {
+  background: none;
+  color: #d31876;
+  padding: 6px 8px;
+}
+
+.admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-list-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+.admin-table-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: #888;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e5e5;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.admin-table-actions {
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #888;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+}
+
+.error-message {
+  padding: 16px;
+  color: #c0392b;
+}

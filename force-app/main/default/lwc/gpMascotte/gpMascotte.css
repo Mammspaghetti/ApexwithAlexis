@@ -1,0 +1,622 @@
+.mascotte-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    padding: 25px 15px;
+    background: linear-gradient(145deg, #fff5d6, #f5d5c0);
+    border-radius: 15px;
+}
+
+/* Colonne de la mascotte */
+.mascotte-colonne {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ===== Cadeau (à droite) ===== */
+.cadeau-panel {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 420px;
+    padding: 16px;
+    background: #fffaf0;
+    border: 3px solid #55352c;
+    border-radius: 12px;
+    box-shadow: 4px 4px 0 #bd7558;
+}
+
+.cadeau {
+    position: relative;
+    width: 100px;
+    height: 110px;
+    margin-bottom: 12px;
+    animation: cadeauSautille 1.6s ease-in-out infinite;
+}
+
+/* Boîte avec ruban vertical */
+.cadeau-boite {
+    position: absolute;
+    bottom: 0;
+    left: 8px;
+    width: 84px;
+    height: 62px;
+    background:
+        linear-gradient(90deg, transparent 36px, #f2c94c 36px, #f2c94c 48px, transparent 48px),
+        #bd392e;
+    border: 3px solid #55352c;
+    border-radius: 0 0 6px 6px;
+}
+
+/* Couvercle avec ruban vertical */
+.cadeau-couvercle {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    width: 100px;
+    height: 22px;
+    background:
+        linear-gradient(90deg, transparent 41px, #f2c94c 41px, #f2c94c 53px, transparent 53px),
+        #e85d4a;
+    border: 3px solid #55352c;
+    border-radius: 5px;
+}
+
+/* Noeud */
+.cadeau-noeud {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    width: 0;
+    height: 0;
+}
+
+.boucle {
+    position: absolute;
+    bottom: 0;
+    width: 26px;
+    height: 20px;
+    background: #f2c94c;
+    border: 3px solid #55352c;
+    border-radius: 50% 50% 0 50%;
+}
+
+.boucle-gauche {
+    right: 0;
+    transform: rotate(20deg);
+}
+
+.boucle-droite {
+    left: 0;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-20deg);
+}
+
+@keyframes cadeauSautille {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(-3deg); }
+}
+
+.cadeau-input {
+    width: 100%;
+}
+
+.cadeau-bouton {
+    margin-top: 10px;
+}
+
+/* Liste des derniers cadeaux */
+.cadeau-liste {
+    width: 100%;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 2px dashed #bd7558;
+    font-size: 11px;
+    color: #55352c;
+}
+
+/* Titre du tableau : texte à gauche, compteur à droite */
+.cadeau-liste-titre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 900;
+    color: #bd392e;
+    margin-bottom: 6px;
+}
+
+/* Petit badge "2 / 5 donnés" */
+.cadeau-compteur {
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    background: #bd392e;
+    padding: 2px 8px;
+    border: 2px solid #55352c;
+    border-radius: 10px;
+}
+
+/* Tableau des cadeaux : même style "cartoon" que le reste (bord foncé + ombre décalée) */
+.cadeau-tableau {
+    width: 100%;
+    background: #fff;
+    border: 3px solid #55352c;
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 #bd7558;
+    overflow: hidden;
+}
+
+
+/* Larmes de la mascotte */
+.larme {
+    position: absolute;
+    top: 55%;
+    font-size: 16px;
+    z-index: 6;
+    animation: larmeTombe 0.8s ease-in infinite;
+}
+
+.larme-gauche { left: 30%; }
+.larme-droite { right: 30%; animation-delay: 0.4s; }
+
+@keyframes larmeTombe {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(30px); opacity: 0; }
+}
+
+.cadeau-vide {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Nom */
+.mascotte-nom {
+    font-size: 19px;
+    font-weight: 900;
+    color: #bd392e;
+    margin-bottom: 18px;
+}
+
+/* Cercle principal */
+.mascotte-bulle {
+    position: relative;
+    width: 145px;
+    height: 145px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #ffe8c9, #e9a58d);
+    border: 4px solid #55352c;
+    box-shadow: 4px 4px 0 #bd7558;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Soleil levant */
+.mascotte-bulle::before {
+    content: "";
+    position: absolute;
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: #e85d4a;
+    opacity: 0.3;
+    top: 28px;
+}
+
+/* Couches d'animation */
+.leaf-layer,
+.kaomoji-rain {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Feuilles */
+.leaf {
+    position: absolute;
+    top: 5px;
+    font-size: 17px;
+    z-index: 1;
+    animation: leafFall linear infinite;
+    opacity: 0;
+}
+
+.l1 { left: 5%; animation-duration: 4s; animation-delay: 0s; }
+.l2 { left: 20%; animation-duration: 5s; animation-delay: 1s; }
+.l3 { left: 35%; animation-duration: 4.5s; animation-delay: 2s; }
+.l4 { left: 50%; animation-duration: 5.5s; animation-delay: .5s; }
+.l5 { left: 65%; animation-duration: 4s; animation-delay: 1.5s; }
+.l6 { left: 80%; animation-duration: 5s; animation-delay: 2.5s; }
+.l7 { left: 15%; animation-duration: 6s; animation-delay: 3s; }
+.l8 { left: 75%; animation-duration: 4.5s; animation-delay: 3.5s; }
+.l9 { left: 45%; animation-duration: 5s; animation-delay: 4s; }
+
+@keyframes leafFall {
+    0% {
+        transform: translate(0, -20px) rotate(0deg);
+        opacity: 0;
+    }
+    15% { opacity: 1; }
+    50% {
+        transform: translate(15px, 75px) rotate(180deg);
+    }
+    85% { opacity: 0.8; }
+    100% {
+        transform: translate(-10px, 170px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Kaomoji */
+.k {
+    position: absolute;
+    top: -25px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: bold;
+    color: #9e382b;
+    z-index: 2;
+    opacity: 0;
+    animation: kaomojiFall linear infinite;
+}
+
+.k1 { left: 0%; animation-duration: 5s; animation-delay: 0s; }
+.k2 { left: 20%; animation-duration: 6s; animation-delay: 1s; }
+.k3 { left: 40%; animation-duration: 5s; animation-delay: 2s; }
+.k4 { left: 60%; animation-duration: 6s; animation-delay: .5s; }
+.k5 { left: 75%; animation-duration: 5s; animation-delay: 2.5s; }
+.k6 { left: 10%; animation-duration: 6s; animation-delay: 3s; }
+.k7 { left: 45%; animation-duration: 5s; animation-delay: 3.5s; }
+.k8 { left: 80%; animation-duration: 6s; animation-delay: 4s; }
+
+@keyframes kaomojiFall {
+    0% {
+        transform: translateY(-20px) rotate(-10deg);
+        opacity: 0;
+    }
+    20% { opacity: 0.8; }
+    50% {
+        transform: translateY(75px) rotate(15deg);
+    }
+    100% {
+        transform: translateY(170px) rotate(-15deg);
+        opacity: 0;
+    }
+}
+
+/* Visage : toujours au premier plan */
+.mascotte-visage {
+    position: relative;
+    z-index: 5;
+    font-size: 38px;
+    font-weight: bold;
+    color: #292020;
+    text-shadow: 2px 2px #fff0df;
+    margin-top: -10px;
+}
+
+/* Très grognon : visage plus petit et sur une seule ligne */
+.mascotte-visage.tres-grognon {
+    font-size: 24px;
+    white-space: nowrap;
+    letter-spacing: -1px;
+}
+
+/* Repère pour placer la table lancée à côté de la bulle (pas dedans) */
+.bulle-zone {
+    position: relative;
+}
+
+/* Bras qui s'agitent quand il réclame son cadeau */
+.bras-reclame {
+    position: absolute;
+    top: 25%;
+    z-index: 8;
+    font-size: 44px;
+    font-weight: 900;
+    color: #292020;
+    text-shadow: 2px 2px #fff0df;
+    pointer-events: none;
+    animation-duration: 0.25s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.bras-reclame-gauche {
+    left: -34px;
+    transform-origin: bottom right;
+    animation-name: brasGauche;
+}
+
+.bras-reclame-droite {
+    right: -34px;
+    transform-origin: bottom left;
+    animation-name: brasDroite;
+}
+
+@keyframes brasGauche {
+    from { transform: rotate(-25deg) translateY(4px); }
+    to { transform: rotate(20deg) translateY(-6px); }
+}
+
+@keyframes brasDroite {
+    from { transform: rotate(25deg) translateY(4px); }
+    to { transform: rotate(-20deg) translateY(-6px); }
+}
+
+/* Table lancée vers la gauche, qui tourne en s'éloignant */
+.table-lancee {
+    position: absolute;
+    top: 30%;
+    left: -10px;
+    z-index: 8;
+    font-size: 26px;
+    font-weight: bold;
+    color: #bd392e;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: tableLancee 1.4s ease-out infinite;
+}
+
+@keyframes tableLancee {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-60px, -30px) rotate(-200deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-110px, 10px) rotate(-400deg);
+        opacity: 0;
+    }
+}
+
+/* Table volante */
+.mascotte-action {
+    display: flex;
+    align-items: center;
+    margin-top: 22px;
+    transform: rotate(-5deg);
+    font-size: 25px;
+    font-weight: bold;
+    color: #292020;
+}
+
+.bras {
+    white-space: nowrap;
+}
+
+.table {
+    font-size: 32px;
+    color: #bd392e;
+    white-space: nowrap;
+}
+
+/* Légende */
+.mascotte-legende {
+    margin-top: 18px;
+    background: #bd392e;
+    color: white;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 7px 14px;
+    border: 2px solid #55352c;
+    border-radius: 20px;
+    transform: rotate(2deg);
+    box-shadow: 3px 3px 0 #55352c;
+}
+
+/* Roue de kaomoji */
+.kaomoji-wheel {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    animation: wheelRotation 12s linear infinite;
+}
+
+/* Chaque kaomoji est placé autour du visage */
+.k {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: bold;
+    color: #9e382b;
+    transform-origin: center;
+}
+
+/* Positions autour du cercle */
+.k1 {
+    transform: translate(-50%, -50%) rotate(0deg) translateY(-57px);
+}
+
+.k2 {
+    transform: translate(-50%, -50%) rotate(60deg) translateY(-57px);
+}
+
+.k3 {
+    transform: translate(-50%, -50%) rotate(120deg) translateY(-57px);
+}
+
+.k4 {
+    transform: translate(-50%, -50%) rotate(180deg) translateY(-57px);
+}
+
+.k5 {
+    transform: translate(-50%, -50%) rotate(240deg) translateY(-57px);
+}
+
+.k6 {
+    transform: translate(-50%, -50%) rotate(300deg) translateY(-57px);
+}
+
+@keyframes wheelRotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes kaomoji-fall {
+    0% {
+        transform: translateY(-30px) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(220px) rotate(25deg);
+        opacity: 0;
+    }
+}
+
+/* ===== Mascotte grosse ===== */
+
+/* La bulle s'élargit et s'écrase */
+.mascotte-bulle {
+    transition: width 0.4s ease, height 0.4s ease, border-radius 0.4s ease;
+}
+
+.mascotte-bulle.gros {
+    width: 210px;
+    height: 160px;
+    border-radius: 50% 50% 46% 46% / 55% 55% 45% 45%;
+    background: linear-gradient(145deg, #ffd9e0, #e98da0);
+    animation: grosRespire 1.2s ease-in-out infinite;
+}
+
+@keyframes grosRespire {
+    0%, 100% { transform: scale(1, 1); }
+    50% { transform: scale(1.04, 0.97); }
+}
+
+/* Joues roses */
+.joue {
+    position: absolute;
+    z-index: 4;
+    width: 30px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ff7f96;
+    opacity: 0.7;
+    top: 85px;
+}
+
+.joue-gauche { left: 28px; }
+.joue-droite { right: 28px; }
+
+/* Petit rot */
+.burp {
+    position: absolute;
+    z-index: 6;
+    bottom: 14px;
+    font-size: 11px;
+    font-style: italic;
+    font-weight: bold;
+    color: #55352c;
+    animation: burpMonte 1.5s ease-out infinite;
+}
+
+@keyframes burpMonte {
+    0% { transform: translateY(0); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateY(-15px); opacity: 0; }
+}
+
+/* Zone du STOP (hauteur réservée pour ne pas tout décaler) */
+.stop-zone {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    z-index: 7;
+}
+
+.stop {
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    background: #d4231a;
+    padding: 2px 10px;
+    border: 3px solid #55352c;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0 #55352c;
+    white-space: nowrap;
+    transition: font-size 0.3s ease;
+    animation: stopTremble 0.3s ease-in-out infinite alternate;
+}
+
+/* Il tremble de plus en plus */
+.stop-1 { animation-duration: 0.5s; }
+.stop-2 { animation-duration: 0.4s; }
+.stop-3 { animation-duration: 0.3s; }
+.stop-4 { animation-duration: 0.2s; }
+.stop-5 { animation-duration: 0.1s; }
+
+/* Message temporaire : même style que STOP, en plus nerveux */
+.stop.message {
+    font-size: 18px;
+    background: #8b0000;
+    animation-duration: 0.1s;
+}
+
+@keyframes stopTremble {
+    from { transform: rotate(-4deg); }
+    to { transform: rotate(4deg); }
+}
+
+/* Symbole de colère */
+.colere {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    z-index: 6;
+    font-size: 22px;
+    animation: colerePulse 0.6s ease-in-out infinite alternate;
+}
+
+/* Très grognon : rangée de 💢 qui tremble au-dessus du visage */
+.trescolere {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    z-index: 6;
+    font-size: 14px;
+    letter-spacing: -2px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    animation: tresColereTremble 0.12s linear infinite alternate;
+}
+
+@keyframes tresColereTremble {
+    from { transform: translateX(-52%) rotate(-3deg) scale(1); }
+    to { transform: translateX(-48%) rotate(3deg) scale(1.1); }
+}
+
+@keyframes colerePulse {
+    from {
+        transform: scale(0.8) rotate(-10deg);
+    }
+    to {
+        transform: scale(1.2) rotate(10deg);
+    }
+}

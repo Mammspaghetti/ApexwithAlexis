@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Go_Live_Date__c</fullName>
+    <description>Date de mise en service du gating. Les besoins créés avant cette date restent au niveau Avertissement ; ceux créés à partir de cette date suivent la sévérité configurée.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Date de mise en service du gating</label>
+    <required>true</required>
+    <type>Date</type>
+</CustomField>

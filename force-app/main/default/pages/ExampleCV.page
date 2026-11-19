@@ -1,0 +1,537 @@
+<apex:page controller="cxsrec.cxsCV" applyHtmlTag="false" applyBodyTag="false" showHeader="false" renderAs="{!IF($CurrentPage.parameters.html=='true','','pdf')}" standardStylesheets="false">
+<head>
+    <style>
+        @page {
+         size: A4;
+         margin: 12mm;
+        
+         @top-left {
+             content: "CompanyName - {!$label.cxsrec__candidate} <cxsrec:getMapLabel map="{!candidateFieldMap}" key="Nice_name__c"/> {!$Label.cxsrec__for_the_position_of} <cxsrec:getMapLabel map="{!jobApplicationFieldMap}" key="Position__r.Name"/>";
+             font-size: 10px;
+         }
+         @bottom-center {
+             content: "Page " counter(page) " of " counter(pages);
+             font-size: 10px;
+         }
+        }
+
+        body { 
+            font-family: Arial Unicode MS;
+            font-size:13px;
+            max-width:734px;
+        }
+
+        @page :first { /* setting of the first page of a document */
+            /* hide page header */
+            margin-top: 5mm;
+            margin-left: 5mm;
+            margin-right: 5mm;
+            @top-right { content: "" }
+            @top-left { content: "" }
+
+            @bottom-left {
+                content: "";
+            }
+
+            @bottom-center {
+                content:"";
+            }
+        }
+        
+        //With the css below the first page is styled
+        div#header {
+            margin-left:5mm;
+            max-width:734px;
+        }
+
+        div.logo {
+            float:left;
+        }
+
+        img#headerImage {
+            width:734px;
+        }
+        
+        div#firstPageContainer {
+            width:734px;
+            border: 0px solid !important;
+            height:730px;
+            position: relative;
+        }
+
+        div#candidateSummary {
+            margin-top:20px;
+            margin-left:20px;
+            display: table;
+        }
+
+        .row {
+            display: table-row;
+            height:30px;
+        }
+
+        .cell.left {
+            display: table-cell;
+            font-weight: bold;
+            width:200px;
+        }
+
+        .cell.right {
+            display: table-cell;
+            width:500px;            
+        }
+        
+        .candidateFields.cell.right {
+            width: 300px !important;
+        }
+
+        .candidateFields.row {
+            height: 20px;
+        }
+
+        div#candidateFields {
+            float: left;
+        }
+
+        div#footerContainer {
+            bottom: 0px !important;
+            position: absolute;
+            width: 100%;
+        }
+
+        div#termsAndConditionsContainer {
+            width: 40%;
+            float:right;
+        }
+        
+        table#recruiterInfo {
+            width:7cm;
+            font-size: 11px;
+            float:left;
+            bottom: 0px !important;
+            position: absolute;
+        }
+
+        td.recruiterInfo {
+            padding: 5px;
+            width:1cm;
+        }
+        td.recruiterInfo.recruiterInfoFieldValues {
+            width: 8cm;
+        }
+            
+        img.Image_URL__c {
+            height: 15mm;
+        }
+
+        img.Image_Url__c {
+            height: 130px;
+        }
+
+        div#recruiterInfoFieldValues {
+            font-size:11px;
+        }
+        
+        table#termsAndConditions {
+            width:100%;
+            font-size:10px;
+        }
+
+        th#termsAndConditions {
+            padding-left: 5px;
+            padding-right: 5px;     }
+        
+        td#termsAndConditions {
+            padding: 5px;
+        }
+
+        div#pageBreak {
+            page-break-after: always;
+        }
+
+        .unbreak {
+            page-break-inside: avoid;
+            page-break-after: avoid;
+            border:none;
+        }
+
+        //With the css below the following pages are styled
+        div#content {
+            clear:both;
+            margin-top:100px;
+        }
+
+        img#candidatePhoto {
+            height:150px;
+            float:right;                    
+            margin-right:1cm;
+        }
+
+        div#candidateIntroduction {
+            clear:both;
+            width:95%;
+            margin-top:30px;
+            float: left;
+        }
+
+        div#candidateIntroductionHeader {
+            font-weight:bold;
+            font-family:sans-serif;
+        }
+
+        div#candidateIntroductionContent {
+            margin-right:20px;
+        }
+        
+        div#workExperiences, div#jobCriteria, div#personality {
+            float: left;
+            margin-top: 20px;
+        }
+
+        div#workExperiencesHeader, div#jobcriteriaHeader, div#personalityHeader {
+            font-family:sans-serif;
+            font-weight: bold;
+            page-break-after: avoid;
+        }
+        
+        div.workExperienceItem {
+            margin-top:10px;
+        }
+
+        div#jobcriteriaHeader, div#personalityHeader {
+            width:18cm;
+            margin-bottom:10px;
+        }
+
+        div#jobCriteria .jobCriteria {
+            line-height:25px;
+        }
+
+        div#jobCriteria img {
+            float: right;
+        }
+
+        div#personality .personalityItem {
+            width:12cm;
+            height:40px;
+            position:relative;
+            margin-bottom:10px;
+        }
+
+        div#personality .personalityBar {
+            height:40px;
+            position:absolute;
+        }
+
+        div#personality .personalityItem label {
+            position: absolute;
+            z-index: 10;
+            top:0px;
+            left: 20px;
+            color:#fff;
+            height:40px;
+            line-height:40px;
+        }
+
+        div#personality .percent {
+            text-align: right;
+            padding:0px;
+            margin:0px;
+            padding-right: 10px;    
+            color:#fff;
+            line-height: 40px;      
+        }
+
+        table {
+            border-spacing: 0px;
+            border: 1px solid #cbcbcb;
+            margin-top:5px;
+            width:18cm;
+        }
+        
+        table.workExperienceItem {
+            page-break-inside: avoid;
+        }
+
+        td.workExperienceFieldLabel.Functietitel  {
+            vertical-align: baseline !important;
+        }
+
+        th {
+            font-family:sans-serif;
+            font-weight: bold;
+            background-color: #e0e0e0;
+            height:26px;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        td {
+        padding-left: 10px;
+        padding-right: 10px;
+        vertical-align: top;
+        }
+
+        td.workExperienceFieldLabel {
+        padding-left: 10px;
+        vertical-align: top;
+        }
+        
+        div#educationsContent {
+            float: left;
+            margin-top: 20px;
+        }
+
+        div#educationsHeader {
+            font-weight: bold;
+        }
+
+        div.educationItem {
+            margin-top:10px;
+        }
+
+        td.educationFieldLabel.Functietitel  {
+            vertical-align: baseline !important;
+        }
+
+        td.educationFieldValue.Functietitel {
+            font-weight: bold;
+        }
+
+        td.educationFieldLabel.Beschrijving {
+        vertical-align: top;
+        }
+
+    </style>
+</head>
+<body>
+<apex:outputText rendered="{!errorMessage != null}">
+    Problem: {!errorMessage}
+</apex:outputText>
+<apex:outputText rendered="{!errorMessage == null}">
+    <div id="header">
+        <div id="logo">
+            <cxsrec:hasMapEntry map="{!recruiterFieldMap}" key="Account.Image_url__c">
+                <cxsrec:getMapValue map="{!recruiterFieldMap}" key="Account.Image_url__c" asImage="true"/>
+            </cxsrec:hasMapEntry>
+        </div>
+        <div>
+            <img src="{!$Resource.cxsrec__CVPDFHeaderImage}" id="headerImage"/>
+        </div>
+        <div id="firstPageContainer">
+            <div id="candidateSummary">
+                <div class="candidateSummary row">
+                    <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Nice_name__c">
+                        <div class="candidateSummary cell left">Naam</div>
+                        <div class="candidateSummary cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Nice_name__c"/></div>
+                    </cxsrec:hasMapEntry>
+                </div>
+                <div class="candidateSummary row">
+                    <cxsrec:hasMapEntry map="{!jobApplicationFieldMap}" key="Position__r.Name">
+                        <div class="candidateSummary cell left">Aanbieding voor functie</div>
+                        <div class="candidateSummary cell right"><cxsrec:getMapValue map="{!jobApplicationFieldMap}" key="Position__r.Name"/></div>
+                    </cxsrec:hasMapEntry>
+                </div>
+                <div class="candidateSummary row">
+                    <cxsrec:hasMapEntry map="{!jobApplicationFieldMap}" key="Position__r.Name">
+                        <div class="candidateSummary cell left">Beschikbaar per</div>
+                        <div class="candidateSummary cell right">Direct</div>
+                    </cxsrec:hasMapEntry>
+                </div>
+                <div class="candidateSummary row">
+                    <cxsrec:hasMapEntry map="{!jobApplicationFieldMap}" key="Pay_rate_per_unit__c">
+                        <div class="candidateSummary cell left">Tarief</div>
+                        <div class="candidateSummary cell right"><cxsrec:getMapValue map="{!jobApplicationFieldMap}" key="Pay_rate_per_unit__c"/></div>
+                    </cxsrec:hasMapEntry>
+                </div>
+            </div>
+            <div id="footerContainer">
+                <table id="recruiterInfo">
+                    <tr><th colspan="2" id="recruiterInfoHeader">Contactgegevens</th></tr>
+                    <td class=" recruiterInfo recruiterPhoto">
+                        <cxsrec:getMapValue map="{!recruiterFieldMap}" key="User__r.FullPhotoURL" asImage="true"/>
+                    </td>
+                    <td class ="recruiterInfo recruiterInfoFieldValues">
+                        <div id="recruiterInfoFieldValues">
+                            <div class="recruiterInfoFieldValue"><cxsrec:getMapValue map="{!recruiterFieldMap}" key="Full_name__c"/></div>
+                            <div class="recruiterInfoFieldValue"><cxsrec:getMapValue map="{!recruiterFieldMap}" key="Phone"/></div>
+                            <div class="recruiterInfoFieldValue"><cxsrec:getMapValue map="{!recruiterFieldMap}" key="Email"/></div>
+                            <div class="recruiterInfoFieldValue"><cxsrec:getMapValue map="{!recruiterFieldMap}" key="MobilePhone"/></div>
+                        </div>
+                    </td>
+                </table>
+                <div id="termsAndConditionsContainer">
+                    <table id="termsAndConditions">
+                    <tr>
+                        <th id="termsAndConditions"> Algemene voorwaarden</th>
+                    </tr>
+                    <tr>
+                        <td id="termsAndConditions">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div id="pageBreak"/>
+    </div>  
+    <div id="content">
+        <h2><cxsrec:getMapValue map="{!candidateFieldMap}" key="Nice_name__c"/></h2>
+        <div id="candidateFields">
+            <div id = "candidateFields table">
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="First_name__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Roepnaam</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="First_name__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Last_name_prefix__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Tussenvoegsel</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Last_name_prefix__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Last_name__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Achternaam</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Last_name__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Gender__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Geslacht</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Gender__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Date_of_birth__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Geboortedatum</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Date_of_birth__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Address_line_1__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Adres</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Address_line_1__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Postcode__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Postcode</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Postcode__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Town_city__c">
+                    <div class="candidateFields row">
+                        <div class = "candidateFields cell left">Plaats</div>
+                        <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="Town_city__c"/></div>
+                    </div>
+                </cxsrec:hasMapEntry>
+            </div>
+        </div>
+        <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="Image_Url__c">
+            <cxsrec:getMapValue map="{!candidateFieldMap}" key="Image_Url__c" asImage="true"/>
+        </cxsrec:hasMapEntry>
+
+        <div id="candidateIntroduction">
+            <div id="candidateIntroductionHeader">
+                Introductie         
+            </div>
+            <div id="candidateIntroductionContent">
+                <cxsrec:getMapValue map="{!jobapplicationFieldMap}" key="Motivation__c"/>
+            </div>
+        </div>
+        <apex:outputText rendered="{!educationFieldLists.size>0}">
+            <div id="educations">
+                <div id="educationsContent">
+                    <table id="educations">
+                        <tr><th colspan="2">Opleidingen</th></tr>
+                        <apex:repeat value="{!educationFieldLists}" var="education">
+                            <tr class="educationItem">
+                                <td class="educationName">
+                                    <apex:repeat value="{!education}" var="field">
+                                        <apex:outputText rendered="{!field.label==packagePrefix+'Startdatum'}">
+                                            {!field.value}
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!field.label==packagePrefix+'Einddatum'}">
+                                            -{!field.value}
+                                        </apex:outputText>
+                                    </apex:repeat>
+                                </td>
+                                <td class="educationName">
+                                    <apex:repeat value="{!education}" var="field">
+                                        <apex:outputText rendered="{!field.label!='Startdatum'&&field.label!='Einddatum'&&field.label!='Instituut'}" value="{!field.value}" escape="false" />
+                                        <apex:outputText rendered="{!field.label!='Startdatum'&&field.label!='Einddatum'&&field.label=='Instituut'}">
+                                             ({!field.value})
+                                        </apex:outputText>
+                                        <br/>
+                                    </apex:repeat>
+                                </td>   
+                            </tr>
+                        </apex:repeat>
+                    </table>
+                </div>
+            </div>  
+        </apex:outputText>
+        <apex:outputText rendered="{!workExperienceFieldLists.size>0}">
+            <div id="workExperiences">
+                <div id="workExperiencesContent">
+                    <div id="workExperiencesHeader">
+                        Werkervaring            
+                    </div>              
+                    <apex:repeat value="{!workExperienceFieldLists}" var="workExperience">
+                        <div class="workExperienceItem">    
+                            <table class="workExperienceItem">
+                                <apex:repeat value="{!workExperience}" var="field" rows="1">
+                                    <tr class="workEperienceField">
+                                        <th class="workExperienceFieldValue {!field.label}" colspan="2">
+                                        {!field.value}</th> 
+                                    </tr>
+                                </apex:repeat>
+                                <apex:repeat value="{!workExperience}" var="field" first="2">
+                                    <tr class="workEperienceField">
+                                        <td class="workExperienceFieldLabel {!field.label}">{!field.label}:</td>
+                                        <td class="workExperienceFieldValue {!field.label}"><apex:outputText value="{!field.value}" escape="false" /></td>
+                                    </tr>
+                                </apex:repeat>
+                            </table>
+                        </div>
+                    </apex:repeat>
+                </div>
+            </div>
+        </apex:outputText>
+        
+        <apex:outputText rendered="{!jobCriteriaFieldList.size>0}">
+            <div id="jobCriteria">
+                <div id="jobcriteriaHeader">
+                    Functie eisen           
+                </div>           
+                <apex:repeat value="{!jobCriteriaFieldList}" var="jobCrit">
+                    <div class="jobCriteria jobcriteria-{!jobCrit.answer}"><span>{!jobCrit.question}</span><img src="/resource/jobcritImg_{!jobCrit.answer}"/></div>
+                </apex:repeat>
+            </div>
+        </apex:outputText>
+        
+        <apex:outputText rendered="{!personalityMatchList.size !=null && personalityMatchList.size > 0}">
+            <div id="personality">
+                <table class="unbreak"><tr><td>
+                <div id="personalityHeader">
+                    Persoonlijkheid         
+                </div>           
+                <apex:repeat value="{!personalityMatchList}" var="personality">
+                    <div class="personalityItem" style="background-color:{!personality.backColor};">
+                        <label>{!personality.label}</label>
+                        <div class="personalityBar" style="width:{!personality.value}%; background-color: {!personality.color}">
+                            <p class="percent">{!personality.value}%</p>
+                        </div>
+                    </div>
+                </apex:repeat>
+            </td></tr></table>
+            </div>
+        </apex:outputText>
+
+    
+    </div>
+</apex:outputText>
+</body>
+</apex:page>

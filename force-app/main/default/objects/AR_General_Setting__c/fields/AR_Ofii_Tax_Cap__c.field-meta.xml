@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Ofii_Tax_Cap__c</fullName>
+    <defaultValue>2506.67</defaultValue>
+    <description>Plafond mensuel de la taxe OFII, en euros. Le montant proposé dans la matrice ne dépasse jamais ce plafond (converti dans la devise de la matrice) ; vide : calcul indisponible.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Montant maximum de la taxe, en euros, atteint à partir d&apos;un salaire mensuel de plafond ÷ taux. Les matrices existantes ne changent pas quand on modifie cette valeur.</inlineHelpText>
+    <label>Taxe OFII — plafond (€)</label>
+    <precision>10</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

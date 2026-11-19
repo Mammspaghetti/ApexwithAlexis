@@ -1,0 +1,196 @@
+<template>
+  <div class="tab-body">
+    <div class="kpi-row">
+      <div class="kpi-card kpi-tint-navy" data-kpi="requested">
+        <p class="kpi-label">{i18n.DrKpiRequested}</p>
+        <p class="kpi-value">{kpis.requestedCount}</p>
+      </div>
+      <div class="kpi-card kpi-tint-amber" data-kpi="rate">
+        <p class="kpi-label">{i18n.DrKpiRate}</p>
+        <p class="kpi-value">{rateText}</p>
+      </div>
+      <div class="kpi-card kpi-tint-green" data-kpi="accepted">
+        <p class="kpi-label">{i18n.DrKpiAccepted}</p>
+        <p class="kpi-value">{acceptedText}</p>
+        <p class="kpi-detail">{acceptedDetail}</p>
+      </div>
+      <div class="kpi-card kpi-tint-navy" data-kpi="delay">
+        <p class="kpi-label">{i18n.DrKpiDelay}</p>
+        <p class="kpi-value">{delayText}</p>
+      </div>
+    </div>
+
+    <div class="section-card block-monthly">
+      <p class="section-title">{i18n.DrMonthlyTitle}</p>
+      <template if:true={monthlyHasData}>
+        <div class="trend" role="img" aria-label={i18n.DrMonthlyTitle}>
+          <template for:each={monthColumns} for:item="col">
+            <div key={col.key} class="trend-col" title={col.title}>
+              <span class="trend-total">{col.total}</span>
+              <div class="trend-slot">
+                <div class="trend-stack" style={col.columnStyle}>
+                  <template for:each={col.parts} for:item="part">
+                    <div
+                      key={part.key}
+                      class="trend-part"
+                      style={part.style}
+                      title={part.title}
+                    ></div>
+                  </template>
+                </div>
+              </div>
+              <span class="trend-month">{col.label}</span>
+            </div>
+          </template>
+        </div>
+        <ul class="legend">
+          <template for:each={decisionLegend} for:item="item">
+            <li key={item.key} class="legend-item">
+              <span class="legend-dot" style={item.style}></span>
+              <span>{item.label}</span>
+            </li>
+          </template>
+        </ul>
+      </template>
+      <template if:false={monthlyHasData}>
+        <p class="empty-message">{i18n.NoData}</p>
+      </template>
+    </div>
+
+    <div class="grid-two">
+      <div class="section-card block-rate">
+        <p class="section-title">{rateTitle}</p>
+        <template if:true={rateRows.length}>
+          <template for:each={rateRows} for:item="row">
+            <div key={row.key} class="segment-row">
+              <span class="segment-name">{row.label}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style={row.barStyle}></div>
+              </div>
+              <span class="segment-count">{row.detail}</span>
+            </div>
+          </template>
+          <ul class="legend">
+            <template for:each={rateLegend} for:item="item">
+              <li key={item.key} class="legend-item">
+                <span class="legend-dot" style={item.style}></span>
+                <span>{item.label}</span>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template if:false={rateRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+
+      <div class="section-card block-reasons">
+        <div class="section-head">
+          <p class="section-title">{i18n.DrReasonsTitle}</p>
+          <div class="pill-row" role="group" aria-label={i18n.DrReasonsFilter}>
+            <template for:each={pills} for:item="pill">
+              <button
+                key={pill.key}
+                type="button"
+                class={pill.className}
+                data-value={pill.value}
+                aria-pressed={pill.pressed}
+                onclick={handlePill}
+              >
+                {pill.label}
+              </button>
+            </template>
+          </div>
+        </div>
+        <template if:true={hasReasons}>
+          <template for:each={reasonRows} for:item="row">
+            <div key={row.key} class="segment-row">
+              <span class="segment-name">{row.label}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style={row.barStyle}></div>
+              </div>
+              <span class="segment-count">{row.detail}</span>
+            </div>
+          </template>
+        </template>
+        <template if:false={hasReasons}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="section-card block-validators">
+        <p class="section-title">{i18n.DrValidatorsTitle}</p>
+        <template if:true={validatorRows.length}>
+          <div class="table-scroll">
+            <table class="rank-table validators-table">
+              <thead>
+                <tr>
+                  <th>{i18n.ColValidator}</th>
+                  <th class="num">{i18n.ColReceived}</th>
+                  <th>{i18n.ColSplit}</th>
+                  <th class="num">{i18n.ColRefusal}</th>
+                  <th class="num">{i18n.ColDelay}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={validatorRows} for:item="row">
+                  <tr key={row.key}>
+                    <td>{row.name}</td>
+                    <td class="num">{row.received}</td>
+                    <td>
+                      <div class="split-bar" title={row.split}>
+                        <div class="split-part" style={row.acceptedStyle}></div>
+                        <div class="split-part" style={row.refusedStyle}></div>
+                        <div class="split-part" style={row.pendingStyle}></div>
+                      </div>
+                    </td>
+                    <td class="num">{row.refusal}</td>
+                    <td class="num">{row.delay}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={validatorRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+
+      <div class="section-card block-clients">
+        <p class="section-title">{i18n.DrClientsTitle}</p>
+        <template if:true={clientRows.length}>
+          <div class="table-scroll">
+            <table class="rank-table clients-table">
+              <thead>
+                <tr>
+                  <th>{i18n.ColAccountName}</th>
+                  <th class="num">{i18n.ColDerogations}</th>
+                  <th class="num">{i18n.ColValidated}</th>
+                  <th class="num">{i18n.ColRateShort}</th>
+                  <th>{i18n.ColMainReason}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={clientRows} for:item="row">
+                  <tr key={row.key}>
+                    <td>{row.accountName}</td>
+                    <td class="num">{row.derogationCount}</td>
+                    <td class="num">{row.validatedCount}</td>
+                    <td class="num">{row.rate}</td>
+                    <td>{row.mainReason}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={clientRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

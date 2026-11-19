@@ -1,0 +1,456 @@
+<apex:page language="en_US" controller="cxsrec.cxsCV" applyHtmlTag="false" applyBodyTag="false" showHeader="false" renderAs="{!IF($CurrentPage.parameters.html=='true','','pdf')}" standardStylesheets="false">
+<head>
+    <style>
+        @page {
+            size: A4;
+            margin-top: 35mm;
+            margin-left: 20mm;
+            margin-right: 20mm;
+            margin-bottom: 20mm;
+            @top-left { content: element(logo); }
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 11px;
+                font-family: sans-serif,Arial Unicode MS;
+                color: #202945;
+            }
+        }
+
+        @page :first {
+            margin: 0;
+            padding: 0;
+            @top-left { content: none; }
+            @top-right { content: element(recruiter); }
+        }
+
+        body { 
+            font-family: sans-serif,Arial Unicode MS;
+            font-size:14px;
+            max-width:166mm;
+            color: #202945;
+            line-height: 1.5;
+        }
+        
+        //With the css below the first page is styled
+        div#header {
+        }
+
+        div#firstLogo {
+            position: running(firstLogo);
+            padding: 2mm;
+        }
+
+        div#firstLogo img {
+            position: absolute; 
+            float:left;  
+            width:45mm;
+            left:22mm;
+            top:17mm;
+        }
+        
+        img#firstLogo {
+            width: 100mm;
+        }
+
+        div#logo {
+            position: running(logo);
+            padding: 2mm;
+        }
+
+        div#logo img {
+            position: absolute; 
+            float:left;  
+            width:45mm;
+            left:-5mm;
+            top:12.5mm;
+        }
+
+        div#recruiter {
+            position: running(recruiter);
+        }
+
+        table#recruiterTable {
+            width:11cm;
+            font-size: 11px;
+            right: 22mm;
+            top: 10mm !important;
+            position: absolute;
+            text-align: right;
+            vertical-align: baseline;
+        }
+
+        div#recruiterInfoHeader {
+            color: #ff6900;
+            font-size: 14px;
+            font-weight: bold;
+            padding-bottom: 2mm;
+        }
+
+        td.recruiterPhoto {
+            width:22mm;
+            padding-left:12mm;
+            border-style: none;
+        }
+
+        td.recruiterPhoto img {
+            padding: 1mm;
+            width:22mm;
+        }
+ 
+        div#firstFooter {
+            position: absolute;
+            top: 246mm !important;
+            clear: both;
+        }
+
+        div#firstFooter img {
+            width:210mm;
+            height:51mm;
+            padding: 0;
+            margin-bottom: -2.2mm;
+        }
+
+        div#firstPageContainer {
+            width:166mm;
+            border: 0px solid !important;
+            height:100mm;
+            position: relative;
+            top: 40mm;
+            left: 20mm;
+            clear: both;
+        }
+
+        div#firstHeader img {
+            width:210mm;
+            height:44mm;
+            margin-left: -22mm;
+            margin-bottom: 10mm;
+        }
+
+        div#summary {
+            float: left;
+        }
+
+        div#candidatePhoto {
+            height:150px;
+            margin-top:10mm;
+        }
+
+        div#candidateIntroduction, div#criteriaIntroduction, div#jobRequirementsIntroduction {
+            clear:both;
+            width:95%;
+            margin-top:8mm;
+            float: left;
+        }
+
+        div#candidateIntroductionHeader {
+            font-weight:bold;
+            color: #009bdf;
+        }
+
+        div#candidateIntroductionContent {
+            margin-right:20px;
+        }
+
+        div#introductionCandidate {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5mm;
+        }
+
+        .row {
+            display: table-row;
+            height:30px;
+        }
+
+        .cell.left {
+            display: table-cell;
+            font-weight: bold;
+            width:200px;
+        }
+
+        .cell.right {
+            display: table-cell;
+            width:500px;            
+        }
+
+        .candidateFields.cell.left {
+            color: #009bdf;
+        }
+
+        .candidateFields.cell.right {
+            width: 300px !important;
+        }
+
+        .candidateFields.row {
+            height: 30px;
+        }
+
+        div#candidateFields {
+            float: left;
+        }
+
+            
+        img.Image_URL__c {
+            height: 40mm;
+        }
+        
+        img[class^="User__r"] {
+            width: 100px;
+        }
+
+        table {
+            border-spacing: 0px;
+            border: none;
+            margin-top:5px;
+            width:166mm;
+        }
+
+        th {
+            font-weight: bold;
+            background-color: #202945;
+            color: #FFFFFF;
+            height:26px;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        td {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        div#pageBreak {
+            page-break-after: always;
+        }
+
+        //With the css below the following pages are styled
+        div#content {
+            clear:both;
+        }
+
+        div#workExperienceHeader, div#educationHeader, div#criteriaHeader, div#jobRequirementsHeader {
+            font-weight: bold;
+            font-size:20px;
+            page-break-after: avoid;
+            margin-top: 3mm;
+            margin-botton:5mm;
+            color: #009bdf;
+        }
+
+        tr.workExperienceRow td, tr.educationRow td {
+            padding-top: 6mm;
+            vertical-align: baseline;
+        }
+
+    </style>
+</head>
+<body>
+<apex:outputText rendered="{!errorMessage != null}">
+    Problem: {!errorMessage}
+</apex:outputText>
+<apex:outputText rendered="{!errorMessage == null}">
+
+    <div id="firstLogo">
+        <img src="/resource/CV_Bullhorn_Logo"/>
+    </div>
+
+    <div id="logo">
+        <img src="/resource/CV_Bullhorn_Logo"/>
+    </div>
+
+    <div id="recruiter">
+        <table id="recruiterTable">
+            <td class ="recruiterInfo">
+                <cxsrec:hasMapEntry map="{!recruiterFieldMap}" key="cxsrec__Full_name__c">
+                    <div id="recruiterInfoHeader">
+                        <cxsrec:getMapValue map="{!recruiterFieldMap}" key="cxsrec__Full_name__c"/>
+                    </div>
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!recruiterFieldMap}" key="Title">
+                    <cxsrec:getMapValue map="{!recruiterFieldMap}" key="Title"/><br />
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!recruiterFieldMap}" key="Email">
+                    <cxsrec:getMapValue map="{!recruiterFieldMap}" key="Email"/><br />
+                </cxsrec:hasMapEntry>
+                <cxsrec:hasMapEntry map="{!recruiterFieldMap}" key="MobilePhone">
+                    <cxsrec:getMapValue map="{!recruiterFieldMap}" key="MobilePhone"/>
+                </cxsrec:hasMapEntry>
+            </td>
+            <td class="recruiterPhoto">
+                <cxsrec:getMapValue map="{!recruiterFieldMap}" key="cxsrec__User__r.FullPhotoURL" asImage="true"/>
+            </td>
+        </table>
+    </div>
+
+    <div id="firstPageContainer">
+        <div id="firstHeader">
+            <img src="/resource/CV_Bullhorn_Header"/>
+        </div>
+        <div id="summary">
+            <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="cxsrec__First_name__c">
+                <div id="introductionCandidate"><cxsrec:getMapValue map="{!candidateFieldMap}" key="First_name__c"/> <cxsrec:getMapValue map="{!candidateFieldMap}" key="Last_name__c"/></div>
+            </cxsrec:hasMapEntry>
+            <cxsrec:hasMapEntry map="{!jobApplicationFieldMap}" key="cxsrec__Position__r.cxsrec__Position_name__c">
+                <div class="candidateFields row">
+                    <div class= "candidateFields cell left">For the position</div>
+                    <div class= "candidateFields cell right"><cxsrec:getMapValue map="{!jobApplicationFieldMap}" key="cxsrec__Position__r.cxsrec__Position_name__c"/></div>
+                </div>
+            </cxsrec:hasMapEntry>
+            <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="cxsrec__Date_of_birth__c">
+                <div class="candidateFields row">
+                    <div class = "candidateFields cell left">Date of birth</div>
+                    <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="cxsrec__Date_of_birth__c"/></div>
+                </div>
+            </cxsrec:hasMapEntry>
+            <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="cxsrec__Town_city__c">
+                <div class="candidateFields row">
+                    <div class = "candidateFields cell left">City</div>
+                    <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="cxsrec__Town_city__c"/></div>
+                </div>
+            </cxsrec:hasMapEntry>
+            <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="cxsrec__First_possible_start_date__c">
+                <div class="candidateFields row">
+                    <div class = "candidateFields cell left">Available from</div>
+                    <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!candidateFieldMap}" key="cxsrec__First_possible_start_date__c"/></div>
+                </div>
+            </cxsrec:hasMapEntry>
+            <cxsrec:hasMapEntry map="{!introductionFieldMap}" key="cxsrec__Rate__c">
+                <div class="candidateFields row">
+                    <div class = "candidateFields cell left">Hourly rate</div>
+                    <div class = "candidateFields cell right"><cxsrec:getMapValue map="{!introductionFieldMap}" key="cxsrec__Rate__c"/></div>
+                </div>
+            </cxsrec:hasMapEntry>
+        </div>
+        <cxsrec:hasMapEntry map="{!candidateFieldMap}" key="cxsrec__Image_Url__c">
+            <div id="candidatePhoto">
+                <cxsrec:getMapValue map="{!candidateFieldMap}" key="cxsrec__Image_Url__c" asImage="true"/>
+            </div>
+        </cxsrec:hasMapEntry>
+
+        <cxsrec:hasMapEntry map="{!introductionFieldMap}" key="cxsrec__Introduction__c">
+            <div id="candidateIntroduction">
+                <div id="candidateIntroductionHeader">
+                    Introduction
+                </div>
+                <div id="candidateIntroductionContent">
+                    <cxsrec:getMapValue map="{!introductionFieldMap}" key="cxsrec__Introduction__c"/>
+                </div>
+            </div>
+        </cxsrec:hasMapEntry>
+
+        <apex:outputText rendered="{!jobCriteriaFieldList.size>0}">
+            <div id="jobRequirementsIntroduction">
+                <table id="jobRequirementsTable">
+                    <apex:repeat value="{!jobCriteriaFieldList}" var="jobCrit">
+                        <tr class="jobRequirements jobrequirement-{!jobCrit.answer}">
+                            <td class="jobRequirementsImage"><img src="/resource/cxsrec__jobcritImg_{!jobCrit.answer}"/></td>
+                            <td>{!jobCrit.question}</td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </div>
+        </apex:outputText>
+    </div>
+    <div id="firstFooter">
+        <img src="/resource/CV_Bullhorn_Footer"/>
+    </div>
+
+    <div id="pageBreak"/>
+    <div id="content">
+
+        <apex:outputText rendered="{!workExperienceFieldLists.size>0}">
+            <div id="workExperiences">
+                <div id="workExperienceHeader">Work Experience</div>
+                <table class="workExperienceTable">
+                    <apex:repeat value="{!workExperienceFieldMaps}" var="workExperience">
+                        <tr class="workExperienceRow">
+                            <td class="cell left">
+                                <cxsrec:hasMapEntry map="{!workExperience}" key="cxsrec__Start_date__c">
+                                    <cxsrec:getMapValue map="{!workExperience}" key="cxsrec__Start_date__c"/>
+                                    <cxsrec:hasMapEntry map="{!workExperience}" key="cxsrec__End_date__c">
+                                        -&nbsp;
+                                    </cxsrec:hasMapEntry>
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!workExperience}" key="cxsrec__End_date__c">
+                                    <cxsrec:getMapValue map="{!workExperience}" key="cxsrec__End_date__c"/>
+                                </cxsrec:hasMapEntry>
+                            </td>
+                            <td class="cell right">
+                                <cxsrec:hasMapEntry map="{!workExperience}" key="Name">
+                                    <b><cxsrec:getMapValue map="{!workExperience}" key="Name"/></b><br />
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!workExperience}" key="cxsrec__Employer_Name_and_Place__c">
+                                    <b><cxsrec:getMapValue map="{!workExperience}" key="cxsrec__Employer_Name_and_Place__c"/></b><br />
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!workExperience}" key="cxsrec__Description__c">
+                                    <cxsrec:getMapValue map="{!workExperience}" key="cxsrec__Description__c"/>
+                                </cxsrec:hasMapEntry>
+                            </td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </div>
+        </apex:outputText>
+    
+        <apex:outputText rendered="{!educationFieldLists.size>0}">
+            <div id="educations">
+                <div id="educationHeader">Education</div>
+                
+                    <apex:repeat value="{!educationFieldMaps}" var="education">
+                    <table class="educationTable">
+                        <tr class="educationRow">
+                            <td class="cell left">
+                                <cxsrec:hasMapEntry map="{!education}" key="cxsrec__Start_date__c">
+                                    <cxsrec:getMapValue map="{!education}" key="cxsrec__Start_date__c"/>
+                                    <cxsrec:hasMapEntry map="{!education}" key="cxsrec__End_date__c">
+                                        -&nbsp;
+                                    </cxsrec:hasMapEntry>
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!education}" key="cxsrec__End_date__c">
+                                    <cxsrec:getMapValue map="{!education}" key="cxsrec__End_date__c"/>
+                                </cxsrec:hasMapEntry>
+                            </td>
+                            <td class="cell right">
+                                <cxsrec:hasMapEntry map="{!education}" key="Name">
+                                    <b><cxsrec:getMapValue map="{!education}" key="Name"/></b><br />
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!education}" key="cxsrec__Institute_Name_and_Place__c">
+                                    <cxsrec:getMapValue map="{!education}" key="cxsrec__Institute_Name_and_Place__c"/>
+                                </cxsrec:hasMapEntry>
+                                <cxsrec:hasMapEntry map="{!education}" key="cxsrec__Level__c">
+                                    -&nbsp;<cxsrec:getMapValue map="{!education}" key="cxsrec__Level__c"/>
+                                </cxsrec:hasMapEntry>
+                            </td>
+                        </tr>
+                    </table>
+                </apex:repeat>
+            </div>
+        </apex:outputText>
+
+        <apex:outputText rendered="{!hardCriteriaFieldList.size !=null && hardCriteriaFieldList.size > 0}">
+            <div id="criteriaIntroduction">
+                <div id="criteriaHeader">Skills</div> 
+                <apex:repeat value="{!hardCriteriaFieldList}" var="criteriaType">
+                    <div class="row">
+                        <div class="cell left">{!criteriaType.name}:</div>
+                        <div class="cell right">
+                            <apex:variable var="countVals" value="{!0}" />
+                            <apex:repeat value="{!criteriaType.criterias}" var="criteriaValue">
+                                <apex:outputText rendered="{!countVals > 0}">, </apex:outputText>
+                                {!criteriaValue.name}
+                                <apex:outputText rendered="{!criteriaValue.level != null}">
+                                    ({!criteriaValue.level.name})
+                                </apex:outputText>
+                                <apex:variable var="countVals" value="{!countVals+1}"/>
+                            </apex:repeat>
+                        </div>
+                    </div>
+                </apex:repeat>
+            </div>
+        </apex:outputText>
+
+    </div>
+</apex:outputText>
+</body>
+</apex:page>

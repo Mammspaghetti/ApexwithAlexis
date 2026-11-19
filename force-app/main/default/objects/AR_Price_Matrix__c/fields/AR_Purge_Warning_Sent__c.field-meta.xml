@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Purge_Warning_Sent__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Positionné par AR_DraftPurgeBatch (en bypass trigger) quand l&apos;e-mail d&apos;avertissement a été envoyé.</description>
+    <label>Avertissement de purge envoyé</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_RPLSR_Plan__c</fullName>
+    <description>Plan mensuel en JSON : jours ouvrés, vendus et prévisionnels par mois. Écrit par le serveur.</description>
+    <label>Plan prévisionnel (régie par lot)</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

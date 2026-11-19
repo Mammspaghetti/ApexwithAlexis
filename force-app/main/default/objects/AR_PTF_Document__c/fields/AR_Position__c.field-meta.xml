@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Position__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Besoin Connexys dénormalisé depuis la matrice, pour le lien de fichier et la future couverture multi-consultants (phase 2 CDS).</description>
+    <label>Besoin</label>
+    <referenceTo>cxsrec__cxsPosition__c</referenceTo>
+    <relationshipLabel>Documents PTF</relationshipLabel>
+    <relationshipName>AR_PTF_Documents</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

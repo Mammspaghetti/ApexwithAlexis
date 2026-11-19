@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Gating_Enabled__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Interrupteur général du gating de qualification. Lorsqu&apos;il est désactivé, le mécanisme de gating est entièrement suspendu.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Gating actif</label>
+    <type>Checkbox</type>
+</CustomField>

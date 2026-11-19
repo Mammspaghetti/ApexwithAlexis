@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Currency__c</fullName>
+    <description>Devise du CJM Nearshore. Elle doit correspondre à la devise de la matrice qui utilise cette indemnité, car le calcul ne réalise pas de conversion.</description>
+    <label>Devise</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>EUR</fullName>
+                <default>true</default>
+                <label>EUR</label>
+            </value>
+            <value>
+                <fullName>GBP</fullName>
+                <default>false</default>
+                <label>GBP</label>
+            </value>
+            <value>
+                <fullName>CHF</fullName>
+                <default>false</default>
+                <label>CHF</label>
+            </value>
+            <value>
+                <fullName>CAD</fullName>
+                <default>false</default>
+                <label>CAD</label>
+            </value>
+            <value>
+                <fullName>MAD</fullName>
+                <default>false</default>
+                <label>MAD</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

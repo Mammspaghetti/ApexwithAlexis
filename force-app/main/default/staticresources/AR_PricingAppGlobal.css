@@ -1,0 +1,14 @@
+/* AR_PricingAppGlobal — règles ciblant le light DOM de la page Lightning (hors shadow DOM de
+   arPricingApp, donc inatteignables par le CSS scopé du composant). Chargées uniquement par
+   arPricingApp (app plein écran) via loadStyle — cf. AR-BAND-HACK dans arPricingApp.css pour le
+   contexte complet et la procédure de retrait. */
+
+/* AR_ — app plein écran : neutralise le padding du conteneur Lightning */
+.slds-brand-band.slds-brand-band_medium {
+    padding: 0 !important;
+}
+
+/* AR_ — supprime la marge basse de la région du template */
+.forcegenerated-flexipage-template .region.slds-m-bottom_medium {
+    margin-bottom: 0 !important;
+}

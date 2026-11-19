@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AB_Area_of_mobility__c</fullName>
+    <label>Area of mobility</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Grand Est et Franche-Comté</fullName>
+                <default>false</default>
+                <label>Grand Est et Franche-Comté</label>
+            </value>
+            <value>
+                <fullName>Auvergne-Rhône-Alpes et Bourgogne-Franche-Comté</fullName>
+                <default>false</default>
+                <label>Auvergne-Rhône-Alpes et Bourgogne-Franche-Comté</label>
+            </value>
+            <value>
+                <fullName>Provence Alpes Cote d&apos;Azure, Monaco, Rhône Alpes, Occitanie</fullName>
+                <default>false</default>
+                <label>Provence Alpes Cote d&apos;Azure, Monaco, Rhône Alpes, Occitanie</label>
+            </value>
+            <value>
+                <fullName>Bretagne</fullName>
+                <default>false</default>
+                <label>Bretagne</label>
+            </value>
+            <value>
+                <fullName>Ile de France, Centre val de Loire, Pays de la Loire, Normandie, Oise et Poitou Charentes</fullName>
+                <default>false</default>
+                <label>Ile de France, Centre val de Loire, Pays de la Loire, Normandie, Oise et Poitou Charentes</label>
+            </value>
+            <value>
+                <fullName>Ile de France, Oise, Centre Val-De-Loire, Normandie</fullName>
+                <default>false</default>
+                <label>Ile de France, Oise, Centre Val-De-Loire, Normandie</label>
+            </value>
+            <value>
+                <fullName>Hauts de France et Normandie</fullName>
+                <default>false</default>
+                <label>Hauts de France et Normandie</label>
+            </value>
+            <value>
+                <fullName>Nouvelle-Aquitaine et Occitanie</fullName>
+                <default>false</default>
+                <label>Nouvelle-Aquitaine et Occitanie</label>
+            </value>
+            <value>
+                <fullName>Pays de la Loire et Nouvelle-Aquitaine</fullName>
+                <default>false</default>
+                <label>Pays de la Loire et Nouvelle-Aquitaine</label>
+            </value>
+            <value>
+                <fullName>Auvergne-Rhône-Alpes</fullName>
+                <default>false</default>
+                <label>Auvergne-Rhône-Alpes</label>
+            </value>
+            <value>
+                <fullName>Centre Normandie</fullName>
+                <default>false</default>
+                <label>Centre Normandie</label>
+            </value>
+            <value>
+                <fullName>Ile-De-France</fullName>
+                <default>false</default>
+                <label>Ile-De-France</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_TJM_EUR_Equivalent__c</fullName>
+    <description>TJM proposé converti en euros au taux de change appliqué. Utilisé pour la comparaison et la consolidation ; pour une matrice en euros, il est identique au TJM proposé.</description>
+    <externalId>false</externalId>
+    <label>TJM équivalent EUR</label>
+    <precision>16</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

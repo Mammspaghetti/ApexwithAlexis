@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Bank_Name__c</fullName>
+    <description>Nom de la banque de l&apos;entité, imprimé dans les gabarits PTF concernés. Les coordonnées bancaires doivent être renseignées pour générer ces gabarits.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Banque</label>
+    <length>60</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,330 @@
+<apex:page controller="AR_PTFTemplateController"
+  renderAs="pdf"
+  applyBodyTag="false"
+  applyHtmlTag="false"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  cache="false"
+  docType="html-5.0"
+>
+<!--
+  Gabarit AVENANT_AT_V11 (session 37) — transposition de docs/gabarits/Avenant_PTF_AT_v11.docx,
+  mapping des 8 annotations + 4 variables de corps de docs/33-gabarits-ptf-annotations-matthieu.md §2.
+  Remplace la coquille de session 35.
+
+  Ce n'est NI une nouvelle PTF NI une nouvelle version de PTF : un avenant cite la référence et la
+  date de la PTF initiale (C8/C9), ne réécrit que ce qui change (durée, et optionnellement prix +
+  échéancier), et déclare tout le reste inchangé — cf. AR_PTFDataService.collectAvenant.
+
+  Réutilise TEL QUEL le mécanisme de lots de la session 35 (lotsDisplay/hasLotOverride/
+  lotsTotalLabel, AR_PTFTemplateController) pour le tableau Lots/Montant/Échéancier du bloc de
+  révision de prix — même garde-fou anti-fuite de surcharge que le gabarit Abylsen (session 37,
+  cf. AR_PTFTemplateAbylsen.page) : la mention "(surchargé — calculé : ...)" et la note d'écart ne
+  sont visibles qu'à l'aperçu (ptf.isPreview), jamais sur le document contractuel.
+
+  Rappel des pièges Visualforce déjà payés (cf. AR_PTFData, AR_PTFTemplateAbylsen.page) : tout champ
+  consommé ici est une propriété avec accesseurs, SPLIT() n'est pas reconnu par le compilateur de
+  cette org, et un espace littéral immédiatement avant une balise <apex:outputText> est perdu au
+  rendu PDF (Flying Saucer) — le litige se règle en déplaçant l'espace À L'INTÉRIEUR de la valeur de
+  l'outputText qui suit, jamais comme texte littéral du parent (cf. les correctifs de session 37 sur
+  AR_PTFTemplateAbylsen.page).
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<apex:stylesheet value="{!URLFOR($Resource.AR_PTFStyleAbylsen)}" />
+</head>
+<body>
+
+<!-- Bandeau de prévisualisation (session 30, identique aux autres gabarits). -->
+<!-- Session 127 : bandeau d'aperçu en position:fixed (classe .aby-preview-banner) — hors du flux,
+     il ne décale plus la mise en page ; le moteur PDF le répète en haut de CHAQUE page et le peint
+     au-dessus du contenu. Fond noir, texte anglais (demande d'Alexis, 30/09/2026). Le second
+     bandeau en bas de la page de garde est supprimé : la répétition par page le rend inutile. -->
+<apex:outputPanel rendered="{!ptf.isPreview}" layout="none">
+  <div class="aby-preview-banner">PREVIEW: non-contractual and unregistered document</div>
+</apex:outputPanel>
+
+<!-- Session 127 : page de garde en pleine page — conteneur .aby-cover (hauteur A4, position
+     relative) au lieu d'une table dont la cellule portait 18 mm de padding sur tout, bandeau et
+     pied compris. Bandeau et pied d'image vont désormais bord à bord ; seuls les tableaux
+     (.aby-cov-body) gardent une marge de lecture ; le pied est ancré en bas de page. -->
+<div class="aby-cover">
+
+    <!-- Bandeau de garde = image, même charte que AR_PTFTemplateAbylsen.page (session 56 §6 :
+         "même charte, même en-tête, même pied"). -->
+    <div class="aby-cov-banner-wrap">
+      <img class="aby-cov-banner-img" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-cover-header.jpg')}" alt="" />
+      <!-- A22 (session 58) : plus de ligne entité/badge sous le titre — le bandeau du modèle ne
+           porte que les lignes du titre. Ce retrait règle aussi le chevauchement titre/filet
+           documenté en session 57 (titre à 4 lignes qui butait sur le bas du bandeau, cf.
+           docs/57-page-de-garde-iso.md §6 : la cause en était précisément ces deux lignes). -->
+      <div class="aby-cov-title-overlay">
+        <div class="aby-cov-title-main">Avenant à une Proposition<br/>Technique et Financière</div>
+      </div>
+    </div>
+
+    <div class="aby-cov-body">
+
+    <!-- Tableau d'identification (session 57, A2, partagé avec AR_PTFTemplateAbylsen.page) :
+         Référence PTF / Client / Projet + Version n°. Référence PTF affiche le format interne
+         (AV<n>-PTF-MAT-...) : la nomenclature du modèle reste l'arbitrage Matthieu #3 de
+         docs/53-plan-ptf-iso-et-sources.md, non tranché — pas de format inventé tant qu'il ne
+         répond pas. Projet (titreBesoin) câblé côté AR_PTFDataService.collectAvenant à cette même
+         session (absent avant, cette table n'existait pas).
+         Session 122 : Lieu de prestation ajouté pour cohérence avec les autres gabarits. -->
+    <table class="aby-ident">
+      <tr><td class="k">Référence PTF</td><td class="v" colspan="3"><apex:outputText value="{!ptf.reference}" /></td></tr>
+      <tr><td class="k">Client</td><td class="v" colspan="3"><apex:outputText value="{!ptf.client}" /></td></tr>
+      <tr>
+        <td class="k">Projet</td>
+        <td class="v"><apex:outputText value="{!ptf.titreBesoin}" /></td>
+        <td class="k" style="width:16%;">Version n°</td>
+        <td class="v" style="width:12%;"><apex:outputText value="{!versionNumeroLabel}" /></td>
+      </tr>
+      <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.lieuPrestation))}" layout="none">
+        <tr>
+          <td class="k">Lieu de prestation</td>
+          <td class="v" colspan="3"><apex:outputText value="{!ptf.lieuPrestation}" /></td>
+        </tr>
+      </apex:outputPanel>
+    </table>
+
+    <!-- Session 127 : les trois blocs à deux colonnes (Rédacteur/Valideur, Interlocuteurs/Fonctions,
+         Client/Adresse ABYLSEN) sont désormais UNE SEULE table chacun — une ligne = une rangée de
+         la table, donc les deux cellules d'une même ligne ont toujours la même hauteur (avant : deux
+         tables imbriquées côte à côte, chaque colonne gardait sa propre hauteur de ligne). -->
+    <!-- Rédacteur / Valideur (C0/C1) — session 111 : UN seul tableau à deux colonnes 50/50,
+         séparées par un filet blanc (point 3), 3 lignes de corps, même structure que
+         AR_PTFTemplateAbylsen.page (session 57, A3). -->
+    <table class="aby-grid2">
+      <tr>
+        <td class="aby-box3-hd" style="width:50%;">Rédacteur (nom / prénom / fonction)</td>
+        <td class="aby-box3-hd" style="width:50%;">Valideur (nom / prénom / fonction)</td>
+      </tr>
+      <tr>
+        <td class="aby-box3-row">
+          <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.redacteurNom))}">
+            <span class="aby-bold"><apex:outputText value="{!ptf.redacteurNom}" /></span>
+            <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.redacteurFonction))}"><apex:param value="{!ptf.redacteurFonction}" /></apex:outputText>
+          </apex:outputPanel>
+        </td>
+        <td class="aby-box3-row">
+          <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.valideurNom))}">
+            <span class="aby-bold"><apex:outputText value="{!IF(ISBLANK(ptf.valideurNom), '', ptf.valideurNom + ' ')}" /></span>
+            <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.valideurFonction))}"><apex:param value="{!ptf.valideurFonction}" /></apex:outputText>
+          </apex:outputPanel>
+        </td>
+      </tr>
+      <tr><td class="aby-box3-row"></td><td class="aby-box3-row"></td></tr>
+      <tr><td class="aby-box3-row"></td><td class="aby-box3-row"></td></tr>
+    </table>
+
+    <!-- Interlocuteurs CLIENT | Fonctions / coordonnées (C2/C3) — session 111 : deux colonnes 50/50
+         de même largeur, séparées par un filet blanc (point 4) — interlocuteur TECHNIQUE du besoin,
+         pas le client signataire de la PTF (cf.
+         AR_PTFDataService.TEMPLATES_USING_TECHNICAL_CONTACT_AS_INTERLOCUTEUR) ; trois lignes,
+         même structure que AR_PTFTemplateAbylsen.page (session 57, A4). -->
+    <table class="aby-grid2">
+      <tr>
+        <td class="aby-box3-hd" style="width:50%;">Interlocuteurs CLIENT</td>
+        <td class="aby-box3-hd" style="width:50%;">Fonctions / coordonnées</td>
+      </tr>
+      <tr>
+        <td class="aby-box3-row"><span class="aby-bold"><apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ptf.interNom + ' ')}" /></span></td>
+        <td class="aby-box3-row">
+          <apex:outputText value="{!IF(ISBLANK(ptf.interFonction), '', ptf.interFonction + ' ')}" />
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interTel))}" layout="none"><br/><apex:outputText value="{!ptf.interTel}" /></apex:outputPanel>
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interEmail))}" layout="none"><br/><apex:outputText value="{!ptf.interEmail}" /></apex:outputPanel>
+        </td>
+      </tr>
+      <tr><td class="aby-box3-row"></td><td class="aby-box3-row"></td></tr>
+      <tr><td class="aby-box3-row"></td><td class="aby-box3-row"></td></tr>
+    </table>
+
+    <!-- Historique des modifications : retiré (session 49, demande explicite de Matthieu, réunion
+         du 03/09/2026 — ce bloc "ne l'intéresse pas"), et TOUJOURS retiré à la session 57 : question
+         (arbitrage Matthieu #1 de docs/53-plan-ptf-iso-et-sources.md) redemandée dans
+         docs/57-page-de-garde-iso.md, sans réponse à ce jour. Retrait de l'AFFICHAGE seulement :
+         AR_PTFData.historique et le snapshot restent produits et figés, cf. AR_PTFDataService. -->
+
+    <!-- Nom et adresse du CLIENT / Adresse ABYLSEN.
+         Session 111 : UN seul tableau à deux colonnes 50/50, filet blanc au milieu (point 5).
+         Session 58 : A23, plus de préfixe "House of ABY —" ; A26, libellés "Client :" et
+         "Adresse :" ajoutés (seul SIRET était labellé avant) — même correctif que
+         AR_PTFTemplateAbylsen.page. -->
+    <table class="aby-grid2" style="margin-top:10px;">
+      <tr>
+        <td class="aby-box-hd" style="width:50%;">Nom et adresse du CLIENT</td>
+        <td class="aby-box-hd" style="width:50%;"><apex:outputText value="Adresse {0}"><apex:param value="{!ptf.entite}" /></apex:outputText></td>
+      </tr>
+      <tr>
+        <td class="aby-box-body">
+          <p><span class="aby-lbl">Client :</span> <span class="aby-bold"><apex:outputText value=" {0}"><apex:param value="{!ptf.client}" /></apex:outputText></span></p>
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.adresseClient))}" layout="none">
+            <p><span class="aby-lbl">Adresse :</span> <span style="white-space:pre-line;"><apex:outputText value=" {0}"><apex:param value="{!ptf.adresseClient}" /></apex:outputText></span></p>
+          </apex:outputPanel>
+          <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.siretClient))}">
+            <p><span class="aby-lbl">SIRET :</span><apex:outputText value=" {0}"><apex:param value="{!ptf.siretClient}" /></apex:outputText></p>
+          </apex:outputPanel>
+        </td>
+        <td class="aby-box-body">
+          <div class="aby-bold"><apex:outputText value="{!ptf.entite}" /></div>
+          <!-- Session 63 : adresse en bloc multi-lignes (AR_Address__c), white-space:pre-line. -->
+          <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.entiteInfo.adresse))}">
+            <p style="white-space:pre-line;"><apex:outputText value="{!ptf.entiteInfo.adresse}" /></p>
+          </apex:outputPanel>
+          <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.entiteInfo.siret))}">
+            <p><span class="aby-lbl">SIRET :</span><apex:outputText value=" {0}"><apex:param value="{!ptf.entiteInfo.siret}" /></apex:outputText></p>
+          </apex:outputPanel>
+        </td>
+      </tr>
+    </table>
+
+    </div><!-- /aby-cov-body -->
+
+    <!-- Pied de garde = word/media/image5.jpg (AR_PTFAbylsenAssets, session 57 §7), même charte que
+         AR_PTFTemplateAbylsen.page — remplace l'encart gris "document confidentiel" ci-dessus. -->
+    <div class="aby-cov-footer-wrap">
+      <img class="aby-cov-footer-img" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-cover-footer.jpg')}" alt="" />
+    </div>
+
+</div><!-- /aby-cover -->
+
+<!-- ═══════ Table unique et paginée : en-tête/pied répétés sur chaque page suivante ═══════ -->
+<!-- Session 56 : l'avenant n'avait PAS cette structure avant cette session (page toujours
+     restée sous les ~3 pages où le manque ne se voyait pas) — ajoutée pour porter le même
+     en-tête/pied que AR_PTFTemplateAbylsen.page ("même charte, même en-tête, même pied",
+     §6 du prompt de session), cf. docs/56-socle-charte-abylsen.md §4. -->
+<table class="aby-flow-table">
+  <thead><tr><td>
+    <table class="aby-rh-table"><tr><td>
+      <img class="aby-rh-img" src="{!URLFOR($Resource.AR_PTFAbylsenAssets, 'aby-content-header.jpg')}" alt="" />
+    </td></tr></table>
+  </td></tr></thead>
+
+  <tfoot><tr><td>
+    <table class="aby-rf-table"><tr><td>
+      <div class="aby-rf-center">
+        <div class="aby-rf-brand">ABYLSEN</div>
+        <div class="aby-rf-conf">Les informations renseignées sur ce document sont strictement confidentielles. Elles ne doivent en aucun cas être diffusées ou traitées en dehors d’Abylsen ou du client concerné par le projet.</div>
+        <div class="aby-rf-ref">Référence document interne :<apex:outputText value=" {!ptf.reference}" /></div>
+      </div>
+      <div class="aby-rf-pagenum"><span class="aby-pagenum-test"></span></div>
+    </td></tr></table>
+  </td></tr></tfoot>
+
+  <tbody><tr><td>
+
+    <!-- ══════════════════════ CORPS DE L'AVENANT ══════════════════════ -->
+    <!-- Session 56 : plus de page-break-before:always ici — ce bloc est désormais le tout
+         premier contenu du tbody paginé (ajouté cette session), déjà sur une page neuve ; le
+         garder produisait une page 2 blanche (vérifiée en réel, corrigée avant livraison). -->
+    <div>
+      <div class="aby-sec-banner">
+        <h1>Avenant à la Proposition Technique et Financière</h1>
+        <div class="aby-sec-ref"><apex:outputText value="Réf. {0} · {1}"><apex:param value="{!ptf.reference}" /><apex:param value="{!ptf.client}" /></apex:outputText></div>
+      </div>
+
+      <!-- Variable 1 (C8/C9) : référence et date de la PTF initiale, jamais ressaisies. Toujours
+           renseignées à ce stade (session 49, cause B) : AR_PTFDataService bloque la génération de
+           l'avenant en amont si l'une des deux manque, plutôt que d'imprimer un texte de
+           remplacement dans un document contractuel. -->
+      <p class="aby-p">
+        <apex:outputText value="Les Parties ont conclu une proposition technique et financière n° {0} en date du {1}.">
+          <apex:param value="{!ptf.ptfInitialeReference}" />
+          <apex:param value="{!ptfInitialeDateLabel}" />
+        </apex:outputText>
+      </p>
+      <p class="aby-p">Le présent avenant a pour objet de modifier cette proposition technique et financière selon les termes ci-dessous.</p>
+
+      <!-- Variable 2 : prolongation. Présente sur tout avenant historique (formulaire) — bloqué en
+           amont si absente (session 49, cause B, cf. AR_PTFDataService.collectAvenant). Session 180d :
+           un avenant piloté par la matrice n'imprime ce paragraphe que si la période change
+           (prolongationJusquAu null sinon) ; aucun avenant historique n'en est privé. -->
+      <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.prolongationJusquAu))}" layout="none">
+        <p class="aby-p">À la fin de l’article 3.3, les termes suivants sont ajoutés :</p>
+        <p class="aby-p">
+          <apex:outputText value="« les Prestations sont prolongées jusqu’au {0} inclus »">
+            <apex:param value="{!prolongationJusquAuLabel}" />
+          </apex:outputText>
+        </p>
+      </apex:outputPanel>
+
+      <!-- Variable 3 : révision de prix — bloc CONDITIONNEL (ptf.revisionPrix). La mention Word
+           "[option en cas de modification du prix]" est une instruction de rédaction, jamais imprimée
+           (cf. docs/33 §2) : seul le "rendered" ci-dessous en tient lieu. -->
+      <apex:outputPanel rendered="{!ptf.revisionPrix}" layout="none">
+        <p class="aby-p">À la fin de l’article 4.3, les termes suivants sont ajoutés :</p>
+        <p class="aby-p">
+          <apex:outputText value="« À compter du {0}, le prix et l’échéancier de facturation prévisionnelle des Prestations sont les suivants :">
+            <apex:param value="{!revisionPrixADateDuLabel}" />
+          </apex:outputText>
+        </p>
+        <!-- Session 279 : plus de ligne « Tarif journalier » (décision du 09/11 : aucun prix par jour
+             dans un document client). Le nouveau TJM saisi reste utilisé pour le calcul des lots. -->
+        <!-- Session 60 : plus de ligne TOTAL — même tableau que AR_PTFTemplateAbylsen.page (A18,
+             session 58), le modèle n’en porte aucune (retrait, pas un déplacement ; lotsTotalLabel
+             reste calculé, utilisé par le contrôle de surcharge ci-dessous et par l’aperçu). -->
+        <table class="aby-sch">
+          <tr><th>Lots</th><th class="r">Montant</th><th class="r">Echéancier</th></tr>
+          <apex:repeat value="{!lotsDisplay}" var="lot">
+            <tr>
+              <td><span class="aby-bold"><apex:outputText value="{!lot.libelle}" /></span></td>
+              <td class="r"><apex:outputText value="{!lot.montantLabel} HT" /></td>
+              <td class="r"><apex:outputText value="{!lot.echeanceLabel}" /></td>
+            </tr>
+          </apex:repeat>
+        </table>
+        <!-- Même garde-fou anti-fuite qu'AR_PTFTemplateAbylsen.page (session 37) : réservé à l'aperçu. -->
+        <apex:outputPanel rendered="{!AND(hasLotOverride, ptf.isPreview)}">
+          <p class="aby-note"><apex:outputText value="Un ou plusieurs lots ont été surchargés — total théorique (avant surcharge) : {0} HT. C’est le total retenu ci-dessus qui est imprimé."><apex:param value="{!lotsTotalCalculeLabel}" /></apex:outputText></p>
+        </apex:outputPanel>
+        <p class="aby-p">»</p>
+      </apex:outputPanel>
+
+      <!-- Variable 4 : clause de fermeture, même référence qu'à la variable 1, même garde. -->
+      <p class="aby-p">
+        <apex:outputText value="Les autres articles de la proposition technique et financière n° {0} restent inchangés.">
+          <apex:param value="{!ptf.ptfInitialeReference}" />
+        </apex:outputText>
+      </p>
+
+      <!-- Bloc de signature -->
+      <table class="aby-sig-table">
+        <tr><td class="aby-sig-hd" colspan="2">
+          <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.entiteInfo.ville))}">
+            <apex:outputText value="Fait à {0}, le {1}">
+              <apex:param value="{!ptf.entiteInfo.ville}" />
+              <apex:param value="{!generatedAtLabel}" />
+            </apex:outputText>
+          </apex:outputPanel>
+          <apex:outputText value="Fait le {0}" rendered="{!ISBLANK(ptf.entiteInfo.ville)}"><apex:param value="{!generatedAtLabel}" /></apex:outputText>
+        </td></tr>
+        <tr>
+          <td class="aby-sig-box" style="width:50%;">
+            <div class="aby-sig-box-lbl">Pour le Client*</div>
+            <!-- Session 111 (point 7) : « Nom : » et « Qualité : » toujours affichés, même vides
+                 (champs à remplir à la main). Aucune valeur de repli inventée. -->
+            <div class="aby-sig-line"><apex:outputText value="Nom : {0}"><apex:param value="{!ptf.interNom}" /></apex:outputText></div>
+            <div class="aby-sig-line"><apex:outputText value="Qualité : {0}"><apex:param value="{!ptf.interFonction}" /></apex:outputText></div>
+          </td>
+          <td class="aby-sig-box" style="width:50%;">
+            <div class="aby-sig-box-lbl">Pour le Prestataire</div>
+            <!-- Session 111 (point 7) : « Nom : » toujours affiché, même vide. Aucune valeur de repli. -->
+            <div class="aby-sig-line"><apex:outputText value="Nom : {0}"><apex:param value="{!ptf.valideurNom}" /></apex:outputText></div>
+            <div class="aby-sig-line"><apex:outputText value="Qualité : {0}"><apex:param value="{!ptf.valideurFonction}" /></apex:outputText></div>
+          </td>
+        </tr>
+      </table>
+      <p class="aby-note">*Faire précéder la signature de la mention « Lu et approuvé, Bon pour accord »</p>
+      <p class="aby-note">Merci de retourner le présent contrat par courrier ou email dès acceptation à l’interlocuteur mentionné en première page.</p>
+    </div>
+
+  </td></tr></tbody>
+</table>
+
+</body>
+</html>
+</apex:page>

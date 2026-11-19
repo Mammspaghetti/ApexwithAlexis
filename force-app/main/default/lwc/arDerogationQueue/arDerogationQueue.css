@@ -1,0 +1,651 @@
+.queue-page {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.queue-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.queue-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.queue-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.identity-icon {
+  --sds-c-icon-color-foreground-default: #64748b;
+}
+
+/* Onglets "segmented control" maquette : fond #f1f5f9, actif blanc + ombre légère. La table
+   suit immédiatement (maquette : tab-bar en mb-4, rien d'autre entre les onglets et la table). */
+/* Session 33 : bandeau persistant "ne jamais afficher une file vide muette" — un utilisateur
+   habilité mais mal partagé, ou un utilisateur non habilité, doit comprendre pourquoi sans deviner. */
+.queue-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.queue-banner p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.queue-banner-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+
+.queue-banner-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  width: fit-content;
+  margin-bottom: 1rem;
+}
+
+/* Bandeau de filtres (session 28 §5) : accessoire de la table, pas une seconde barre de
+   contrôles — même fond que l'en-tête de colonnes, accolé sans marge, séparé par une bordure
+   fine (session 31 §2). */
+.queue-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
+}
+
+.queue-filter {
+  min-width: 160px;
+  max-width: 200px;
+}
+
+.queue-filter-reset {
+  border: none;
+  background: none;
+  color: #d31876;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0;
+}
+.queue-filter-reset:hover {
+  text-decoration: underline;
+}
+
+.queue-goto-all {
+  border: none;
+  background: none;
+  color: #d31876;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0;
+}
+.queue-goto-all:hover {
+  text-decoration: underline;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tab-active {
+  background: #ffffff;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tab-count {
+  background: #e2e8f0;
+  color: #475569;
+  border-radius: 9999px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tab-count-amber {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+/* .queue-card ne doit pas avoir overflow:hidden : les menus déroulants des filtres (lightning-combobox)
+   s'affichent en position absolue et doivent pouvoir déborder en bas de la carte. Le padding 0.5rem 0
+   et les border-radius 12px de la carte contiennent les contenus statiques (en-tête, tableau, lignes
+   détaillées) sans besoin de clipping supplémentaire. */
+.queue-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 0.5rem 0;
+}
+
+.error-message {
+  color: #c23934;
+  font-size: 0.8125rem;
+  padding: 1rem 1.25rem;
+}
+
+.empty-state {
+  max-width: 420px;
+  margin: 2.5rem auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-state-check {
+  --sds-c-icon-color-foreground-default: #16a34a;
+}
+
+.empty-state-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111111;
+  margin: 0;
+}
+
+.empty-state-text {
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  margin: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Largeurs minimales, pas figées (session 31 §3) : à la maquette, un vrai <table> laisse les
+   colonnes s'ajuster au contenu ; ici, minmax() laisse "Sous plancher" ou un nom de demandeur long
+   respirer au lieu d'être tronqués — vérifié à 1 280 px et 1 440 px, pas seulement à min-width.
+   Le minimum réel de la grille (somme des bornes basses de minmax() ci-dessous, ~840px) est la
+   seule source de vérité : un `.derogation-table { min-width: 900px }` fixe, resté d'avant la
+   conversion en grille fluide (session 31), forçait un plancher plus large que ce minimum réel et
+   déclenchait un ascenseur horizontal évitable à la largeur plancher de l'app (1152px, sidebar
+   dépliée — session 32, cf. docs/32-adaptation-ecran.md §2). Retiré : ne pas le réintroduire sans
+   revoir grid-template-columns en même temps, sous peine de dupliquer une même contrainte à deux
+   endroits divergents. Session 143 : colonne MC2 passée de 110 à 150px pour « 25,4 % · 1 250 € / j »,
+   pris sur la colonne client (200 → 160px, tronquée en ellipse) — somme des minimums inchangée. */
+.table-head-row,
+.derogation-row {
+  display: grid;
+  grid-template-columns:
+    56px minmax(160px, 1.8fr) minmax(120px, 1fr) minmax(150px, 1fr)
+    minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, 0.8fr) 24px;
+  gap: 0;
+  align-items: center;
+}
+
+.table-head-row {
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.th {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Session 116 : en-têtes triables, même rendu que « Matrices de prix ». */
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+.sort-header:hover {
+  color: #1e293b;
+}
+.sort-header-active {
+  color: #d31876;
+}
+.sort-icon {
+  --slds-c-icon-color-foreground-default: #d31876;
+}
+
+.derogation-row {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.12s ease;
+}
+
+.derogation-row:hover {
+  background: #f8fafc;
+}
+
+.td {
+  padding-right: 8px;
+  min-width: 0;
+}
+
+.type-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eef3fb;
+  color: #1c4a8f;
+  letter-spacing: 0.8px;
+}
+
+.cell-primary {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.cell-secondary {
+  font-size: 12px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.cell-value {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.mc2-green {
+  font-weight: 700;
+  color: #16a34a;
+}
+.mc2-amber {
+  font-weight: 700;
+  color: #f59e0b;
+}
+.mc2-red {
+  font-weight: 700;
+  color: #dc2626;
+}
+/* Session 143 : MC2/jour en valeur, couleur héritée du % (mc2-*), poids normal. */
+.mc2-per-day {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.rplsr-mention {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.segment-text-red {
+  font-size: 10px;
+  font-weight: 600;
+  color: #dc2626;
+}
+.segment-text-amber {
+  font-size: 10px;
+  font-weight: 600;
+  color: #f59e0b;
+}
+.segment-text-green {
+  font-size: 10px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.cell-owner {
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell-date {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.chevron-icon {
+  --sds-c-icon-color-foreground-default: #94a3b8;
+}
+
+/* Pill de décision, format maquette (fond teinté + texte foncé + bordure). */
+.decision-pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.decision-pending {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+.decision-accepted {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+.decision-rejected {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+/* Ligne dépliée */
+.detail-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-block-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.detail-block-title-spaced {
+  margin-top: 12px;
+}
+
+.indicator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  font-size: 13px;
+}
+
+.indicator-label {
+  color: #64748b;
+}
+
+.indicator-value {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.rfa-line {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.boxed-text {
+  font-size: 13px;
+  color: #334155;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.reason-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 0;
+}
+
+/* Session 113 : lien discret vers la matrice, repositionné en bas de la colonne gauche
+   (session XXX), aligné sur les boutons de décision. */
+.detail-footer {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  min-height: 40px;
+}
+
+.detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d31876;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.detail-link:hover {
+  color: #b81563;
+  text-decoration: underline;
+}
+
+.detail-link:hover .detail-link-icon {
+  transform: translateX(2px);
+}
+
+.detail-link:focus-visible {
+  color: #b81563;
+  text-decoration: underline;
+  outline: 2px solid #d31876;
+  outline-offset: 2px;
+}
+
+.detail-link-icon {
+  --slds-c-icon-color-foreground-default: currentColor;
+  transition: transform 150ms ease;
+}
+
+.treated-by {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 4px 0 0;
+}
+
+.notice-amber {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.notice-amber p {
+  font-size: 12px;
+  color: #b45309;
+  margin: 0;
+}
+
+.notice-icon {
+  --sds-c-icon-color-foreground-default: #d97706;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.comment-input {
+  width: 100%;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #d31876;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.12);
+}
+
+.decision-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+.btn-success:hover {
+  background: #15803d;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.result-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.result-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.result-badge span {
+  font-weight: 600;
+}
+
+.result-timestamp {
+  font-size: 11px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.result-approved {
+  background: #ecfdf5;
+}
+.result-approved lightning-icon {
+  --sds-c-icon-color-foreground-default: #10b981;
+}
+.result-approved span:not(.result-timestamp) {
+  color: #047857;
+}
+
+.result-rejected {
+  background: #fef2f2;
+}
+.result-rejected lightning-icon {
+  --sds-c-icon-color-foreground-default: #ef4444;
+}
+.result-rejected span:not(.result-timestamp) {
+  color: #b91c1c;
+}

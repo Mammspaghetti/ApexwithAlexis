@@ -1,0 +1,43 @@
+<apex:page controller="cxsrec.cxsCV" 
+    showHeader="false" 
+            sidebar="false" 
+            standardStylesheets="false" 
+            renderAs="pdf" 
+            applyBodyTag="false" 
+            applyHtmlTag="false">
+ 
+    <html>
+        <head>
+            <style type="text/css" media="print">
+                @page {
+                    margin-bottom: 3cm;
+                    break-before: auto;
+                    @bottom-center {
+                     content: element(footer);
+                    }
+                }
+
+                div.footer {
+                    display: block;
+                    padding: 10px;
+                    position: running(footer);
+                }
+
+                #pageBreak {
+                  page-break-after: always;
+                }
+
+            </style>
+        </head>
+        <body>
+            <!--some elements-->
+            <div id="pageBreak">asdasd</div>
+            
+            
+            <!-- Add some long text here -->
+        </body>
+        <div class="footer" name="footer">
+          <p>Footer</p>
+      </div>
+    </html>
+</apex:page>

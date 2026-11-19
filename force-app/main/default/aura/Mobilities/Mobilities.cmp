@@ -1,0 +1,39 @@
+<aura:component controller="LTNG_Mobilities" implements="flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+	<aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+    
+    <aura:attribute name="recordId" type="Id" />
+    
+    <aura:attribute name="_availableMobilities" type="LTNG_Mobilities.HierarchyNode[]" />
+    <aura:attribute name="_selectedMobilities" type="String[]" />
+    
+    <aura:attribute name="_loading" type="Boolean" default="true" />
+    <aura:attribute name="_isUpdated" type="Boolean" default="false" />
+    <aura:attribute name="saveOnlyHigherLevel" type="Boolean" required="true" default="false" />
+    <aura:attribute name="fieldValueToBeStored" type="String" required="true" default="Name" />
+
+    <aura:handler name="refreshSelectedValues" event="c:EVT_HierarchyNodeEvent" action="{!c.handleMobilitiesUpdated}" />
+    <aura:registerEvent name="appToast" type="c:EVT_ShowToast"/>
+    
+    <c:Toaster />
+    <lightning:card iconName="custom:custom78" title="{! $Label.c.Mobilities_component_header }" class="slds-is-relative">
+        <aura:set attribute="actions">
+            <div class="buttonContainer">
+                <lightning:button variant="brand" label="Enregistrer" onclick="{!c.saveSelectedMobilities}" class="{!v._isUpdated ? '' : 'slds-hide'}"/>
+            </div>
+        </aura:set>
+     
+        <aura:if isTrue="{!v._availableMobilities.length > 0}">
+            
+            <c:HierarchySelector nodes="{!v._availableMobilities}" 
+                                 selectedValues="{!v._selectedMobilities}"
+                                 toggleNodesRecursively="true"
+                                 selectOnlyHigherLevel="{!v.saveOnlyHigherLevel}"
+                                 class="slds-p-horizontal_small"/>
+            
+        </aura:if>
+        
+        
+        <lightning:spinner variant="brand" class="{!v._loading ? '' : 'slds-hide'}"/>
+    </lightning:card>
+      
+</aura:component>

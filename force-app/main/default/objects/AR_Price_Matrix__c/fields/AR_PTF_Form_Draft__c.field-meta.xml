@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_PTF_Form_Draft__c</fullName>
+    <description>JSON (version 1) du brouillon du formulaire PTF et du formulaire d&apos;avenant : une entrée par mode (ptf, avenant) avec la saisie telle qu&apos;envoyée à la génération, la date et l&apos;auteur de l&apos;enregistrement.</description>
+    <label>Brouillon du formulaire PTF</label>
+    <length>131072</length>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

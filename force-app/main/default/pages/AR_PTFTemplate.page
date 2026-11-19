@@ -1,0 +1,384 @@
+<apex:page controller="AR_PTFTemplateController"
+  renderAs="pdf"
+  applyBodyTag="false"
+  applyHtmlTag="false"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  cache="false"
+  docType="html-5.0"
+>
+<!--
+  Transposition table-based du gabarit HTML/CSS moderne de la maquette (buildPTFHTML,
+  pricing-tool.html:3035) : le moteur PDF de Visualforce (Flying Saucer) ne supporte ni flexbox, ni
+  grid, ni les variables CSS, ni les dégradés/ombres/coins arrondis. Tout est donc redescendu en
+  <table> et positionnement classique. L'en-tête/pied répétés ne passent PAS par @page (non supporté
+  par Flying Saucer pour du contenu répété par page) mais par la technique documentée
+  -fs-table-paginate:paginate sur une table unique dont le <thead>/<tfoot> se répètent à chaque
+  saut de page généré par le contenu du <tbody>. Détail et limites : docs/20-generation-ptf.md.
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<apex:stylesheet value="{!URLFOR($Resource.AR_PTFStyle)}" />
+</head>
+<body>
+
+<!-- Bandeau de prévisualisation (session 30) : jamais affiché sur un document réellement généré,
+     ptf.isPreview n'étant vrai que pour un rendu transitoire (AR_PTFTemplateController, paramètre
+     `data`). Répété en tête ET en pied de la page de garde pour ne jamais pouvoir être manqué,
+     même sur une impression physique de la seule première page. -->
+<apex:outputPanel rendered="{!ptf.isPreview}" layout="none">
+  <div style="background:#000000;color:#FFFFFF;text-align:center;font-weight:bold;font-size:10pt;padding:6px 0;letter-spacing:1px;">
+    PREVIEW: non-contractual and unregistered document
+  </div>
+</apex:outputPanel>
+
+<!-- ═══════════════════════════ PAGE DE GARDE (non répétée) ═══════════════════════════ -->
+<table class="cover-page">
+  <tr><td>
+
+    <table class="cov-bar-table"><tr>
+      <td class="cov-mark-cell"><table><tr><td class="cov-mark">H</td></tr></table></td>
+      <td>
+        <div class="cov-brand">House of ABY</div>
+        <div class="cov-entity"><apex:outputText value="{!ptf.entite}" /></div>
+      </td>
+      <td style="text-align:right;">
+        <div class="cov-title-main">Proposition Technique<br/>et Financière</div>
+        <div class="cov-badge">Assistance Technique — AT</div>
+      </td>
+    </tr></table>
+
+    <table class="cov-body-table"><tr>
+      <td style="width:50%;">
+        <table class="cov-box">
+          <tr><td class="cov-box-hd">Client / Donneur d'ordre</td></tr>
+          <tr><td class="cov-box-body">
+            <div class="nm"><apex:outputText value="{!ptf.client}" /></div>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.adresseClient))}">
+              <p style="white-space:pre-line;font-size:7.5pt;color:#555555;"><apex:outputText value="{!ptf.adresseClient}" /></p>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interNom))}">
+              <div class="lbl" style="margin-top:8px;">Interlocuteur</div>
+              <p><strong><apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ptf.interNom + ' ')}" /></strong><apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.interFonction))}"><apex:param value="{!ptf.interFonction}" /></apex:outputText></p>
+              <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interTel))}" layout="none"><apex:outputText value="{!ptf.interTel}" /><br/></apex:outputPanel>
+              <apex:outputText value="{!ptf.interEmail}" rendered="{!NOT(ISBLANK(ptf.interEmail))}" />
+            </apex:outputPanel>
+          </td></tr>
+        </table>
+      </td>
+      <td style="width:50%;">
+        <table class="cov-box">
+          <tr><td class="cov-box-hd">Prestataire</td></tr>
+          <tr><td class="cov-box-body">
+            <div class="nm">House of ABY</div>
+            <!-- Session 63 : le référentiel v6 porte l'adresse en bloc multi-lignes (voie, CP/ville,
+                 pays, mention légale) sur AR_Address__c ; les champs granulaires AR_Postal_Code__c/
+                 AR_City__c ne sont plus alimentés par cet import et ne sont donc plus imprimés à part
+                 (ligne devenue vide sinon). white-space:pre-line, même technique déjà vérifiée en PDF
+                 réel sur ptf.adresseClient ci-dessus. -->
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.entiteInfo.adresse))}">
+              <p style="white-space:pre-line;"><apex:outputText value="{!ptf.entiteInfo.adresse}" /></p>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.entiteInfo.siret))}">
+              <p style="margin-top:5px;"><span class="lbl">SIRET : </span><apex:outputText value="{!ptf.entiteInfo.siret}" /></p>
+            </apex:outputPanel>
+            <div style="margin-top:8px;"><div class="lbl">Rédacteur</div>
+              <p><strong><apex:outputText value="{!ptf.redacteurNom}" /></strong><apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.redacteurFonction))}"><apex:param value="{!ptf.redacteurFonction}" /></apex:outputText></p>
+            </div>
+            <div style="margin-top:5px;"><div class="lbl">Valideur</div>
+              <p><strong><apex:outputText value="{!IF(ISBLANK(ptf.valideurNom), '', ptf.valideurNom + ' ')}" /></strong><apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.valideurFonction))}"><apex:param value="{!ptf.valideurFonction}" /></apex:outputText></p>
+            </div>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.consultantNom))}">
+              <div style="margin-top:8px;padding-top:8px;border-top:1px solid #E8E8E8;">
+                <div class="lbl">Consultant proposé</div>
+                <p style="font-weight:bold;color:#000000;"><apex:outputText value="{!ptf.consultantNom}" /></p>
+                <apex:outputText value="{!ptf.consultantExperience} d'expérience" rendered="{!NOT(ISBLANK(ptf.consultantExperience))}" style="color:#D31876;font-weight:bold;font-size:7.5pt;" />
+              </div>
+            </apex:outputPanel>
+          </td></tr>
+        </table>
+      </td>
+    </tr></table>
+
+    <div class="cov-section-lbl">Identification du document</div>
+    <table class="cov-id-table">
+      <tr><th>Référence PTF</th><th>Version</th><th>Date</th><th>Rédacteur</th><th>Valideur</th></tr>
+      <tr>
+        <td><apex:outputText value="{!ptf.reference}" /></td>
+        <td><apex:outputText value="{!ptf.version}" /></td>
+        <td><apex:outputText value="{!generatedAtLabel}" /></td>
+        <td><apex:outputText value="{!ptf.redacteurNom}" /></td>
+        <td><apex:outputText value="{!IF(ISBLANK(ptf.valideurNom), '', ptf.valideurNom + ' ')}" /></td>
+      </tr>
+    </table>
+
+    <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.reference))}">
+      <table class="cov-id-table" style="margin-top:10px;">
+        <tr><th colspan="4">Synthèse financière</th></tr>
+        <tr>
+          <td class="k">Montant total HT</td>
+          <td style="font-size:11pt;font-weight:bold;color:#D31876;"><apex:outputText value="{!totalHTLabel}" /></td>
+          <!-- Session 279 : plus de TJM (aucun prix par jour dans un document client). -->
+          <td class="k">Total jours</td>
+          <td><apex:outputText value="{!totalJoursLabel}" /></td>
+        </tr>
+        <tr>
+          <td class="k">Début mission</td>
+          <td><apex:outputText value="{!dateDebutLabel}" rendered="{!NOT(ISNULL(ptf.dateDebut))}" /></td>
+          <td class="k">Fin mission</td>
+          <td><apex:outputText value="{!dateFinLabel}" rendered="{!NOT(ISNULL(ptf.dateFin))}" /></td>
+        </tr>
+      </table>
+    </apex:outputPanel>
+
+    <!-- Historique des modifications : retiré (session 49, demande explicite de Matthieu, réunion
+         du 03/09/2026 — ce bloc "ne l'intéresse pas"). Retrait de l'AFFICHAGE seulement :
+         AR_PTFData.historique et le snapshot restent produits et figés, cf. AR_PTFDataService. -->
+    <div class="cov-conf">Ce document est strictement confidentiel. Il est destiné exclusivement à son destinataire et ne peut être reproduit ou divulgué sans l'accord préalable écrit de House of ABY.</div>
+    <apex:outputPanel rendered="{!ptf.isPreview}" layout="none">
+      <div style="margin-top:10px;background:#000000;color:#FFFFFF;text-align:center;font-weight:bold;font-size:9pt;padding:5px 0;">
+        PREVIEW: non-contractual and unregistered document
+      </div>
+    </apex:outputPanel>
+
+  </td></tr>
+</table>
+
+<!-- ═══════ Table unique et paginée : en-tête/pied répétés sur chaque page suivante ═══════ -->
+<table class="flow-table">
+  <thead><tr><td>
+    <table class="rh-table"><tr>
+      <td style="width:26px;"><table><tr><td class="rh-mark">H</td></tr></table></td>
+      <td>
+        <div class="rh-brand">House of ABY</div>
+        <div class="rh-entity"><apex:outputText value="{!ptf.entite}" /></div>
+      </td>
+      <td style="text-align:center;">
+        <apex:outputText value="{!ptf.client} " />— Proposition Technique et Financière
+      </td>
+      <td style="text-align:right;">
+        <apex:outputText value="Réf. {0} · {1}"><apex:param value="{!ptf.reference}" /><apex:param value="{!ptf.version}" /></apex:outputText><br/>
+        <apex:outputText value="{!generatedAtLabel}" />
+      </td>
+    </tr></table>
+  </td></tr></thead>
+
+  <tfoot><tr><td>
+    <table class="rf-table"><tr>
+      <td><apex:outputText value="{!ptf.entite}" /></td>
+      <td style="text-align:center;font-style:italic;">Document strictement confidentiel</td>
+      <td style="text-align:right;"><apex:outputText value="Réf. {0}"><apex:param value="{!ptf.reference}" /></apex:outputText></td>
+    </tr></table>
+  </td></tr></tfoot>
+
+  <tbody><tr><td>
+
+    <!-- ── Sommaire ── -->
+    <div class="toc-h1"><span>Section I — Proposition Technique et Financière</span></div>
+    <div class="toc-h2">I.1 Objet du document</div>
+    <div class="toc-h2">I.2 Contexte du projet</div>
+    <div class="toc-h2">I.3 Proposition Technique et Qualité</div>
+    <div class="toc-h2">I.4 Conditions Financières</div>
+    <div class="toc-h1" style="margin-top:10px;"><span>Section II — Conditions Générales de Prestation de Services</span></div>
+
+    <!-- ── Section I ── -->
+    <div style="page-break-before:always;">
+      <table class="sec-banner-table"><tr><td>
+        <h1>Section I — Proposition Technique et Financière</h1>
+        <div class="sec-ref"><apex:outputText value="Réf. {0} · {1} · Type : {2}"><apex:param value="{!ptf.reference}" /><apex:param value="{!ptf.client}" /><apex:param value="{!ptf.missionType}" /></apex:outputText></div>
+      </td></tr></table>
+
+      <div class="sec-title">I.1 — Objet du document</div>
+      <p><apex:outputText value="{!ptf.objet}" /></p>
+
+      <div class="sec-title">I.2 — Contexte du projet</div>
+      <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.contexte))}">
+        <p style="white-space:pre-line;"><apex:outputText value="{!ptf.contexte}" /></p>
+      </apex:outputPanel>
+
+      <div class="sec-title">I.3 — Proposition Technique et Qualité</div>
+      <div class="sub-title">I.3.1 — Besoins client</div>
+      <table class="kv">
+        <tr><td class="k">Société</td><td><apex:outputText value="{!ptf.client}" /></td></tr>
+        <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.interNom))}" layout="none">
+          <tr><td class="k">Interlocuteur</td><td>
+            <apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ptf.interNom + ' ')}" />
+            <apex:outputText value=" — {0}" rendered="{!NOT(ISBLANK(ptf.interFonction))}"><apex:param value="{!ptf.interFonction}" /></apex:outputText>
+          </td></tr>
+        </apex:outputPanel>
+        <tr><td class="k">Type de prestation</td><td>Assistance Technique (AT) — régie</td></tr>
+        <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.lieuPrestation))}" layout="none">
+          <tr><td class="k">Site / Localité</td><td><apex:outputText value="{!ptf.lieuPrestation}" /></td></tr>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!NOT(ISNULL(ptf.dateDebut))}" layout="none">
+          <tr><td class="k">Début de mission</td><td><apex:outputText value="{!dateDebutLabel}" /></td></tr>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!NOT(ISNULL(ptf.dateFin))}" layout="none">
+          <tr><td class="k">Fin prévisionnelle</td><td><apex:outputText value="{!dateFinLabel}" /></td></tr>
+        </apex:outputPanel>
+      </table>
+
+      <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.consultantNom))}">
+        <p style="font-size:8pt;font-weight:bold;color:#555555;">Consultant proposé</p>
+        <table class="consultant-table"><tr>
+          <td style="width:40px;"><table><tr><td class="cc-avatar"><apex:outputText value="{!LEFT(ptf.consultantNom, 1)}" /></td></tr></table></td>
+          <td>
+            <div class="cc-nom"><apex:outputText value="{!ptf.consultantNom}" /></div>
+            <div class="cc-exp"><apex:outputText value="{!ptf.consultantExperience} d'expérience" rendered="{!NOT(ISBLANK(ptf.consultantExperience))}" /></div>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(ptf.consultantCompetences))}"><p><apex:outputText value="{!ptf.consultantCompetences}" /></p></apex:outputPanel>
+          </td>
+        </tr></table>
+      </apex:outputPanel>
+
+      <div class="sub-title">I.3.2 — Organisation matérielle</div>
+      <table class="kv">
+        <tr><td class="k">Lieu de prestation</td><td><apex:outputText value="{!IF(ISBLANK(ptf.lieuPrestation), 'Sur site client', ptf.lieuPrestation)}" /></td></tr>
+        <tr><td class="k">Moyens matériels</td><td><apex:outputText value="{!IF(ptf.materielClient, 'Poste de travail et accès informatiques fournis par le Client', 'Fournis par le Prestataire')}" /></td></tr>
+      </table>
+
+      <div class="sub-title">I.3.3 — Relation client — Suivi de mission</div>
+      <table class="kv">
+        <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(ptf.interNom))}">
+          <tr><td class="k">Interlocuteur client</td><td><apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ptf.interNom + ' ')}" /></td></tr>
+        </apex:outputPanel>
+        <tr><td class="k">Fréquence</td><td><apex:outputText value="{!IF(ISBLANK(ptf.freqReunions), 'Trimestrielle ou sur demande', ptf.freqReunions)}" /></td></tr>
+        <tr><td class="k">Compte rendu</td><td>Transmis dans les 72h suivant chaque réunion</td></tr>
+      </table>
+
+      <div class="sub-title">I.3.4 — Calendrier prévisionnel</div>
+      <table class="kv">
+        <apex:outputPanel rendered="{!NOT(ISNULL(ptf.dateDebut))}" layout="none">
+          <tr><td class="k">Date de démarrage</td><td><apex:outputText value="{!dateDebutLabel}" /></td></tr>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!NOT(ISNULL(ptf.dateFin))}" layout="none">
+          <tr><td class="k">Date de fin prévisionnelle</td><td><apex:outputText value="{!dateFinLabel}" /></td></tr>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!hasSchedule}" layout="none">
+          <tr><td class="k">Durée totale</td><td><apex:outputText value="{0} mois — {1} facturés"><apex:param value="{!ptf.schedule.size}" /><apex:param value="{!totalJoursLabel}" /></apex:outputText></td></tr>
+        </apex:outputPanel>
+      </table>
+
+      <div class="sub-title">I.3.5 — Livrables et engagements de House of ABY</div>
+      <apex:outputPanel rendered="{!NOT(livrableLines.size = 0)}">
+        <ul>
+          <apex:repeat value="{!livrableLines}" var="liv">
+            <li><apex:outputText value="{!liv}" /></li>
+          </apex:repeat>
+        </ul>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!livrableLines.size = 0}"><p>Les livrables seront définis conjointement avec le client en cours de mission et formalisés dans le compte rendu de réunion de lancement.</p></apex:outputPanel>
+
+      <div class="sec-title">I.4 — Conditions Financières</div>
+      <div class="sub-title">I.4.1 — Tarification</div>
+      <table class="price-banner-table"><tr>
+        <td>
+          <div class="pb-lbl">Montant total de la prestation (HT)</div>
+          <div class="pb-amt"><apex:outputText value="{!totalHTLabel}" /></div>
+        </td>
+      </tr></table>
+      <table class="kv" style="margin-top:8px;">
+        <tr><td class="k">Jours facturés / mois</td><td><apex:outputText value="{!joursParMoisLabel}" /></td></tr>
+        <tr><td class="k">Total jours mission</td><td><apex:outputText value="{!totalJoursLabel}" /></td></tr>
+        <tr><td class="k">Montant total HT</td><td style="font-weight:bold;color:#D31876;"><apex:outputText value="{!totalHTLabel}" /></td></tr>
+      </table>
+      <apex:outputPanel rendered="{!showCurrencyMention}" layout="none">
+        <p class="note"><strong>Devise de facturation :<apex:outputText value=" {!currencyCodeLabel}" /></strong></p>
+      </apex:outputPanel>
+      <p class="note">*<apex:outputText value="{!IF(ISBLANK(currencyLegalMentionLabel), '', ' ' + currencyLegalMentionLabel)}" /></p>
+
+      <div class="sub-title">I.4.2 — Frais</div>
+      <p><apex:outputText value="{!IF(ptf.fraisDepl, 'Les frais de déplacements et d\'hébergement engagés dans le cadre de la mission seront refacturés au réel au Client, sur présentation de justificatifs originaux. Aucune majoration ne sera appliquée.', 'Les frais de déplacements éventuels sont inclus dans le prix de la prestation.')}" /></p>
+
+      <div class="sub-title">I.4.3 — Échéancier de facturation</div>
+      <!-- Non soumis au blocage de la session 49 (cause B) : asymétrie assumée avec Abylsen, cf.
+           AR_PTFDataService.TEMPLATES_REQUIRING_SCHEDULE — le générique reste volontairement
+           généré même sans dates de mission (session 20c, non-régression testée). -->
+      <apex:outputPanel rendered="{!NOT(hasSchedule)}">
+        <p>Dates de mission non renseignées — échéancier à définir conjointement.</p>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!hasSchedule}">
+        <table class="sch">
+          <tr><th>Période</th><th class="r">Nb jours facturés</th><th class="r">Montant HT</th><th class="r">Cumul HT</th></tr>
+          <apex:repeat value="{!scheduleDisplay}" var="row">
+            <tr>
+              <td><strong><apex:outputText value="{!row.mois}" /></strong></td>
+              <td class="r"><apex:outputText value="{!row.joursLabel}" /></td>
+              <td class="r"><apex:outputText value="{!row.montantLabel}" /></td>
+              <td class="r" style="color:#888888;"><apex:outputText value="{!row.cumulLabel}" /></td>
+            </tr>
+          </apex:repeat>
+          <tr class="tot">
+            <td>TOTAL</td>
+            <td class="r"><apex:outputText value="{!totalJoursLabel}" /></td>
+            <td class="r"><apex:outputText value="{!totalHTLabel}" /></td>
+            <td class="r"><apex:outputText value="{!totalHTLabel}" /></td>
+          </tr>
+        </table>
+        <p class="note">Émission de facture en début de mois pour la période précédente.</p>
+      </apex:outputPanel>
+
+      <div class="sub-title">I.4.4 — Évolution des prix</div>
+      <p><apex:outputText value="{!IF(ISBLANK(ptf.evolutionPrix), 'Les prix sont fermes et non révisables pour la durée de la présente PTF.', ptf.evolutionPrix)}" /></p>
+
+      <div class="sub-title">I.4.5 — Conditions de règlement</div>
+      <p>Règlement par virement bancaire à <strong><apex:outputText value="{!IF(ISBLANK(ptf.conditionsReglement), '30 jours fin de mois', ptf.conditionsReglement)}" /></strong> à compter de la date d'émission de la facture.</p>
+      <p class="note"><apex:outputText value="En cas de litige, les parties conviennent de la compétence du {0}."><apex:param value="{!ptf.tribunalCompetent}" /></apex:outputText></p>
+
+      <table class="sig-table">
+        <tr><td class="sig-hd" colspan="2">Pour accord — Bon pour exécution</td></tr>
+        <tr>
+          <td class="sig-box" style="width:50%;border-right:1px solid #D0D0D0;">
+            <div class="sig-box-lbl">Pour le Client<br/><apex:outputText value="{!ptf.client}" /></div>
+            <div class="sig-line">Nom &amp; Prénom :<apex:outputText value="{!IF(ISBLANK(ptf.interNom), '', ' ' + ptf.interNom)}" /></div>
+            <div class="sig-line">Qualité / Fonction :<apex:outputText value="{!IF(ISBLANK(ptf.interFonction), '', ' ' + ptf.interFonction)}" /></div>
+            <div class="sig-area">Signature</div>
+            <div class="sig-line">Date :</div>
+          </td>
+          <td class="sig-box" style="width:50%;">
+            <div class="sig-box-lbl">Pour le Prestataire<br/>House of ABY</div>
+            <div class="sig-line">Nom &amp; Prénom :<apex:outputText value="{!IF(ISBLANK(ptf.valideurNom), '', ' ' + ptf.valideurNom)}" /></div>
+            <div class="sig-line">Qualité / Fonction :<apex:outputText value=" {!IF(ISBLANK(ptf.valideurFonction), 'Directeur d’activités', ptf.valideurFonction)}" /></div>
+            <div class="sig-area">Signature</div>
+            <div class="sig-line">Date :</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ── Section II : CGV, transposées en table 2 colonnes (comme cgv2col dans la maquette) ── -->
+    <div style="page-break-before:always;">
+      <table class="sec-banner-table"><tr><td>
+        <h1>Section II — Conditions Générales de Prestation de Services</h1>
+        <div class="sec-ref">House of ABY</div>
+      </td></tr></table>
+
+      <table class="cg-table"><tr>
+        <td>
+          <div class="cg-art"><span class="cg-n">Art. 1 — Objet :</span> Les présentes Conditions Générales définissent les modalités selon lesquelles House of ABY (ci-après « le Prestataire ») réalise des prestations de conseil et d'assistance technique auprès de ses clients (ci-après « le Client »).</div>
+          <div class="cg-art"><span class="cg-n">Art. 2 — Durée :</span> Les prestations sont réalisées pour la durée définie dans la PTF correspondante. Toute prolongation fera l'objet d'un avenant écrit signé par les deux parties.</div>
+          <div class="cg-art"><span class="cg-n">Art. 3 — Personnel :</span> Le Prestataire affecte sur la mission des consultants présentant les compétences et l'expérience correspondant aux profils définis dans la PTF. Toute substitution fait l'objet d'une information préalable au Client avec présentation du nouveau profil dans les meilleurs délais.</div>
+          <div class="cg-art"><span class="cg-n">Art. 4 — Obligations du Client :</span> Le Client s'engage à fournir au(x) consultant(s) les accès, moyens matériels et informationnels nécessaires à la bonne exécution des prestations, ainsi qu'un interlocuteur désigné disponible pour le suivi.</div>
+          <div class="cg-art"><span class="cg-n">Art. 5 — Facturation et paiement :</span> La facturation est établie selon l'échéancier défini dans la PTF. Les factures sont payables dans les délais convenus à compter de leur date d'émission. En cas de retard de paiement, des pénalités s'appliquent conformément aux dispositions légales (taux BCE + 10 points).</div>
+          <div class="cg-art"><span class="cg-n">Art. 6 — Confidentialité :</span> Chaque partie s'engage à maintenir confidentielles toutes les informations communiquées par l'autre dans le cadre de la mission et ne pas les divulguer sans accord préalable écrit. Cette obligation subsiste 5 ans après la fin de la mission.</div>
+        </td>
+        <td>
+          <div class="cg-art"><span class="cg-n">Art. 7 — Propriété intellectuelle :</span> Sauf accord contraire formalisé, les livrables produits spécifiquement dans le cadre de la mission sont la propriété du Client après paiement intégral. Les outils, méthodes et savoir-faire propres au Prestataire restent sa propriété exclusive.</div>
+          <div class="cg-art"><span class="cg-n">Art. 8 — Responsabilité :</span> La responsabilité du Prestataire est limitée au montant des honoraires perçus dans les 12 mois précédant le fait générateur. Le Prestataire ne saurait être tenu responsable des dommages indirects, pertes de chiffre d'affaires ou préjudices consécutifs.</div>
+          <div class="cg-art"><span class="cg-n">Art. 9 — Assurance :</span> Le Prestataire déclare être couvert par une assurance Responsabilité Civile Professionnelle couvrant les risques liés à son activité et s'engage à en justifier sur simple demande du Client.</div>
+          <div class="cg-art"><span class="cg-n">Art. 10 — Non-débauchage :</span> Les parties s'interdisent mutuellement, pendant la durée du contrat et les 12 mois suivant son terme, de recruter ou faire travailler directement tout collaborateur de l'autre partie ayant participé à la mission, sans accord préalable écrit.</div>
+          <div class="cg-art"><span class="cg-n">Art. 11 — Résiliation :</span> En cas de manquement grave non corrigé dans les 15 jours suivant mise en demeure par LRAR, chaque partie peut résilier le contrat de plein droit. Les prestations réalisées jusqu'à la résiliation restent dues au Prestataire.</div>
+          <div class="cg-art"><span class="cg-n">Art. 12 — Droit applicable — Attribution de juridiction :</span> Les présentes Conditions Générales et tout accord conclu en vertu de celles-ci sont soumis au droit français. En cas de litige, à défaut de règlement amiable dans un délai de 30 jours, les parties conviennent de la compétence exclusive du<apex:outputText value=" {0}.">
+            <apex:param value="{!ptf.tribunalCompetent}" />
+          </apex:outputText></div>
+        </td>
+      </tr></table>
+    </div>
+
+  </td></tr></tbody>
+</table>
+
+</body>
+</html>
+</apex:page>

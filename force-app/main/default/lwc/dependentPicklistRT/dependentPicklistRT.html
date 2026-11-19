@@ -1,0 +1,37 @@
+<template>
+    <div class="slds-grid slds-wrap slds-gutters">
+
+        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+            <lightning-combobox
+                name="controllingPicklist"
+                label={controllingFieldLabel}
+                value={controllingValue}
+                placeholder={controllingPlaceholder}
+                options={controllingOptions}
+                required={required}
+                disabled={isLoading}
+                onchange={handleControllingChange}>
+            </lightning-combobox>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1">
+            <lightning-combobox
+                name="dependentPicklist"
+                label={dependentFieldLabel}
+                value={dependentValue}
+                placeholder={dependentPlaceholder}
+                options={dependentOptions}
+                required={required}
+                disabled={isDependentDisabled}
+                onchange={handleDependentChange}>
+            </lightning-combobox>
+        </div>
+
+    </div>
+
+    <template if:true={errorMessage}>
+        <div class="slds-text-color_error slds-m-top_small">
+            {errorMessage}
+        </div>
+    </template>
+</template>

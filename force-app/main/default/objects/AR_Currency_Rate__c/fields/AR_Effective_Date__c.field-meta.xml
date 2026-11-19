@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Effective_Date__c</fullName>
+    <description>Date à partir de laquelle ce taux s&apos;applique. Le taux courant d&apos;une devise est la ligne la plus récente par cette date.</description>
+    <label>Date d&apos;effet</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

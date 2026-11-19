@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <label>Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Active</fullName>
+                <default>false</default>
+                <label>Active</label>
+            </value>
+            <value>
+                <fullName>Active, End Date Final</fullName>
+                <default>false</default>
+                <label>Active, End Date Final</label>
+            </value>
+            <value>
+                <fullName>Posted S&amp;S</fullName>
+                <default>false</default>
+                <label>Posted S&amp;S</label>
+            </value>
+            <value>
+                <fullName>Ended</fullName>
+                <default>false</default>
+                <label>Ended</label>
+            </value>
+            <value>
+                <fullName>Bench</fullName>
+                <default>false</default>
+                <label>Bench</label>
+            </value>
+            <value>
+                <fullName>Terminated, Billing Pending</fullName>
+                <default>false</default>
+                <label>Terminated, Billing Pending</label>
+            </value>
+            <value>
+                <fullName>Active, Reassignment Ongoing</fullName>
+                <default>false</default>
+                <label>Active, Reassignment Ongoing</label>
+            </value>
+            <value>
+                <fullName>Bench Terminated</fullName>
+                <default>false</default>
+                <label>Bench Terminated</label>
+            </value>
+            <value>
+                <fullName>Push</fullName>
+                <default>false</default>
+                <label>Push</label>
+            </value>
+            <value>
+                <fullName>New</fullName>
+                <default>false</default>
+                <label>New</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

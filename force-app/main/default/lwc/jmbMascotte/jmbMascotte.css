@@ -1,0 +1,469 @@
+/* =========================================================
+   Jumbo l'Explorateur — petit éléphant randonneur
+   ========================================================= */
+
+.text-style {
+    color: red;
+    font-weight: 700;
+}
+
+/* ---------- Conteneur ---------- */
+.mascotte-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+    border-radius: 1rem;
+}
+
+.mascotte-titre {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #0b5cab;
+}
+
+.mascotte-sous-titre {
+    font-size: 0.9rem;
+    color: #5a6b85;
+    margin-bottom: 0.75rem;
+}
+
+/* ---------- Scène ---------- */
+.scene {
+    position: relative;
+    width: 340px;
+    height: 270px;
+}
+
+/* ---------- Paysage circulaire ---------- */
+.paysage {
+    position: absolute;
+    right: 0;
+    top: 20px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 6px solid #ffffff;
+    box-shadow: 0 6px 18px rgba(11, 92, 171, 0.25);
+    overflow: hidden;
+    background: linear-gradient(180deg, #8fd3ff 0%, #d9f1ff 70%);
+}
+
+.soleil {
+    position: absolute;
+    top: 22px;
+    left: 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ffd84d;
+    box-shadow: 0 0 18px 6px rgba(255, 216, 77, 0.6);
+}
+
+.nuage {
+    position: absolute;
+    height: 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    opacity: 0.9;
+    animation: nuage 9s linear infinite;
+}
+
+.nuage-1 {
+    top: 40px;
+    width: 46px;
+}
+
+.nuage-2 {
+    top: 70px;
+    width: 32px;
+    animation-delay: -4.5s;
+}
+
+@keyframes nuage {
+    from { left: -50px; }
+    to   { left: 230px; }
+}
+
+.montagne {
+    position: absolute;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.montagne-arriere {
+    bottom: 60px;
+    right: -10px;
+    width: 120px;
+    height: 85px;
+    background: #9aa9c4;
+}
+
+.montagne-avant {
+    bottom: 60px;
+    left: 30px;
+    width: 140px;
+    height: 110px;
+    background: #6f7f9e;
+}
+
+.neige {
+    position: absolute;
+    top: 0;
+    left: calc(50% - 19px);
+    width: 38px;
+    height: 30px;
+    background: #ffffff;
+    clip-path: polygon(50% 0, 100% 100%, 72% 78%, 50% 100%, 28% 78%, 0 100%);
+}
+
+/* Drapeau au sommet */
+.drapeau {
+    position: absolute;
+    left: 99px;
+    bottom: 168px;
+    width: 3px;
+    height: 24px;
+    background: #2b2b2b;
+}
+
+.drapeau::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 3px;
+    width: 18px;
+    height: 12px;
+    background: #0b5cab;
+    transform-origin: left center;
+    animation: drapeau 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes drapeau {
+    from { transform: skewY(0deg) scaleX(1); }
+    to   { transform: skewY(-10deg) scaleX(0.85); }
+}
+
+.colline {
+    position: absolute;
+    bottom: -50px;
+    left: -30px;
+    width: 280px;
+    height: 130px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #7ed27f 0%, #4fae5b 100%);
+}
+
+.chemin {
+    position: absolute;
+    bottom: 0;
+    left: 100px;
+    width: 60px;
+    height: 80px;
+    background: #f6dc9a;
+    clip-path: polygon(42% 0, 58% 0, 95% 100%, 5% 100%);
+}
+
+/* ---------- Badges flottants ---------- */
+.badge {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #0b5cab;
+    box-shadow: 0 4px 10px rgba(11, 92, 171, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    z-index: 5;
+    animation: flotte 3s ease-in-out infinite;
+}
+
+.badge-carte {
+    top: 35px;
+    left: 100px;
+}
+
+.badge-boussole {
+    top: 0;
+    right: 10px;
+    animation-delay: -1s;
+}
+
+.badge-ampoule {
+    bottom: 10px;
+    right: 0;
+    animation-delay: -2s;
+}
+
+@keyframes flotte {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+/* ---------- Personnage ---------- */
+.perso {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 150px;
+    height: 200px;
+    z-index: 4;
+    animation: marche 1.6s ease-in-out infinite;
+}
+
+@keyframes marche {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-5px) rotate(-2deg); }
+}
+
+.perso > div {
+    position: absolute;
+}
+
+/* Sac à dos */
+.sac {
+    left: 98px;
+    top: 104px;
+    width: 34px;
+    height: 50px;
+    border-radius: 10px;
+    background: #2e9b57;
+    border-top: 6px solid #227a43;
+}
+
+/* Oreilles */
+.oreille {
+    top: 30px;
+    width: 60px;
+    height: 70px;
+    border-radius: 50%;
+    background: #9bb7e8;
+    animation: oreilles 2.4s ease-in-out infinite;
+}
+
+.oreille::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: #ffb3c7;
+}
+
+.oreille-gauche {
+    left: 4px;
+    transform-origin: right center;
+}
+
+.oreille-droite {
+    right: 4px;
+    transform-origin: left center;
+    animation-direction: reverse;
+}
+
+@keyframes oreilles {
+    0%, 100% { transform: rotate(-8deg); }
+    50%      { transform: rotate(8deg); }
+}
+
+/* Tête */
+.tete {
+    left: 30px;
+    top: 25px;
+    width: 90px;
+    height: 85px;
+    border-radius: 50%;
+    background: #a9c4f2;
+    z-index: 2;
+}
+
+.oeil {
+    position: absolute;
+    top: 36px;
+    width: 12px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1f2a44;
+    animation: cligne 4s infinite;
+}
+
+.oeil::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffffff;
+}
+
+.oeil-gauche { left: 24px; }
+.oeil-droit  { right: 24px; }
+
+@keyframes cligne {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95%           { transform: scaleY(0.1); }
+}
+
+.joue {
+    position: absolute;
+    top: 56px;
+    width: 14px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff8fab;
+    opacity: 0.7;
+}
+
+.joue-gauche { left: 12px; }
+.joue-droite { right: 12px; }
+
+.trompe {
+    position: absolute;
+    top: 50px;
+    left: 37px;
+    width: 16px;
+    height: 42px;
+    border-radius: 8px 8px 10px 10px;
+    background: #a9c4f2;
+    border-bottom: 4px solid #8ea9dc;
+    transform-origin: top center;
+    animation: trompe 2s ease-in-out infinite;
+}
+
+@keyframes trompe {
+    0%, 100% { transform: rotate(-12deg); }
+    50%      { transform: rotate(18deg); }
+}
+
+/* Chapeau d'explorateur */
+.chapeau-bord {
+    left: 18px;
+    top: 22px;
+    width: 114px;
+    height: 16px;
+    border-radius: 50%;
+    background: #c8a165;
+    z-index: 3;
+}
+
+.chapeau-haut {
+    left: 45px;
+    top: 2px;
+    width: 60px;
+    height: 30px;
+    border-radius: 30px 30px 6px 6px;
+    background: #ddb87d;
+    z-index: 3;
+    overflow: hidden;
+}
+
+.chapeau-haut::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 6px;
+    background: #8a5a2b;
+}
+
+/* Corps (veste orange) */
+.corps {
+    left: 40px;
+    top: 100px;
+    width: 70px;
+    height: 60px;
+    border-radius: 30px 30px 14px 14px;
+    background: #ff7a3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.logo {
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+}
+
+/* Bras */
+.bras {
+    width: 16px;
+    height: 38px;
+    border-radius: 10px;
+    background: #a9c4f2;
+    z-index: 2;
+}
+
+.bras-coucou {
+    left: 30px;
+    top: 78px;
+    transform-origin: bottom center;
+    animation: coucou 0.9s ease-in-out infinite;
+}
+
+@keyframes coucou {
+    0%, 100% { transform: rotate(-35deg); }
+    50%      { transform: rotate(5deg); }
+}
+
+.bras-baton {
+    left: 104px;
+    top: 110px;
+    transform: rotate(-40deg);
+}
+
+/* Bâton de marche */
+.baton {
+    left: 124px;
+    top: 95px;
+    width: 6px;
+    height: 105px;
+    border-radius: 3px;
+    background: #8a5a2b;
+    transform: rotate(8deg);
+    z-index: 1;
+}
+
+/* Chaussures de rando */
+.pied {
+    top: 152px;
+    width: 30px;
+    height: 22px;
+    border-radius: 12px 12px 8px 8px;
+    background: #5c3b1e;
+    z-index: 2;
+}
+
+.pied-gauche { left: 44px; }
+.pied-droit  { left: 78px; }
+
+/* ---------- Bulle ---------- */
+.bulle {
+    position: relative;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    background: #ffffff;
+    border: 3px solid #0b5cab;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(11, 92, 171, 0.2);
+}
+
+.bulle::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 30px;
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-top: 3px solid #0b5cab;
+    border-left: 3px solid #0b5cab;
+    transform: rotate(45deg);
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Version_Change_Comment__c</fullName>
+    <description>Complément texte libre au(x) motif(s) standardisés de changement de version (AR_Reason_Selection__c). Optionnel, ne remplace jamais la sélection de motifs.</description>
+    <label>Commentaire de changement de version</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

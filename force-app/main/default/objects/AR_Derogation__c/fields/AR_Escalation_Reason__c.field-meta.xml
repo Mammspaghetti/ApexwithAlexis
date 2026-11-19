@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Escalation_Reason__c</fullName>
+    <description>Précise si l&apos;escalade est due au dépassement du délai de traitement ou à l&apos;indisponibilité du valideur sélectionné.</description>
+    <label>Motif d&apos;escalade</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Délai dépassé</fullName>
+                <default>false</default>
+                <label>Délai dépassé</label>
+            </value>
+            <value>
+                <fullName>Valideur absent</fullName>
+                <default>false</default>
+                <label>Valideur absent</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

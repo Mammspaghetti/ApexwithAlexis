@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Dashboard_MC2_Bands__c</fullName>
+    <description>Bornes en % séparées par des points-virgules, ex. 10;15;20. Vide ou illisible : repli sur 10;15;20.</description>
+    <externalId>false</externalId>
+    <label>Tranches MC2 du tableau de bord</label>
+    <length>50</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

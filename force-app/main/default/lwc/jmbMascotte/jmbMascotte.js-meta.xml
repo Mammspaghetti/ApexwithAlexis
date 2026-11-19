@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>68.0</apiVersion>
+    
+    <!-- is exposed ==> disponible ou pas dans Salesforce-->
+    <isExposed>true</isExposed>
+
+    <!-- Nom du composant affiché dans Salesforce-->
+    <masterLabel>Mascotte JMB</masterLabel>
+
+    <!-- Targetx ==> A quel endroit je veux pouvoir appeler mon composant-->
+    <targets>
+        <!-- dans quel page/ élément de Salesforce -->
+        <target>lightning__RecordPage</target>
+        <!-- App page; lightning home page; lightning tab; ligthtning flow screen; URL adressable (site web); Record action (quick action)-->
+    </targets>
+
+
+    <!-- Une configuration pour chaque target défini-->
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Account</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
+
+</LightningComponentBundle>

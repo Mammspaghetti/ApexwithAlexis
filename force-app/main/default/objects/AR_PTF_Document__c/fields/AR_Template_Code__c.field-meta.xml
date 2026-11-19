@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Template_Code__c</fullName>
+    <description>Code du gabarit enregistré dans le snapshot au moment de la génération de la PTF. Permet d&apos;afficher et de filtrer les documents par gabarit.</description>
+    <externalId>false</externalId>
+    <label>Code gabarit utilisé</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

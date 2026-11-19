@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Derogation_Waiver_Amount__c</fullName>
+    <defaultValue>100</defaultValue>
+    <description>Montant de dispense de dérogation, en euros : une matrice dont la MC2 par jour (convertie en EUR) atteint ce montant se valide directement, même sous le seuil de dérogation. Vide = règle désactivée (aucune valeur substituée).</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Si la MC2 par jour de la matrice atteint ce montant, elle se valide directement, même sous le seuil de dérogation. Vide : la règle est désactivée.</inlineHelpText>
+    <label>Dispense de dérogation — MC2/jour (€)</label>
+    <precision>16</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

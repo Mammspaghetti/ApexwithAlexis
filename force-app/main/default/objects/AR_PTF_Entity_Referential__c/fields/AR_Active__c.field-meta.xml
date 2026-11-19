@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Active__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Permet de désactiver une entité PTF sans la supprimer : une entité inactive n&apos;est plus proposée dans le choix d&apos;entité à la création d&apos;une matrice (AR_PricingMatrixService.getEntityOptions), mais reste utilisable pour la génération PTF des matrices.</description>
+    <label>Actif</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

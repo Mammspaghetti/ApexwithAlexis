@@ -1,0 +1,474 @@
+<template>
+  <div class="admin-list-header">
+    <div>
+      <h2 class="admin-section-title">{i18n.AR_ADM_TabPtfEntities}</h2>
+      <p class="admin-list-subtitle">{countLabel}</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick={handleAdd}>
+      {i18n.AR_APE_AddEntity}
+    </button>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={showInactiveBanner}>
+    <div class="validators-banner" role="status" data-id="validators-banner">
+      <span class="validators-banner-text">{i18n.AR_APE_ValidatorsBanner}</span>
+      <span class="validators-banner-count">{inactiveBannerCount}</span>
+    </div>
+  </template>
+
+  <template if:true={showForm}>
+    <c-ar-admin-form-modal
+      heading={i18n.AR_APE_Heading}
+      saving={isSaving}
+      onsave={handleSave}
+      oncancel={handleCancel}
+    >
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_EntityName}
+          data-field="name"
+          value={form.name}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_Common_Active}
+          data-field="active"
+          checked={form.active}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <div class="admin-template-field">
+          <lightning-combobox
+            label={i18n.AR_APE_DefaultPtfTemplate}
+            data-field="templateCode"
+            options={templateComboOptions}
+            value={templateComboValue}
+            onchange={handleTemplateChange}
+          ></lightning-combobox>
+          <template if:true={templateCodeIsUnknown}>
+            <p class="admin-field-warning" role="alert">
+              {unknownTemplateCodeMessage}
+            </p>
+          </template>
+          <template if:true={templateOptionsError}>
+            <p class="admin-field-warning" role="alert">
+              {templateListErrorMessage}
+            </p>
+          </template>
+        </div>
+      </div>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_APE_AddressSection}</h3>
+      <div class="admin-form-row">
+        <div class="slds-form-element admin-form-block">
+          <label class="slds-form-element__label" for="entity-address">
+            {i18n.AR_APE_AddressBlock}
+          </label>
+          <div class="slds-form-element__control">
+            <textarea
+              id="entity-address"
+              class="slds-textarea admin-textarea"
+              rows="7"
+              data-field="address"
+              oninput={handleFieldChange}
+            >
+{form.address}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_PostalCode}
+          data-field="postalCode"
+          value={form.postalCode}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_City}
+          data-field="city"
+          value={form.city}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_Common_Country}
+          data-field="country"
+          value={form.country}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_Common_Contact}</h3>
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_Siret}
+          data-field="siret"
+          value={form.siret}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_Common_Phone}
+          data-field="phone"
+          value={form.phone}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_FaxOptional}
+          data-field="fax"
+          value={form.fax}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_Website}
+          data-field="website"
+          value={form.website}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_SalesEmail}
+          data-field="commercialEmail"
+          value={form.commercialEmail}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_APE_BankDetails}</h3>
+      <div class="admin-form-row">
+        <div class="slds-form-element admin-form-block">
+          <label class="slds-form-element__label" for="entity-rib">
+            {i18n.AR_APE_RibBlock}
+          </label>
+          <div class="slds-form-element__control">
+            <textarea
+              id="entity-rib"
+              class="slds-textarea admin-textarea"
+              rows="7"
+              data-field="rib"
+              oninput={handleFieldChange}
+            >
+{form.rib}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_Bank}
+          data-field="bankName"
+          value={form.bankName}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_Iban}
+          data-field="iban"
+          value={form.iban}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_Bic}
+          data-field="bic"
+          value={form.bic}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+      <p class="admin-form-help" data-id="bank-help">{i18n.AR_APE_RibHelp}</p>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_APE_LegalTermsSection}</h3>
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_APE_CommercialCourt}
+          placeholder={i18n.AR_APE_CommercialCourtPlaceholder}
+          data-field="tribunalCompetent"
+          value={form.tribunalCompetent}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_APE_CalculationSection}</h3>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          step="0.0001"
+          label={i18n.AR_APE_Coefficient}
+          placeholder={i18n.AR_APE_CoefficientPlaceholder}
+          data-field="coefficient"
+          value={form.coefficient}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          step="1"
+          label={i18n.AR_Common_WorkingDaysPerYear}
+          placeholder={i18n.AR_APE_WorkingDaysPlaceholder}
+          data-field="workingDays"
+          value={form.workingDays}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          step="0.01"
+          min="0"
+          label={i18n.AR_Common_FloorPercent}
+          data-field="floorPercent"
+          value={form.floorPercent}
+          onchange={handleFieldChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          step="0.01"
+          min="0"
+          label={i18n.AR_Common_TargetPercent}
+          data-field="targetPercent"
+          value={form.targetPercent}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="number"
+          step="0.01"
+          min="0"
+          label={i18n.AR_Common_IdealPercent}
+          data-field="idealPercent"
+          value={form.idealPercent}
+          onchange={handleFieldChange}
+        ></lightning-input>
+      </div>
+
+      <h3 class="admin-form-subtitle">{i18n.AR_APE_ValidatorsSection}</h3>
+      <div class="validators-section" data-id="validators-section">
+        <ul class="validator-chips" data-id="validator-chips">
+          <template for:each={validatorChips} for:item="chip">
+            <li
+              key={chip.userId}
+              class={chip.chipClass}
+              data-id="validator-chip"
+            >
+              <span class="validator-avatar" aria-hidden="true"
+                >{chip.initials}</span
+              >
+              <span class="validator-identity">
+                <span class="validator-name">{chip.name}</span>
+                <span class="validator-title">{chip.title}</span>
+              </span>
+              <template if:true={chip.isInactive}>
+                <span
+                  class="validator-badge"
+                  data-id="validator-inactive-badge"
+                >
+                  {i18n.AR_APE_ValidatorInactiveBadge}
+                </span>
+                <button
+                  class="validator-remove-text"
+                  type="button"
+                  data-id="validator-remove"
+                  data-userid={chip.userId}
+                  onclick={handleRemoveValidator}
+                >
+                  {i18n.AR_APE_ValidatorRemove}
+                </button>
+              </template>
+              <template if:false={chip.isInactive}>
+                <button
+                  class="validator-remove"
+                  type="button"
+                  data-id="validator-remove"
+                  data-userid={chip.userId}
+                  aria-label={chip.removeAria}
+                  title={i18n.AR_APE_ValidatorRemove}
+                  onclick={handleRemoveValidator}
+                >
+                  ×
+                </button>
+              </template>
+            </li>
+          </template>
+        </ul>
+        <template if:false={hasValidators}>
+          <p class="validator-empty">{i18n.AR_APE_ValidatorNone}</p>
+        </template>
+
+        <div class="slds-form-element validator-search">
+          <label class="slds-form-element__label" for="validator-search-input">
+            {i18n.AR_APE_ValidatorAdd}
+          </label>
+          <div class="slds-form-element__control">
+            <input
+              id="validator-search-input"
+              class="slds-input"
+              type="text"
+              role="combobox"
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-expanded={showResultsPanel}
+              data-id="validator-search"
+              placeholder={i18n.AR_APE_ValidatorSearchPlaceholder}
+              oninput={handleSearchInput}
+              onkeydown={handleSearchKeydown}
+              onfocus={handleSearchFocus}
+              onblur={handleSearchBlur}
+            />
+          </div>
+          <template if:true={showResultsPanel}>
+            <div class="validator-results" data-id="validator-results">
+              <template if:true={searchLoading}>
+                <p class="validator-results-note">{i18n.AR_Common_Loading}</p>
+              </template>
+              <template if:true={searchError}>
+                <p
+                  class="validator-results-error"
+                  role="alert"
+                  data-id="validator-search-error"
+                >
+                  {searchError}
+                </p>
+              </template>
+              <template if:true={showNoResult}>
+                <p class="validator-results-note" data-id="validator-no-result">
+                  {i18n.AR_APE_ValidatorNoResult}
+                </p>
+              </template>
+              <template if:true={hasResults}>
+                <ul class="validator-options" role="listbox">
+                  <template
+                    for:each={resultItems}
+                    for:item="item"
+                    for:index="idx"
+                  >
+                    <li
+                      key={item.userId}
+                      id={item.optionId}
+                      class={item.optionClass}
+                      role="option"
+                      aria-selected={item.ariaSelected}
+                      data-id="validator-option"
+                      data-index={idx}
+                      onmousedown={handleResultMouseDown}
+                      onmouseenter={handleResultHover}
+                    >
+                      <span
+                        class="validator-avatar validator-avatar_small"
+                        aria-hidden="true"
+                        >{item.initials}</span
+                      >
+                      <span class="validator-identity">
+                        <span class="validator-name">{item.name}</span>
+                        <span class="validator-title">{item.title}</span>
+                      </span>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </div>
+          </template>
+        </div>
+        <p class="admin-form-help validator-help" data-id="validators-help">
+          {i18n.AR_APE_ValidatorsHelp}
+        </p>
+      </div>
+    </c-ar-admin-form-modal>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">{i18n.AR_APE_Empty}</div>
+  </template>
+
+  <template if:false={isEmpty}>
+    <template if:false={isLoading}>
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>{i18n.AR_APE_EntityName}</th>
+              <th>{i18n.AR_Common_Status}</th>
+              <th>{i18n.AR_APE_City}</th>
+              <th>{i18n.AR_Common_Country}</th>
+              <th>{i18n.AR_APE_PtfTemplateColumn}</th>
+              <th>{i18n.AR_APE_CoefficientColumn}</th>
+              <th>{i18n.AR_APE_WorkingDaysColumn}</th>
+              <th>{i18n.AR_APE_PtfReadinessColumn}</th>
+              <th>{i18n.AR_APE_ThresholdsColumn}</th>
+              <th>{i18n.AR_APE_ValidatorsColumn}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={entities} for:item="row">
+              <tr key={row.id}>
+                <td>
+                  {row.name}
+                  <div class="row-meta">{row.modifiedLine}</div>
+                </td>
+                <td>{row.activeLabel}</td>
+                <td>{row.city}</td>
+                <td>{row.country}</td>
+                <td>{row.templateCode}</td>
+                <td>{row.coefficientEffectiveLabel}</td>
+                <td>{row.workingDaysEffectiveLabel}</td>
+                <td class={row.readinessClass}>{row.readinessLabel}</td>
+                <td>{row.thresholdsLabel}</td>
+                <td data-id="validators-cell">
+                  <span class="validators-count">{row.validatorCount}</span>
+                  <template if:true={row.hasInactiveValidators}>
+                    <button
+                      class="validators-warning"
+                      type="button"
+                      data-id={row.id}
+                      data-name="inactive-badge"
+                      onclick={handleEditFromBadge}
+                    >
+                      {row.inactiveValidatorsLabel}
+                    </button>
+                  </template>
+                </td>
+                <td class="admin-table-actions">
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleEdit}
+                  >
+                    {i18n.AR_Common_Edit}
+                  </button>
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleDelete}
+                  >
+                    {i18n.AR_Common_Delete}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+  </template>
+</template>

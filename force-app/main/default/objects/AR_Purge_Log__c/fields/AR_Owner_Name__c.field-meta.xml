@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Owner_Name__c</fullName>
+    <description>Nom du propriétaire de la matrice, dénormalisé (texte, pas de lookup User pour ne pas dépendre d&apos;un utilisateur qui peut être désactivé).</description>
+    <externalId>false</externalId>
+    <label>Propriétaire</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

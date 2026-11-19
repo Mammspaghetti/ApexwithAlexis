@@ -1,0 +1,130 @@
+<template>
+  <section
+    role="dialog"
+    tabindex="-1"
+    class="slds-modal slds-fade-in-open won-modal"
+    aria-modal="true"
+    aria-labelledby="won-modal-heading"
+  >
+    <div class="slds-modal__container won-container">
+      <header class="won-header">
+        <div class="won-header-icon">
+          <lightning-icon
+            icon-name="utility:success"
+            size="small"
+          ></lightning-icon>
+        </div>
+        <div class="won-header-text">
+          <h2 id="won-modal-heading" class="won-title">{title}</h2>
+          <p class="won-subtitle">{recap}</p>
+        </div>
+      </header>
+
+      <div class="won-body">
+        <template if:true={isLoading}>
+          <p class="won-muted">{i18n.loading}</p>
+        </template>
+
+        <template if:true={hasDeal}>
+          <p class="won-section-label">{i18n.versions}</p>
+          <div class="ver-list" role="radiogroup">
+            <template for:each={versionCards} for:item="card">
+              <div
+                key={card.matrixId}
+                class={card.cssClass}
+                role="radio"
+                aria-checked={card.ariaChecked}
+                tabindex="0"
+                data-id={card.matrixId}
+                onclick={handleSelectVersion}
+              >
+                <div class="ver-card-top">
+                  <span class="ver-card-title">{card.title}</span>
+                  <span class="ver-card-date">{card.validatedOn}</span>
+                  <template if:true={card.proposed}>
+                    <span class="ver-card-tag">{i18n.proposed}</span>
+                  </template>
+                </div>
+                <div class="ver-card-prices">{card.prices}</div>
+                <div class="ver-card-mc2">{card.mc2}</div>
+              </div>
+            </template>
+          </div>
+
+          <p class="won-section-label">{i18n.signedPrice}</p>
+          <div class="price-grid" role="radiogroup">
+            <template for:each={priceCards} for:item="card">
+              <button
+                key={card.key}
+                type="button"
+                class={card.cssClass}
+                role="radio"
+                aria-checked={card.ariaChecked}
+                disabled={card.disabled}
+                data-key={card.key}
+                onclick={handleSelectLevel}
+              >
+                <span class="price-card-label">{card.label}</span>
+                <span class="price-card-amount">{card.amount}</span>
+              </button>
+            </template>
+          </div>
+
+          <template if:true={isOtherSelected}>
+            <div class="won-field">
+              <label class="won-field-label">{i18n.amount}</label>
+              <input
+                class="won-input won-amount"
+                aria-label={i18n.amount}
+                type="number"
+                min="0"
+                step="any"
+                value={freeAmount}
+                onchange={handleAmountChange}
+                oninput={handleAmountChange}
+              />
+              <template if:true={computedLevelText}>
+                <span class="won-level">{computedLevelText}</span>
+              </template>
+            </div>
+          </template>
+
+          <div class="won-field">
+            <label class="won-field-label">{i18n.date}</label>
+            <input
+              class="won-input won-date"
+              aria-label={i18n.date}
+              type="date"
+              value={signedDate}
+              onchange={handleDateChange}
+            />
+          </div>
+        </template>
+
+        <template if:true={errorMessage}>
+          <p class="won-error" role="alert">{errorMessage}</p>
+        </template>
+      </div>
+
+      <footer class="won-footer">
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick={handleLater}
+          disabled={isSaving}
+        >
+          {i18n.later}
+        </button>
+        <button
+          class="btn btn-primary"
+          type="button"
+          onclick={handleConfirm}
+          disabled={confirmDisabled}
+        >
+          {i18n.confirm}
+        </button>
+      </footer>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

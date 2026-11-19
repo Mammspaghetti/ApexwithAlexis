@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_StepMatrixLink_Require_Empty_Enabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Active le contrôle du champ matrice sur une étape Connexys lorsque celui-ci est vide et qu&apos;aucune matrice validée unique ne peut être proposée.</description>
+    <label>Requis intelligent pour matrice à étape</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

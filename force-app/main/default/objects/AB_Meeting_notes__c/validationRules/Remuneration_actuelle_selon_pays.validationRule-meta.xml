@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Remuneration_actuelle_selon_pays</fullName>
+    <active>true</active>
+    <description>Rémunération actuelle obligatoire sauf pour BE/FR</description>
+    <errorConditionFormula>IF( ISNEW(),false,
+IF ( RecordType.Id &lt;&gt; $Label.ABY_Meeting_notes_record_type, false,
+IF( NULLVALUE( AB_Remuneration_actuelle__c, -1)&gt;0,false,
+IF( OR(TEXT(AB_Job_application_country__c) = &quot;Belgique&quot;, TEXT(AB_Job_application_country__c) = &quot;France&quot;),false,true)
+)
+)
+)</errorConditionFormula>
+    <errorMessage>Rémunération actuelle obligatoire sauf pour FR/BE</errorMessage>
+</ValidationRule>

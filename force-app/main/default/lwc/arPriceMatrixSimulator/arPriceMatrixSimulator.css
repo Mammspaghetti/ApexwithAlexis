@@ -1,0 +1,3370 @@
+.sim-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 1rem 1.25rem;
+}
+
+.sim-body {
+  padding: 0;
+}
+
+/* Cards de zone numérotées (session 16, pricing-tool.html:1828-1836) : signature visuelle de
+   l'écran — pastille rose + titre par zone, remplace les anciens titres "zone-title" nus. */
+.zone-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  /* Session 289 : overflow visible pour toutes les cartes de zone — une liste déroulante ouverte (séniorité,
+     entité, devise, pays…) déborde de sa carte et passe par-dessus les voisines au lieu d'être rognée
+     (overflow: clip la coupait ; hidden aussi). Le sticky de la session 140 reste fonctionnel
+     (visible ne crée pas de contexte de défilement). Sans rognage, les coins arrondis ne sont plus
+     découpés : l'en-tête (fond opaque) et le dernier enfant reprennent le rayon (cf. session 278c). */
+  overflow: visible;
+}
+
+.zone-card > :first-child {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.zone-card > :last-child {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.zone-card-header {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.zone-card-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: #ffffff;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.zone-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zone-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d31876;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.zone-header-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #111111;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* La maquette écrit ce sous-titre en rgba(255,255,255,.5) sur fond blanc : invisible — bug maquette
+   non reproduit, corrigé en muted lisible. */
+.zone-header-subtitle {
+  font-size: 10px;
+  color: #6b6b6b;
+  margin: 1px 0 0;
+}
+
+.zone-card-body {
+  padding: 14px 16px;
+}
+
+/* Icône discrète "Comment ce chiffre est calculé ?" (session 14, tâche 2) : bouton natif (pas
+   lightning-button, cf. contrainte de style shadow DOM session 10), couleur muted de la maquette. */
+.info-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.info-trigger:hover {
+  background: rgba(107, 107, 107, 0.12);
+}
+.info-icon {
+  --sds-c-icon-color-foreground-default: #6b6b6b;
+}
+
+.info-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 320px;
+  max-width: calc(100vw - 2rem);
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 0.85rem 1rem;
+  max-height: calc(var(--ar-zone-height, 100dvh) - 4rem);
+  overflow-y: auto;
+}
+.info-popover:focus {
+  outline: none;
+}
+
+.info-popover-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 0.5rem;
+}
+
+.market-info-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.market-info-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b6b6b;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.market-info-modal-close:hover {
+  color: #111111;
+}
+
+.info-popover-list {
+  margin: 0;
+}
+.info-popover-list dt {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0.5rem 0 0.15rem;
+}
+.info-popover-list dt:first-child {
+  margin-top: 0;
+}
+.info-popover-list dd {
+  font-size: 12px;
+  color: #333333;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.info-popover-note {
+  font-size: 11px;
+  color: #6b6b6b;
+  font-style: italic;
+  margin: 0.6rem 0 0;
+}
+
+/* Repères marché : accent navy #1C4A8F, couleur d'identité "données marché" (maquette session 10). */
+.market-card {
+  background: #eef3fb;
+  border: 1px solid #d7e3f5;
+  border-left: 3px solid #1c4a8f;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.market-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.market-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Le déclencheur est côté droit du header : ancrer le popover à droite plutôt qu'à gauche (défaut de .info-popover). */
+.market-header .info-popover {
+  left: auto;
+  right: 0;
+}
+
+/* Session 72 : popover élargi pour le schéma logique du moteur pondéré (poids + pipeline + séniorité). */
+.info-popover-wide {
+  width: 440px;
+}
+
+/* Modal centrée dans la zone visible de l'appli (sous l'en-tête Salesforce, cf. arPricingApp). */
+.market-info-modal {
+  position: fixed;
+  top: calc(var(--ar-zone-top, 0px) + var(--ar-zone-height, 100dvh) / 2);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  width: 460px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+  overflow-y: auto;
+}
+
+/* L'en-tête reste visible pendant le défilement du contenu. */
+.market-info-modal .market-info-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: -0.85rem -1rem 0.75rem;
+  padding: 0.85rem 1rem 0.5rem;
+  background: #ffffff;
+}
+
+/* Modale de dérogation (slds-modal) : limitée à la zone visible, corps défilant. */
+.slds-modal {
+  top: var(--ar-zone-top, 0px);
+  bottom: auto;
+  height: var(--ar-zone-height, 100dvh);
+}
+
+.slds-modal__container {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+}
+
+.slds-modal__header,
+.slds-modal__footer {
+  flex: none;
+}
+
+.slds-modal__content {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.slds-backdrop {
+  top: var(--ar-zone-top, 0px);
+}
+
+.market-info-modal-scrim {
+  position: fixed;
+  top: var(--ar-zone-top, 0px);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 99;
+  background: rgba(15, 18, 24, 0.5);
+}
+
+/* Écrans peu hauts : même contenu, espacements réduits. */
+@media (max-height: 820px) {
+  .market-info-modal {
+    padding: 0.6rem 0.8rem;
+  }
+  .market-info-modal .market-info-modal-header {
+    margin: -0.6rem -0.8rem 0.5rem;
+    padding: 0.6rem 0.8rem 0.4rem;
+  }
+  .market-info-modal .market-stats {
+    padding: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .market-info-modal .market-stat {
+    padding: 0.3rem 0.4rem;
+  }
+  .market-info-modal .market-stat-value {
+    font-size: 1rem;
+  }
+  .market-info-modal .pipeline-stage {
+    padding-bottom: 0.7rem;
+  }
+  .market-info-modal .pipeline-stage:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.market-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3a5f92;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.confidence-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  color: #ffffff;
+}
+
+.confidence-badge.confidence-high {
+  background: #16a34a;
+}
+
+.confidence-badge.confidence-medium {
+  background: #f59e0b;
+}
+
+.confidence-badge.confidence-low {
+  background: #8c8c8c;
+}
+
+.market-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+/* Session 74 : stats compactes affichées dans le popover avec fond navy et blanc. */
+.market-info-modal .market-stats {
+  background: #1c4a8f;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  gap: 0.4rem;
+}
+
+.market-info-modal .market-stat {
+  background: transparent;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+.market-info-modal .market-stat:last-child {
+  border-right: none;
+}
+
+.market-info-modal .market-stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.market-info-modal .market-stat-value {
+  font-size: 1.25rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.market-info-modal .market-stat-subtitle {
+  color: #cfe0f5;
+}
+
+.market-info-modal .market-stat-value.confidence-high {
+  color: #16a34a;
+}
+.market-info-modal .market-stat-value.confidence-medium {
+  color: #f59e0b;
+}
+.market-info-modal .market-stat-value.confidence-low {
+  color: #8c8c8c;
+}
+
+.market-stat {
+  background: #ffffff;
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+}
+
+.market-stat-label {
+  font-size: 11px;
+  color: #6b6b6b;
+  margin: 0 0 0.15rem;
+}
+
+.market-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1c4a8f;
+  margin: 0;
+}
+
+/* Session 73 : sous-texte pour les stats (pays, période) */
+.market-stat-subtitle {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  margin: 0.15rem 0 0;
+}
+
+.market-circle-label {
+  font-size: 0.75rem;
+  color: #3a5f92;
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}
+
+.market-low-confidence {
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  margin: 0;
+}
+
+/* Session 24b : mention de conversion des repères marché (source EUR + taux appliqué). */
+.market-conversion-note {
+  font-size: 0.75rem;
+  color: #8c8c8c;
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+/* Session 26 : mention quand les repères restent en EUR faute de taux (§1, situation 3) — même
+   registre visuel que la note de conversion, pas une alerte, une précision. */
+.market-no-rate-note {
+  font-size: 0.75rem;
+  color: #8c8c8c;
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+/* Session 71 : pipeline pédagogique du moteur pondéré (5 étapes + 1 branche séniorité). */
+.market-pipeline {
+  margin-bottom: 1rem;
+}
+
+.pipeline-stage {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+}
+
+.pipeline-stage:last-child {
+  padding-bottom: 0;
+}
+
+.pipeline-num {
+  z-index: 1;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1c4a8f;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  border-radius: 50%;
+}
+
+.pipeline-connector {
+  position: absolute;
+  top: 1.75rem;
+  left: 0.9rem;
+  width: 2px;
+  height: calc(100% - 1.75rem);
+  background: #d7e3f5;
+}
+
+.pipeline-content {
+  flex: 1;
+}
+
+.pipeline-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 0.25rem;
+}
+
+.pipeline-text {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Session 73 : tag du pays retenu (étape 2) — conservé pour compatibilité */
+.pipeline-country-tag {
+  display: block;
+  font-size: 0.75rem;
+  color: #1c4a8f;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+/* Session 74 : deux badges compacts côte à côte (étape 2) */
+.pipeline-tags-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.pipeline-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: #f0f4fa;
+  border: 1px solid #d7e3f5;
+  border-radius: 999px;
+  color: #1c4a8f;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pipeline-tag-count {
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.pipeline-branch {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #ffffff;
+  border-left: 2px dashed #d7e3f5;
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  line-height: 1.4;
+}
+
+.pipeline-branch p {
+  margin: 0;
+}
+
+/* Session 72 : barres de poids du moteur pondéré (étape 3). */
+.weight-bar-container {
+  margin-bottom: 0.5rem;
+}
+
+.weight-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #333333;
+  margin-bottom: 0.2rem;
+}
+
+.weight-bar-track {
+  height: 6px;
+  background: #e8e8e8;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.weight-bar-fill {
+  height: 100%;
+  background: #1c4a8f;
+  border-radius: 3px;
+}
+
+/* Session 73 : texte "réalisé" sous les barres de poids (étape 3) */
+.weight-bar-realized {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  margin: 0.2rem 0 0;
+  line-height: 1.3;
+}
+
+/* Session 72 : puces de confiance (étape 4, badges colorés). */
+.confidence-badges-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+/* Session 73-74 : chips de confiance avec couleurs sémantiques (remplace les puces) */
+.confidence-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.3rem 0;
+}
+
+.confidence-chip {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.confidence-chip.high.inactive {
+  background: #f0f0f0;
+  color: #8c8c8c;
+}
+
+.confidence-chip.medium.inactive {
+  background: #f0f0f0;
+  color: #8c8c8c;
+}
+
+.confidence-chip.low.inactive {
+  background: #f0f0f0;
+  color: #8c8c8c;
+}
+
+.confidence-chip.high.active {
+  background: #16a34a;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px #d3f2de;
+}
+
+.confidence-chip.medium.active {
+  background: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px #fde8c2;
+}
+
+.confidence-chip.low.active {
+  background: #8c8c8c;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px #e5e5e5;
+}
+
+/* Session 73 : ligne d'effectif pondéré (étape 4) */
+.pipeline-effective-line {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  margin: 0.4rem 0 0;
+  line-height: 1.4;
+}
+
+/* Session 72 : label compact de séniorité (remplace pipeline-branch). */
+.seniority-compact-label {
+  font-size: 0.75rem;
+  color: #8c8c8c;
+  font-style: italic;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #eee;
+}
+
+/* Session 72 : pied de popover fusionné. */
+.modal-footer-note {
+  font-size: 0.75rem;
+  color: #8c8c8c;
+  margin: 0.75rem 0 0;
+  line-height: 1.4;
+}
+
+/* Session 82 (refonte UX) : deux colonnes fixes — recherche toujours visible à gauche, aperçu du
+   besoin sélectionné à droite, plutôt que l'aperçu remplaçant la recherche (session 81).
+   Session 83 : encadré visuel unique (.zone-card), séparateur vertical, surbrillance du sélectionné.
+   Session 84 §2 : min-height pour que la carte occupe une vraie portion de la page. */
+.position-selector-card {
+  margin-bottom: 1rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.position-selector-card .zone-card-header {
+  border-bottom: none;
+}
+
+.position-selector-card .zone-card-body {
+  min-height: 500px;
+  max-height: calc(100vh - 220px);
+  display: flex;
+  flex-direction: column;
+}
+
+.position-selector-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.position-selector-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(211, 24, 118, 0.08);
+  border-radius: 0.5rem;
+  --sds-c-icon-color-foreground-default: #d31876;
+}
+
+.position-selector-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.position-selector-subtitle {
+  font-size: 0.75rem;
+  color: #767676;
+  margin: 0.25rem 0 0;
+  font-weight: 400;
+}
+
+.position-selector-row {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  align-items: stretch;
+  gap: 1rem;
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .position-selector-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.position-search-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Session 96 : lightning-input remplacé par un <input> natif (voir arPriceMatrixSimulator.html).
+   Les tentatives précédentes (--slds-c-input-sizing-min-height, ::part(input)/::part(input-container),
+   sélecteur descendant ".position-search-bar input") ne fonctionnaient pas car le Shadow DOM
+   synthétique de lightning-input n'implémente pas CSS Shadow Parts (bug connu, voir
+   github.com/salesforce/lwc issue #2016) et le compilateur LWC neutralise les sélecteurs
+   descendants classiques en scopant chaque segment. Un <input> natif appartient entièrement à
+   notre propre DOM : plus aucune de ces limitations ne s'applique, contrôle CSS total. */
+
+.position-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  --sds-c-icon-color-foreground-default: #706e6b;
+}
+
+.position-search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 0.75rem 0 2.25rem;
+  font-size: 0.8125rem;
+  line-height: normal;
+  color: #16325c;
+  font-family: inherit;
+}
+
+.position-search-input::placeholder {
+  color: #706e6b;
+}
+
+.position-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.position-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.12);
+  border-radius: 0.625rem;
+  height: 2.75rem;
+  overflow: hidden;
+}
+
+.position-search-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0) 60%
+  );
+  border-radius: 0.625rem 0.625rem 0 0;
+  pointer-events: none;
+}
+
+.position-preview-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.position-preview-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 0.875rem;
+  z-index: 1;
+  transition: opacity 0.15s ease;
+}
+
+/* Session 86 §5 : État vide restructuré avec icône en cercle teinté, deux lignes de texte. */
+.position-preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  background: #fafafa;
+  color: #6b6b6b;
+  text-align: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.position-preview-placeholder-icon-circle {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(211, 24, 118, 0.08);
+  border-radius: 50%;
+  color: #d31876;
+}
+
+.position-preview-placeholder-icon {
+  color: currentColor;
+}
+
+.position-preview-placeholder-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111111;
+}
+
+.position-preview-placeholder-help {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #767676;
+  line-height: 1.4;
+}
+
+.position-dropdown {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.position-dropdown li {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+  color: #111111;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.position-dropdown li:hover {
+  background: #f5f5f5;
+}
+
+/* Session 83 §1 : surbrillance du résultat sélectionné — teinte rose clair + bordure gauche
+   marque dérivée de .btn-primary (#d31876/#a81260). */
+.position-dropdown li.position-dropdown-selected {
+  background: #fce7ed;
+  border-left: 3px solid #d31876;
+  padding-left: calc(0.9rem - 3px);
+}
+
+.position-dropdown li.position-dropdown-selected:hover {
+  background: #f8d9e8;
+}
+
+.position-dropdown-empty {
+  color: #6b6b6b;
+  cursor: default;
+}
+
+.position-dropdown-empty:hover {
+  background: transparent;
+}
+
+/* Session 86 §3 : Nouvelle liste de résultats en flux (non flottante), réutilise le bouton
+   accessible plutôt que les <li onclick>. Flex: 1 pour remplir l'espace vertical de la colonne,
+   min-height: 0 pour que le défilement fonctionne correctement. */
+.besoin-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.besoin-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  color: #111111;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-family: inherit;
+  line-height: 1.4;
+  width: 100%;
+}
+
+.besoin-result-item:hover {
+  background: #f5f5f5;
+  border-color: #d1d5db;
+}
+
+.besoin-result-item-left {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.besoin-result-position-name {
+  font-weight: 600;
+  color: #111111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.besoin-result-account-name {
+  font-size: 0.75rem;
+  color: #767676;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.besoin-result-item.position-dropdown-selected {
+  background: #fdf1f7;
+  border-color: #d31876;
+}
+
+.besoin-result-item.position-dropdown-selected:hover {
+  background: #fce7ed;
+}
+
+.besoin-result-check {
+  flex-shrink: 0;
+}
+
+.besoin-results-empty {
+  list-style: none;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .besoin-results-list {
+    max-height: 300px;
+  }
+}
+
+/* Session 54 : lookup consultant — dropdown réutilise .position-dropdown (même structure), le
+   conteneur reste dédié pour ne pas hériter du max-width/margin pensés pour le sélecteur de besoin
+   (élément de section autonome), ici imbriqué dans une colonne de grille déjà dimensionnée. */
+.consultant-search {
+  position: relative;
+}
+
+.consultant-clear-link {
+  background: none;
+  border: none;
+  padding: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #0176d3;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.consultant-clear-link:hover {
+  color: #014486;
+}
+
+.consultant-suggestion {
+  font-size: 0.75rem;
+  color: #444444;
+  margin: 0.35rem 0 0;
+}
+
+.consultant-legacy-note {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: #6b6b6b;
+  margin: 0.35rem 0 0;
+}
+
+.no-position-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b6b6b;
+  font-size: 0.8125rem;
+  padding: 1.5rem 0;
+}
+
+.no-position-message p {
+  margin: 0;
+}
+
+/* Cards de seuils maquette (pricing-tool.html:2052-2060, session 14) : 3 colonnes
+   (Plancher/Cible/Annoncé, pas de Top 10 % ici — il vit dans "Repères marché" et la jauge),
+   fond teinté + liseré gauche 3px, gap uniforme 0.5rem (grid-cols-3 gap-2 de la maquette). */
+.threshold-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .threshold-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.threshold-card {
+  border-radius: 8px;
+  border-left: 3px solid;
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 2px;
+}
+
+.threshold-card .stat-value {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.threshold-floor {
+  background: #fef2f2;
+  border-left-color: #dc2626;
+}
+.threshold-floor .stat-value {
+  color: #dc2626;
+}
+
+.threshold-target {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+}
+.threshold-target .stat-value {
+  color: #d97706;
+}
+
+.threshold-ideal {
+  background: #f0fdf4;
+  border-left-color: #16a34a;
+}
+.threshold-ideal .stat-value {
+  color: #16a34a;
+}
+
+/* Bandeau "Seuils Grand Compte" (pricing-tool.html:2047-2051, session 14) : affiché uniquement
+   quand un corridor spécifique s'applique (AR_Account_Corridor__c trouvé pour ce compte). */
+.grand-compte-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: rgba(211, 24, 118, 0.07);
+  border: 1px solid rgba(211, 24, 118, 0.2);
+  border-radius: 5px;
+  margin-bottom: 6px;
+}
+
+.grand-compte-icon {
+  --sds-c-icon-color-foreground-default: #d31876;
+}
+
+.grand-compte-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d31876;
+  white-space: nowrap;
+}
+
+.grand-compte-values {
+  font-size: 11px;
+  color: #666666;
+}
+
+.grand-compte-standard {
+  color: #aaaaaa;
+}
+
+/* Couleurs de sens partagées (segment pills, valeur MC2 dominante, etc.). */
+.value-green {
+  color: #16a34a;
+}
+.value-green-dark {
+  color: #166534;
+}
+.value-amber {
+  color: #f59e0b;
+}
+.value-red {
+  color: #dc2626;
+}
+
+/* Zone 1 : champs lecture seule (Nom Manager, Nom client, Besoin, Pays, Propriétaire), session 17 —
+   styling hooks SLDS2 sur lightning-input désactivé, fidèle à la maquette
+   (background:var(--aby-bg), color:var(--aby-muted), pricing-tool.html:1837-1845). */
+.readonly-input {
+  --slds-c-input-color-background-disabled: #f9f9f9;
+  --slds-c-input-color-text-disabled: #6b6b6b;
+  --slds-c-input-color-border-disabled: #e8e8e8;
+}
+
+/* Libellé "Nombre de jours mission (calculé auto)" (Zone 2, session 17, pricing-tool.html:1994-2000) :
+   label custom (lightning-input en variant label-hidden) pour pouvoir teinter le suffixe en vert. */
+.mission-days-label {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+.mission-days-auto-tag {
+  margin-left: 0.25rem;
+  font-weight: 400;
+}
+
+/* Bandeau récapitulatif "{profil} — {région} — {secteur}" (Zone 1, session 17, pricing-tool.html:1877-1880). */
+.recap-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f0f4fa;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #6b6b6b;
+}
+.recap-banner-icon {
+  --sds-c-icon-color-foreground-default: #6b6b6b;
+}
+
+/* Jauge : card autonome (session 16, pricing-tool.html:2066) — titre + TJM courant à droite. */
+.gauge-card {
+  margin-bottom: 0;
+}
+
+.gauge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.gauge-header-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.gauge-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gauge-zone-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.gauge-zone-pill-below-floor {
+  background: #fde8e6;
+  color: #a61a14;
+}
+.gauge-zone-pill-low-margin {
+  background: #fdf0d5;
+  color: #7a4d00;
+}
+.gauge-zone-pill-recommended {
+  background: #e4f5e6;
+  color: #1d6b2b;
+}
+.gauge-zone-pill-superstar {
+  background: #d9efdb;
+  color: #145a20;
+}
+
+.gauge-header-tjm {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Jauge corridor : l'étage des prix (pastilles) est au-dessus de la piste, celui des seuils dessous.
+   Positions en pixels calculées côté JS (gaugeView) ; le dégradé de la piste vient de gaugeTrackStyle. */
+.gauge-stage {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.gauge-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.gauge-separator {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 12px;
+  margin-left: -1px;
+  background: #ffffff;
+}
+
+.gauge-price,
+.gauge-threshold {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.gauge-stem {
+  position: absolute;
+  width: 2px;
+  background: #94a3b8;
+}
+.gauge-stem-actual {
+  background: #1e293b;
+}
+.gauge-stem-nego.gauge-nego-below-floor {
+  background: #dc2626;
+}
+.gauge-stem-ghost {
+  background: #cbd5e1;
+}
+
+.gauge-pill {
+  position: absolute;
+  box-sizing: border-box;
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+}
+.gauge-pill-actual {
+  background: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff;
+}
+.gauge-pill-nego.gauge-nego-below-floor {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+.gauge-pill-ghost {
+  border-style: dashed;
+  border-color: #94a3b8;
+  color: #64748b;
+}
+.gauge-pill-tag {
+  font-weight: 700;
+}
+.gauge-pill-tag-actual {
+  font-weight: 500;
+  opacity: 0.75;
+}
+.gauge-pill-value {
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.gauge-threshold-tick {
+  position: absolute;
+  width: 1px;
+  background: #94a3b8;
+}
+
+.gauge-ruler-label {
+  position: absolute;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.gauge-ruler-label-left {
+  text-align: left;
+}
+.gauge-ruler-label-center {
+  text-align: center;
+}
+.gauge-ruler-label-right {
+  text-align: right;
+}
+.gauge-ruler-name {
+  font-size: 11px;
+  font-weight: 600;
+}
+.gauge-ruler-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.gauge-ruler-mc2 {
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.gauge-cursor-wrap {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transition: left 0.3s ease;
+}
+
+.gauge-dot {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 3px solid #1e293b;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/*
+ * Session 18d : un curseur épinglé au bord de l'échelle (TJM hors [min, max]) ne doit plus être
+ * confondu avec une position réelle au bord — même défaut de principe que les affichages faux
+ * corrigés en sessions 15/16. Forme distincte (losange plutôt que rond) + bordure pointillée ambre :
+ * redondant avec la mention « (hors échelle) » de l'infobulle, volontairement, pour
+ * rester lisible même si l'un des deux signaux passe inaperçu.
+ */
+.gauge-dot-out-of-scale {
+  background: #fef3c7;
+  border: 3px dashed #f59e0b;
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
+.gauge-grad-cost {
+  color: #64748b;
+}
+.gauge-grad-floor {
+  color: #dc2626;
+}
+.gauge-grad-target {
+  color: #f59e0b;
+}
+.gauge-grad-ideal {
+  color: #16a34a;
+}
+.gauge-grad-top10 {
+  color: #1c4a8f;
+}
+
+/* Légende des 4 zones (session 16, MarketGauge l.984-989) */
+.gauge-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.gauge-legend-zones,
+.gauge-legend-marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.gauge-legend-dot {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 3px solid #1e293b;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gauge-legend-bar {
+  width: 5px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1.5px solid #0f172a;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.gauge-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.gauge-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Pills segments : fond teinté + texte foncé + bordure (comme les CORRIDOR_COLORS maquette). */
+.segment-pill {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border: 1px solid transparent;
+}
+
+.segment-pill-red {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.segment-pill-amber {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.segment-pill-green {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+/* Vert foncé (superstar, session 155) : blanc sur #166534 ≈ 7:1, contraste AA. */
+.segment-pill-green-dark {
+  background: #166534;
+  color: #ffffff;
+  border-color: #14532d;
+}
+
+/* Boutons maquette : primaire dégradé rose, succès vert, danger rouge, secondaire blanc bordé. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+.btn-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e8e8e8;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: #f9f9f9;
+}
+
+.btn-text {
+  background: transparent;
+  color: #64748b;
+  padding: 0.55rem 0.5rem;
+}
+.btn-text:hover:not(:disabled) {
+  color: #333333;
+}
+
+/* Bandeau de reprise de brouillon + indicateur d'autosave (session 13) */
+.draft-resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #eef3fb;
+  border: 1px solid #d7e3f5;
+  border-left: 3px solid #1c4a8f;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+  color: #1c4a8f;
+}
+
+.draft-resume-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Trois états (session 39) : le seul état précédent ("Brouillon enregistré à HH:MM", couleur
+   #94a3b8 ~2.5:1 de contraste sur blanc) est passé inaperçu au contrôle navigateur du 31/08 —
+   ni pendant la saisie (aucun signal "modifié" n'existait), ni juste après l'autosauvegarde
+   (contraste trop faible pour être remarqué sans le chercher). Couleur relevée à #64748b (même
+   registre que .mc2-context-line/.discount-note, ~4.6:1), point coloré redondant avec le texte
+   pour ne jamais dépendre d'un seul signal (même principe que .gauge-dot-out-of-scale). */
+.autosave-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: -0.25rem 0 0.75rem;
+}
+
+.autosave-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #94a3b8;
+}
+
+.autosave-indicator-dirty {
+  color: #b45309;
+}
+.autosave-indicator-dirty .autosave-indicator-dot {
+  background: #f59e0b;
+}
+
+.autosave-indicator-saving .autosave-indicator-dot {
+  background: #1c4a8f;
+  animation: autosave-pulse 1s ease-in-out infinite;
+}
+
+.autosave-indicator-saved {
+  color: #15803d;
+}
+.autosave-indicator-saved .autosave-indicator-dot {
+  background: #16a34a;
+}
+
+@keyframes autosave-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Helper CJM sous le salaire (session 15, pricing-tool.html:1911) */
+.field-helper-text {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 4px 0 0;
+}
+
+/* Sections de frais repliables (session 15, pricing-tool.html:2005-2019) */
+.fee-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: #6b6b6b;
+  cursor: pointer;
+}
+.fee-toggle:hover {
+  color: #333333;
+}
+
+.fee-toggle-total {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b6b6b;
+}
+
+/* Titre de section de frais (session 178) : remplace le bouton toggle */
+.fee-section-title {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #6b6b6b;
+  font-weight: 500;
+}
+
+/* Encadré de coût journalier (session 15, pricing-tool.html:2038-2043) */
+.cost-summary-box {
+  background: #eef3fb;
+  border: 1px solid #dde6f5;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.cost-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #6b6b6b;
+}
+.cost-summary-row + .cost-summary-row {
+  margin-top: 0.35rem;
+}
+
+.cost-summary-value {
+  font-weight: 600;
+  color: #111111;
+}
+
+.cost-summary-row-total {
+  font-weight: 700;
+  color: #111111;
+  border-top: 1px solid #dde6f5;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+.cost-summary-row-total span:last-child {
+  color: #1c4a8f;
+}
+
+/* Coût non calculable (session 16) : message explicite plutôt qu'un "—/j" + "- 0 €" incohérents. */
+.cost-summary-empty {
+  font-size: 13px;
+  color: #6b6b6b;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Hiérarchie zone 3 (session 16, pricing-tool.html:2079-2083) : une valeur dominante + une ligne de
+   contexte, remplace les deux tuiles de poids égal MC2/jour + MC2 %. */
+.mc2-dominant-block {
+  text-align: left;
+}
+
+.mc2-dominant-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2px 0 0;
+}
+
+.mc2-context-line {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* Décomposition MC2 (session 15, pricing-tool.html:2085-2096) */
+.mc2-breakdown-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 13px;
+}
+
+.mc2-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  color: #475569;
+  padding: 2px 0;
+}
+.mc2-breakdown-row + .mc2-breakdown-row {
+  margin-top: 0.4rem;
+}
+
+.mc2-breakdown-strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.mc2-breakdown-row-rfa {
+  color: #ea580c;
+}
+
+.mc2-breakdown-row-total {
+  font-weight: 700;
+  color: #1e293b;
+  border-top: 1px solid #cbd5e1;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.mc2-breakdown-row-subtotal {
+  font-weight: 600;
+  border-top: 1px solid #cbd5e1;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+.mc2-breakdown-percent {
+  font-weight: 400;
+  font-size: 12px;
+  color: inherit;
+  margin-left: 0.5rem;
+}
+
+.breakdown-line-caption {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 2px 0 0 0;
+}
+
+/* Session 150 : Décomposition MC2 avec une décimale alignée */
+.mc2-breakdown-amount {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.amt-int {
+  display: inline-block;
+  text-align: right;
+}
+
+.amt-dec {
+  display: inline-block;
+  width: 2ch;
+  text-align: left;
+}
+
+.amt-dec-hidden {
+  visibility: hidden;
+}
+
+/* Badge de segment + note "vs objectif" (session 15, pricing-tool.html:2097-2102) */
+.segment-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.discount-note {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Bandeaux d'alerte contextuels par segment (session 15, pricing-tool.html:2104-2107) */
+.alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.alert-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.alert-banner-text {
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+.alert-banner-title + .alert-banner-text {
+  margin-top: 2px;
+}
+
+.alert-banner-red {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+.alert-banner-red .alert-banner-title,
+.alert-banner-red .alert-banner-text {
+  color: #b91c1c;
+}
+.alert-banner-red .alert-banner-icon {
+  --sds-c-icon-color-foreground-default: #dc2626;
+}
+
+.alert-banner-amber {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+.alert-banner-amber .alert-banner-text {
+  color: #b45309;
+  margin: 0;
+}
+.alert-banner-amber .alert-banner-icon {
+  --sds-c-icon-color-foreground-default: #d97706;
+}
+
+.alert-banner-green {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+.alert-banner-green .alert-banner-text {
+  color: #047857;
+  margin: 0;
+}
+.alert-banner-green .alert-banner-icon {
+  --sds-c-icon-color-foreground-default: #16a34a;
+}
+
+/* Bouton "Saisissez un TJM pour continuer" (session 15) : état gris permanent, pas une variante
+   assombrie d'un bouton coloré (contrairement à .btn:disabled ailleurs). */
+.btn-disabled-state {
+  background: #e5e7eb;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+.btn-disabled-state:disabled {
+  opacity: 1;
+}
+
+/* Bandeau de statut lecture seule (session 16) : remplace la bande slds-theme_alert-texture grise
+   brute — même défaut que la bande Salesforce neutralisée en session 12b. Une teinte par statut,
+   cohérente avec arMatrixList.css (status-validated/pending/validated-derog/rejected). */
+.status-banner {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  border-left: 3px solid;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+}
+
+.status-banner-validated {
+  background: #f0fdf4;
+  border-left-color: #16a34a;
+  color: #15803d;
+}
+.status-banner-pending {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+  color: #b45309;
+}
+.status-banner-derog {
+  background: #eef3fb;
+  border-left-color: #1c4a8f;
+  color: #1c4a8f;
+}
+.status-banner-rejected {
+  background: #fef2f2;
+  border-left-color: #dc2626;
+  color: #b91c1c;
+}
+
+/* Pied de page : action principale pleine largeur (session 16, pricing-tool.html:2108-2126). */
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-action-main {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Rappel chiffré de la modale de dérogation (session 16, pricing-tool.html:2168-2190). */
+.derogation-recall {
+  font-size: 0.8125rem;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  margin: 0 0 1rem;
+}
+
+/* Sélecteurs pays VIE/Nearshore (session 18, maquette pricing-tool.html:1913-1970) : encart
+   d'avertissement tant qu'aucun pays n'est choisi — palette ambre (VIE) / violette (Nearshore),
+   couleurs exactes de la maquette. */
+.referential-warning {
+  padding: 5px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.vie-referential-warning {
+  background: #fef9ec;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.nearshore-referential-warning {
+  background: #f3effe;
+  border: 1px solid #c4b5fd;
+  color: #4c1d95;
+}
+
+.vie-referential-note {
+  color: #d31876;
+  margin-left: 4px;
+}
+
+.nearshore-referential-note {
+  color: #5c35a5;
+  margin-left: 4px;
+}
+
+/* Écart au référentiel (session 18, ajout délibéré absent de la maquette, cf. §3 du prompt) :
+   signale une surcharge manuelle du CJM après choix d'un pays, sans jamais effacer le lookup. */
+.referential-mismatch-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: #b45309;
+  margin: 4px 0 0;
+}
+
+/* Alerte de dépassement mark-up INDEP (session 18, maquette pricing-tool.html:1984 : text-amber-600,
+   pas une erreur rouge — l'org utilisait slds-text-color_error avant ce correctif). */
+.markup-mismatch-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: #b45309;
+  margin: 4px 0 0;
+}
+
+/* Session 65 : bandeau de confirmation pré-remplissage à la sélection du consultant — change
+   list + undo button. Palette : bleu discret (vert passe-partout ailleurs, mais vert signifie
+   "validé/enregistré" et ne convient pas à "juste modifié en attente de confirmation"). */
+.prefill-banner {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+}
+
+.prefill-banner-header {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 8px;
+}
+
+.prefill-banner-count {
+  font-weight: 700;
+}
+
+.prefill-banner-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  color: #333;
+}
+
+.prefill-banner-list li {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.prefill-banner-list .field-name {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.prefill-banner-list .field-change {
+  flex: 1;
+  color: #666;
+}
+
+.prefill-banner-undo {
+  background: transparent;
+  border: none;
+  color: #1e40af;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.prefill-banner-undo:hover {
+  color: #1e3a8a;
+}
+
+/* Badge discret de succès (cliquable pour voir détails) — style harmonisé avec confidence-badge */
+.prefill-success-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  margin-left: 0.5rem;
+  background: #16a34a;
+  border-radius: 1rem;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.prefill-success-badge:hover {
+  background: #15803d;
+}
+
+/* Bouton de fermeture pour la boîte détaillée */
+.prefill-close-btn {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.25rem;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.prefill-close-btn:hover {
+  color: #475569;
+}
+
+/* Panneau de détail du besoin sélectionné (session 81) */
+.position-preview-panel {
+  background: #fafafa;
+  border: 1px solid #ececec;
+  border-radius: 0.875rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.position-preview-header {
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.position-preview-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.position-preview-header-right {
+  flex-shrink: 0;
+}
+
+.position-preview-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.position-preview-account-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.position-preview-account-icon {
+  flex-shrink: 0;
+  color: #6b6b6b;
+}
+
+.position-preview-account-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  color: #111111;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.position-preview-account-link:hover {
+  text-decoration: underline;
+}
+
+.position-preview-account-text {
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  word-break: break-word;
+}
+
+.position-preview-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.position-preview-badge-success {
+  background: #e8f7ee;
+  color: #1f8a4c;
+}
+
+.position-preview-badge-danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.position-preview-badge-neutral {
+  background: #eef2f7;
+  color: #3b4d61;
+}
+
+.position-preview-separator {
+  margin: 0;
+  border: none;
+  border-top: 1px solid #ececec;
+  height: 1px;
+  background: transparent;
+}
+
+.position-preview-body {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.preview-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.preview-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #a3a3a3;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+}
+
+.preview-value {
+  font-size: 0.8125rem;
+  color: #111111;
+  word-break: break-word;
+}
+
+/* Session 85 : lien cliquable pour ouvrir la fiche du compte (style discret) */
+.account-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  color: #111111;
+  word-break: break-word;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.account-link:hover {
+  text-decoration: underline;
+}
+
+.position-preview-footer {
+  padding: 1rem;
+  border-top: 1px solid #ececec;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.position-preview-footer .btn-primary {
+  border-radius: 0.625rem;
+  box-shadow: 0 2px 8px rgba(211, 24, 118, 0.28);
+}
+
+.position-preview-footer .btn-secondary {
+  border-radius: 0.625rem;
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Notification « dérogation à traiter » (session 112, refonte UX du 24/09/2026)
+ * Pastille flottante bas-droite, « Dérogation en attente » + flèche : reste visible au défilement.
+ * Entrée : glisse depuis l'extérieur de l'écran, 500 ms après l'affichage (animation-delay, pas de
+ * minuteur JS), léger dépassement puis stabilisation. Mouvement réduit : simple fondu.
+ * ---------------------------------------------------------------------------------------------- */
+.derogation-toast {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 90;
+  max-width: calc(100vw - 40px);
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-left: 4px solid #d31876;
+  border-radius: 10px;
+  box-shadow:
+    0 12px 32px rgba(17, 17, 17, 0.14),
+    0 2px 6px rgba(17, 17, 17, 0.08);
+  animation: derogation-toast-in 520ms cubic-bezier(0.18, 0.89, 0.32, 1.15)
+    500ms both;
+}
+
+.derogation-toast-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px 13px 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.derogation-toast-main:focus-visible {
+  outline: 2px solid #d31876;
+  outline-offset: 2px;
+}
+
+.derogation-toast-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111111;
+  transition: color 150ms ease;
+}
+
+.derogation-toast-main:hover .derogation-toast-title {
+  color: #d31876;
+}
+
+.derogation-toast-go {
+  display: flex;
+  align-items: center;
+  --slds-c-icon-color-foreground-default: #d31876;
+  --sds-c-icon-color-foreground-default: #d31876;
+  transition: transform 180ms ease;
+}
+
+.derogation-toast-main:hover .derogation-toast-go,
+.derogation-toast-main:focus-visible .derogation-toast-go {
+  transform: translateX(4px);
+}
+
+/* Croix dans une petite bulle blanche, à cheval sur le coin haut-droit de la carte. */
+.derogation-toast-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 2px;
+  border: 1px solid #e4e4e4;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(17, 17, 17, 0.15);
+  color: #8a8a8a;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.derogation-toast-close:hover,
+.derogation-toast-close:focus-visible {
+  background: #f4f4f4;
+  color: #222222;
+}
+
+@keyframes derogation-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 32px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes derogation-toast-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .derogation-toast {
+    animation: derogation-toast-fade 200ms ease 500ms both;
+  }
+}
+
+/* Session 118 : Liens cliquables Zone 1 */
+.zone1-field-with-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zone1-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 20px;
+  color: #0070d2;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background-color 150ms ease;
+}
+
+.zone1-link-icon:hover,
+.zone1-link-icon:focus-visible {
+  background-color: rgba(0, 112, 210, 0.1);
+  outline: none;
+}
+
+.zone1-field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.zone1-field-label-text {
+  display: inline-block;
+}
+
+/* Session 126 : zone 1 links styled like disabled input fields (SLDS classes) */
+.zone1-link-field {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: #f3f3f3;
+  border: 1px solid #d3d3d3;
+  border-radius: 0.25rem;
+  color: #0070d2;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-family:
+    Salesforce Sans,
+    Arial,
+    sans-serif;
+  position: relative;
+  padding-right: 2rem;
+  transition: text-decoration 150ms ease;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.zone1-link-field::after {
+  content: "";
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6"/><polyline points="10 14 21 3"/></svg>')
+    no-repeat center;
+  background-size: contain;
+}
+
+.zone1-link-field:hover,
+.zone1-link-field:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.slds-form-element {
+  position: relative;
+}
+
+.slds-form-element__label abbr.slds-required {
+  color: #d31876;
+  font-weight: normal;
+  margin-left: 0.25rem;
+}
+
+.unit-hint {
+  color: #706e6b;
+  margin-left: 0.15rem;
+}
+
+/* MC2/jour à gauche, champs de négociation à droite ; les champs passent sous la MC2 si la largeur manque. */
+.mc2-nego-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+}
+
+/* Prix de négociation 2 et 3 (indicatifs) : plus discrets que le TJM proposé. */
+.nego-fields {
+  display: flex;
+  gap: 0.5rem;
+  text-align: left;
+}
+.nego-field {
+  flex: 0 0 auto;
+  width: 6rem;
+}
+.nego-field.nego-field-grid {
+  width: auto;
+}
+.nego-grid-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+}
+.nego-label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+.nego-input-wrap {
+  position: relative;
+  display: block;
+}
+.nego-input.slds-input {
+  height: 1.75rem;
+  min-height: 1.75rem;
+  font-size: 12px;
+  padding-right: 1.75rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.nego-input::-webkit-inner-spin-button,
+.nego-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.nego-input-unit {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #64748b;
+  pointer-events: none;
+  user-select: none;
+}
+.nego-message {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+.nego-message-floor {
+  color: #dc2626;
+}
+
+/* Panier : colonnes des prix 2 et 3 (3,6rem = « 1 250,0 € » à 12px, mesuré), à droite de la colonne du prix 1.
+   Les lignes sans valeur pour ces colonnes réservent leur largeur pour que les montants du prix 1 restent alignés. */
+/* Grille : libellé, colonne du prix 1, colonnes des prix 2/3 — une cellule par colonne sur chaque ligne,
+   donc le montant du prix 1 reste dans sa colonne, aligné à droite, jamais collé au libellé. */
+/* Replié par défaut (session 268) : les colonnes P2/P3 existent à largeur nulle, déployées par .is-nego-open.
+   Session 270 : « Intermédiaire » (11px), mesuré à ~4,9rem → colonnes de 5rem ; column-gap animé (0 replié). */
+.mc2-breakdown-box-multi {
+  position: relative;
+  padding-right: 1.75rem;
+}
+.mc2-breakdown-box-multi-1 .mc2-breakdown-row {
+  grid-template-columns: minmax(0, 1fr) 6.5rem repeat(1, 0rem);
+}
+.mc2-breakdown-box-multi-2 .mc2-breakdown-row {
+  grid-template-columns: minmax(0, 1fr) 6.5rem repeat(2, 0rem);
+}
+.mc2-breakdown-box-multi-1.is-nego-open .mc2-breakdown-row {
+  grid-template-columns: minmax(0, 1fr) 6.5rem repeat(1, 5rem);
+}
+.mc2-breakdown-box-multi-2.is-nego-open .mc2-breakdown-row {
+  grid-template-columns: minmax(0, 1fr) 6.5rem repeat(2, 5rem);
+}
+.mc2-breakdown-box-multi .mc2-breakdown-row {
+  display: grid;
+  align-items: start;
+  column-gap: 0;
+  transition:
+    grid-template-columns 260ms cubic-bezier(0.2, 0, 0, 1),
+    column-gap 260ms cubic-bezier(0.2, 0, 0, 1);
+}
+.mc2-breakdown-box-multi.is-nego-open .mc2-breakdown-row {
+  column-gap: 0.5rem;
+}
+.mc2-breakdown-box-multi .mc2-breakdown-row > :nth-child(n + 2) {
+  justify-self: end;
+  text-align: right;
+}
+.mc2-breakdown-box-multi .mc2-breakdown-label {
+  min-width: 0;
+}
+.mc2-breakdown-extra {
+  width: 100%;
+  min-width: 0;
+  min-height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.is-nego-open .mc2-breakdown-extra {
+  opacity: 1;
+}
+.mc2-breakdown-box-multi .mc2-breakdown-row > :nth-child(n + 3) {
+  justify-self: stretch;
+  min-width: 0;
+  overflow: hidden;
+}
+.mc2-breakdown-row-total .mc2-breakdown-extra {
+  font-weight: 400;
+}
+
+/* Rangée d'en-tête (Idéal / Intermédiaire / Plancher) : hauteur animée de 0 à son contenu avec les colonnes. */
+.nego-head {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 260ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 220ms ease;
+}
+.nego-head.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.nego-head-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.nego-head-row {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  padding-bottom: 0.25rem;
+}
+.nego-head-row > :nth-child(n + 3) {
+  overflow: visible;
+}
+.mc2-breakdown-box-multi .nego-head-row + .mc2-breakdown-row {
+  margin-top: 0;
+}
+
+/* Poignée verticale des colonnes P2/P3, collée au bord droit intérieur du panier. */
+.nego-handle {
+  all: unset;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 0 7px 7px 0;
+  transition:
+    color 220ms ease,
+    background-color 220ms ease;
+}
+.nego-handle:hover {
+  color: #0176d3;
+  background-color: rgba(1, 118, 211, 0.06);
+}
+.nego-handle:focus-visible {
+  box-shadow: inset 0 0 0 2px #0176d3;
+}
+.nego-handle-text {
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+.nego-handle .tjm-chevron {
+  width: 10px;
+  height: 10px;
+  transform: rotate(90deg);
+  transition: transform 220ms ease;
+}
+.is-nego-open .nego-handle .tjm-chevron {
+  transform: rotate(-90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc2-breakdown-box-multi .mc2-breakdown-row,
+  .mc2-breakdown-extra,
+  .nego-head,
+  .nego-handle,
+  .nego-handle .tjm-chevron {
+    transition: none;
+  }
+}
+.mc2-breakdown-extra-percent {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+.nego-percent-below-floor {
+  color: #f87171;
+}
+
+/* Jauge : repères secondaires des prix 2 et 3 (petite barre sur la piste ; la pastille est dans l'étage des prix). */
+.gauge-nego-tick {
+  position: absolute;
+  top: -5px;
+  width: 4px;
+  height: 22px;
+  margin-left: -2px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
+  z-index: 1;
+}
+/* Périodes de TJM (docs/254c) : frise proportionnelle, 4 teintes douces fixes (fond clair + texte foncé :
+   lisibles quel que soit le thème de la page), une ligne par période, pied « TJM moyen pondéré ». */
+.tjm-color-1 {
+  background-color: #bfdbfe;
+}
+.tjm-color-2 {
+  background-color: #bbf7d0;
+}
+.tjm-color-3 {
+  background-color: #fde68a;
+}
+.tjm-color-4 {
+  background-color: #ddd6fe;
+}
+
+/* Le cadre est dessiné par deux traits : .tjm-frame-top, qui part du soulignement du lien et devient
+   le bord haut, puis .tjm-frame-rest (côtés et bas). Le pied « TJM moyen pondéré » ferme le cadre. */
+.tjm-block {
+  --k: 1;
+  --tjm-ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-hover: calc(220ms * var(--k));
+  --t-line: calc(260ms * var(--k));
+  --t-sides: calc(340ms * var(--k));
+  --t-body: calc(380ms * var(--k));
+  --stagger: calc(35ms * var(--k));
+  position: relative;
+  margin-top: 6px;
+}
+
+.tjm-text-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 16px;
+  color: #5c6b7f;
+  transition: color var(--t-hover, 220ms) ease;
+}
+
+.tjm-text-btn:hover:not(.just-clicked) {
+  color: #0176d3;
+}
+
+.tjm-text-btn:focus-visible {
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 3px #0176d3;
+}
+
+.tjm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 2px 2px 3px;
+}
+
+.tjm-chevron {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  transition: transform var(--t-line) var(--tjm-ease);
+}
+
+.tjm-block.is-open .tjm-chevron {
+  transform: rotate(180deg);
+}
+
+.tjm-frame {
+  position: relative;
+}
+
+.tjm-frame-top,
+.tjm-frame-rest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  border: 1px solid #0176d3;
+  pointer-events: none;
+}
+
+/* Fermé : largeur nulle au début du libellé ; au survol, le trait se dessine sous le libellé. */
+.tjm-frame-top {
+  top: 0;
+  height: 8px;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  clip-path: inset(0 calc(100% - var(--l, 30px)) 0 var(--l, 30px));
+  transition:
+    clip-path var(--t-hover) var(--tjm-ease),
+    border-color var(--t-hover) ease;
+}
+
+.tjm-toggle:hover ~ .tjm-frame .tjm-frame-top,
+.tjm-toggle:focus-visible ~ .tjm-frame .tjm-frame-top {
+  clip-path: inset(0 var(--r, 200px) 0 var(--l, 30px));
+}
+
+.tjm-frame-rest {
+  top: 8px;
+  bottom: 0;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  clip-path: inset(0 0 100% 0);
+  transition:
+    clip-path var(--t-line) var(--tjm-ease),
+    border-color var(--t-hover) ease;
+}
+
+/* Ouverture : le trait s'étire, les côtés descendent, le bas ferme, puis le cadre passe au gris. */
+.tjm-block.is-open .tjm-frame .tjm-frame-top {
+  clip-path: inset(0 0 0 0);
+  border-color: #e2e8f0;
+  transition:
+    clip-path var(--t-line) var(--tjm-ease),
+    border-color calc(420ms * var(--k)) ease calc(560ms * var(--k));
+}
+
+.tjm-block.is-open .tjm-frame-rest {
+  clip-path: inset(0 0 0 0);
+  border-color: #e2e8f0;
+  transition:
+    clip-path var(--t-sides) var(--tjm-ease) calc(200ms * var(--k)),
+    border-color calc(420ms * var(--k)) ease calc(560ms * var(--k));
+}
+
+/* Fermeture : ordre inverse, le trait ne se rétracte qu'une fois le bas remonté. */
+.tjm-block.is-closing .tjm-frame .tjm-frame-top {
+  transition:
+    clip-path var(--t-line) var(--tjm-ease) calc(220ms * var(--k)),
+    border-color 120ms ease;
+}
+
+.tjm-block.is-locked * {
+  transition: none !important;
+}
+
+/* Dépliage du panneau entier (hauteur par grille, comme .tjm-collapse). */
+.tjm-unfold {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows calc(300ms * var(--k)) var(--tjm-ease)
+    calc(40ms * var(--k));
+}
+
+.tjm-block.is-open .tjm-unfold {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--t-body) var(--tjm-ease)
+    calc(120ms * var(--k));
+}
+
+.tjm-unfold-inner {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s linear calc(340ms * var(--k));
+}
+
+.tjm-block.is-open .tjm-unfold-inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.tjm-periods-panel {
+  --tjm-expand: calc(380ms * var(--k, 1));
+  --tjm-collapse: calc(320ms * var(--k, 1));
+  --tjm-stagger: calc(35ms * var(--k, 1));
+  padding: 10px 12px 8px;
+  transition: padding var(--tjm-expand) var(--tjm-ease);
+}
+
+.tjm-periods-panel_compact {
+  padding: 0.25rem 0.5rem;
+  transition-duration: var(--tjm-collapse);
+}
+
+/* Fermé : contenu effacé vite ; à l'ouverture, il apparaît une fois le cadre tracé. */
+.tjm-block:not(.is-open) .tjm-fade-item {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition-duration: calc(140ms * var(--k));
+  transition-delay: 0s;
+}
+
+.tjm-block.is-opening
+  .tjm-periods-panel:not(.tjm-periods-panel_compact)
+  .tjm-fade-item {
+  transition-delay: calc(240ms * var(--k) + var(--i, 0) * var(--tjm-stagger));
+}
+
+.tjm-block:not(.is-open) .tjm-timeline {
+  opacity: 0;
+  transition-duration: calc(140ms * var(--k));
+}
+
+.tjm-block.is-opening .tjm-timeline {
+  transition-delay: 0s, 0s, 0s, calc(240ms * var(--k) + var(--tjm-stagger));
+}
+
+/* Hauteur animée par grille (1fr → 0fr), sans mesure ni max-height. */
+.tjm-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--tjm-expand) var(--tjm-ease);
+}
+
+.tjm-collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 4px;
+  margin: 0 -4px;
+  visibility: visible;
+  transition: visibility 0s linear 0s;
+}
+
+.tjm-periods-panel_compact .tjm-collapse {
+  grid-template-rows: 0fr;
+  transition-duration: var(--tjm-collapse);
+}
+
+/* Sortie de l'ordre de tabulation en fin de repli, rétablie tout de suite au dépliage. */
+.tjm-periods-panel_compact .tjm-collapse-inner {
+  visibility: hidden;
+  transition-delay: var(--tjm-collapse);
+}
+
+.tjm-fade-item {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--tjm-expand) var(--tjm-ease),
+    transform var(--tjm-expand) var(--tjm-ease);
+  transition-delay: calc(var(--i, 0) * var(--tjm-stagger));
+}
+
+.tjm-periods-panel_compact .tjm-fade-item {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition-duration: var(--tjm-collapse);
+  transition-delay: calc(var(--ri, 0) * var(--tjm-stagger));
+}
+
+.tjm-periods-panel_compact .tjm-fade-item_down {
+  transform: translateY(8px);
+}
+
+.tjm-timeline-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.tjm-timeline {
+  display: flex;
+  width: 100%;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  transition:
+    height var(--tjm-expand) var(--tjm-ease),
+    margin-bottom var(--tjm-expand) var(--tjm-ease),
+    box-shadow 0.2s ease,
+    opacity var(--tjm-expand) var(--tjm-ease);
+}
+
+.tjm-periods-panel_compact .tjm-timeline {
+  height: 30px;
+  margin-bottom: 0;
+  cursor: pointer;
+  transition-duration:
+    var(--tjm-collapse), var(--tjm-collapse), 0.2s, var(--tjm-collapse);
+}
+
+.tjm-periods-panel_compact .tjm-timeline:hover {
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+}
+
+.tjm-periods-panel_compact .tjm-timeline:focus-visible {
+  outline: 2px solid #0176d3;
+  outline-offset: 2px;
+}
+
+.tjm-segment {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  color: #1e293b;
+  border-right: 2px solid #ffffff;
+  transition: width 0.25s ease;
+}
+
+.tjm-segment:last-child {
+  border-right: 0;
+}
+
+/* Deux variantes du texte superposées : seule l'opacité change, la mise en page ne bouge pas. */
+.tjm-segment-full,
+.tjm-segment-line {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 4px;
+  opacity: 1;
+  transition: opacity var(--tjm-expand) var(--tjm-ease);
+}
+
+.tjm-segment-full {
+  flex-direction: column;
+}
+
+.tjm-segment-line {
+  opacity: 0;
+}
+
+.tjm-segment-line > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.tjm-segment-tjm {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tjm-segment-days {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tjm-segment-line-tjm {
+  font-weight: 600;
+}
+
+.tjm-segment-line-days {
+  margin-left: 0.3em;
+  font-weight: 400;
+  color: #475569;
+}
+
+.tjm-periods-panel_compact .tjm-segment-full {
+  opacity: 0;
+  transition-duration: var(--tjm-collapse);
+}
+
+.tjm-periods-panel_compact .tjm-segment-line {
+  opacity: 1;
+  transition-duration: var(--tjm-collapse);
+}
+
+/* Dépliage compact → ouvert : 240 ms, sans retard ni échelonnage (le panneau est déjà ouvert). */
+.tjm-block.is-quick .tjm-periods-panel {
+  --tjm-expand: 240ms;
+  --tjm-stagger: 0ms;
+}
+
+.tjm-block.is-quick .tjm-unfold,
+.tjm-block.is-quick .tjm-frame-rest {
+  transition-delay: 0s;
+}
+
+.tjm-block.is-quick .tjm-fade-item,
+.tjm-block.is-quick .tjm-timeline {
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tjm-block {
+    --k: 0.4;
+  }
+
+  .tjm-periods-panel {
+    --tjm-expand: 150ms;
+    --tjm-collapse: 150ms;
+  }
+
+  .tjm-fade-item,
+  .tjm-periods-panel_compact .tjm-fade-item,
+  .tjm-periods-panel_compact .tjm-fade-item_down {
+    transform: none;
+    transition-property: opacity;
+    transition-delay: 0s;
+  }
+}
+
+.tjm-periods-message {
+  font-size: 12px;
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+}
+
+.tjm-period-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2px 0;
+}
+
+.tjm-dot {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.tjm-period-title {
+  flex: 1 1 auto;
+  font-size: 13px;
+}
+
+/* Colonnes communes à toutes les lignes : durée, TJM, ✕. L'unité vit à l'intérieur du champ. */
+.tjm-field {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.tjm-field-days {
+  width: 6rem;
+}
+
+.tjm-field-tjm {
+  width: 6.5rem;
+}
+
+.tjm-period-input {
+  width: 100%;
+  padding-right: 2.75rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.tjm-field-tjm .tjm-period-input {
+  padding-right: 1.75rem;
+}
+
+.tjm-period-input::-webkit-inner-spin-button,
+.tjm-period-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.tjm-field-unit {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #64748b;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tjm-remove-slot {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+/* Valeur de la période 1 : même boîte que le champ TJM (largeur, bordure, padding), sans bordure ni fond. */
+.tjm-period-first-value .tjm-field-unit {
+  right: calc(0.75rem - 1px);
+}
+
+.tjm-period-first-value {
+  height: 2rem;
+  border: 1px solid transparent;
+  padding: 0 1.75rem 0 0.75rem;
+  line-height: calc(2rem - 2px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* Pied du cadre : arrondi partout tant que le panneau est fermé, collé au bas du cadre une fois ouvert. */
+.tjm-weighted-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  color: #1e3a8a;
+  transition: border-radius var(--t-sides) var(--tjm-ease);
+}
+
+.tjm-block.is-open .tjm-weighted-footer {
+  border-radius: 0 0 8px 8px;
+}
+
+.tjm-weighted-footer_clickable {
+  cursor: pointer;
+  transition:
+    border-radius var(--t-sides) var(--tjm-ease),
+    background-color 0.15s ease;
+}
+
+.tjm-weighted-footer_clickable:hover {
+  background-color: #dbeafe;
+}
+
+.tjm-weighted-footer_clickable:focus-visible {
+  outline: 2px solid #0176d3;
+  outline-offset: -2px;
+}
+
+.tjm-add-row {
+  padding: 2px 0;
+}
+
+.tjm-weighted-label {
+  font-size: 13px;
+}
+
+.tjm-weighted-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Régie sans régule (docs/265 §5) : écart de production au panier, MC2 régie classique barrée, repère fantôme de
+   la jauge. Rien de ceci n'est rendu en mode éteint. */
+.rplsr-plan {
+  display: block;
+}
+
+.mc2-breakdown-amount-rplsr-negative {
+  color: #d31876;
+}
+
+.mc2-breakdown-rplsr-classic {
+  margin-left: 0.5rem;
+  font-size: 12px;
+  font-weight: 400;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.gauge-rplsr-ghost {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+.gauge-rplsr-ghost-dot {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px dashed #94a3b8;
+  background: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gauge-rplsr-ghost {
+    transition: none;
+  }
+}
+
+/* Jours facturables (jours de mission − congés prévus) : affichage, pas un champ. */
+.billable-days {
+  font-weight: 600;
+}
+
+/* Session 282 : lecture seule (matrice partagée par l'agence) — bandeau discret, neutre. */
+.read-only-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  background: #f3f3f3;
+  color: #444;
+  font-size: 0.8125rem;
+}
+
+/* Badge « Gagnée · P2 » dans le bandeau de statut (session 284). */
+.won-header-badge {
+  display: inline-block;
+  margin-left: 0.75rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  border: 1px solid #d31876;
+  background: rgba(211, 24, 118, 0.08);
+  color: #a81260;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}

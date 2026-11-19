@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Document_Type__c</fullName>
+    <description>PTF (défaut) ou Avenant : un avenant modifie une PTF déjà signée, il ne la remplace pas et ne consomme pas son AR_Version_Number__c.</description>
+    <label>Type de document</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>PTF</fullName>
+                <default>true</default>
+                <label>PTF</label>
+            </value>
+            <value>
+                <fullName>Avenant</fullName>
+                <default>false</default>
+                <label>Avenant</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,4 @@
+<design:component>
+    <design:attribute name="saveOnlyHigherLevel" description="Save only higher level to field Mobilities__c" label="Save only higher level"/>
+    <design:attribute name="fieldValueToBeStored" description="Which field value to be stored in Mobilitie__c? (Name, Code__c etc)" label="Which field value to be stored in Mobilitie__c? (API name)"/>
+</design:component>

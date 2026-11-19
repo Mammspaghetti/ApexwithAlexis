@@ -1,0 +1,397 @@
+.admin-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px;
+}
+
+.admin-form-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-form-subtitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 16px 0 8px;
+}
+
+.admin-form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-form-row > * {
+  flex: 1 1 180px;
+  min-width: 160px;
+}
+
+/* Blocs multi-lignes (adresse, RIB) : pleine largeur de la modale, sept lignes lisibles sans défilement.
+   Textarea natif stylé en SLDS (session 176i) : le textarea interne de lightning-textarea n'est pas
+   atteignable en CSS depuis un composant parent (Shadow DOM synthétique, cf. CLAUDE.md sessions 90-96). */
+.admin-form-block {
+  flex: 1 1 100%;
+}
+
+.admin-textarea {
+  min-height: 9.5rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.admin-template-field {
+  flex: 1 1 100%;
+}
+
+.admin-field-warning {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #b45309;
+}
+
+.admin-form-help {
+  margin: -8px 0 16px;
+  font-size: 12px;
+  color: #666;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #fff;
+}
+
+.btn-text {
+  background: none;
+  color: #d31876;
+  padding: 6px 8px;
+}
+
+.admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-list-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+.admin-table-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: #888;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e5e5;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.row-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #888;
+}
+
+.admin-table-actions {
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #888;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+}
+
+.error-message {
+  padding: 16px;
+  color: #c0392b;
+}
+
+.readiness-ok {
+  color: #1e824c;
+}
+
+.readiness-missing {
+  color: #c0392b;
+  max-width: 320px;
+}
+
+/* Valideurs d'entité : pastilles, recherche, bandeau. Session 291c : la liste de résultats était dans le
+   flux de la pop-up, donc coupée par le bas de sa zone défilante (une seule ligne visible). Elle s'ouvre
+   maintenant vers le haut, par-dessus les champs situés au-dessus de la recherche (position absolue, sans
+   aucun ancêtre à overflow masqué en dessous de la zone défilante), règle des sessions 278c et 289. */
+.validators-section {
+  margin-bottom: 8px;
+}
+
+.validator-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.validator-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 6px;
+  background: #fdf1f7;
+  border: 1px solid #f3c9de;
+  border-radius: 999px;
+  max-width: 100%;
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.validator-chip_entering {
+  animation: validator-pop 0.18s ease-out;
+}
+
+.validator-chip_leaving {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.validator-chip_inactive {
+  background: #f4f4f4;
+  border-color: #dcdcdc;
+  color: #777;
+}
+
+.validator-chip_inactive .validator-avatar {
+  background: #b5b5b5;
+}
+
+@keyframes validator-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.validator-avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.validator-avatar_small {
+  width: 26px;
+  height: 26px;
+  font-size: 10px;
+}
+
+.validator-identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.validator-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+
+.validator-chip_inactive .validator-name {
+  color: #777;
+}
+
+.validator-title {
+  font-size: 11px;
+  color: #888;
+}
+
+.validator-remove {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #888;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.validator-remove:hover,
+.validator-remove:focus {
+  background: #f3c9de;
+  color: #a81260;
+}
+
+.validator-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fdeccc;
+  color: #8a5300;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.validator-remove-text {
+  border: none;
+  background: none;
+  color: #d31876;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.validator-empty {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: #888;
+}
+
+.validator-search {
+  /* ancre de la liste de résultats */
+  position: relative;
+}
+
+.validator-results {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin-bottom: 4px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.validator-options {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 17rem;
+  overflow-y: auto;
+}
+
+.validator-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.validator-option_active {
+  background: #fdf1f7;
+}
+
+.validator-results-note,
+.validator-results-error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #888;
+}
+
+.validator-results-error {
+  color: #c0392b;
+}
+
+.validator-help {
+  margin-top: 8px;
+}
+
+.validators-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #fff8e8;
+  border: 1px solid #f2dca8;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #8a5300;
+}
+
+.validators-banner-count {
+  font-weight: 700;
+}
+
+.validators-count {
+  font-weight: 600;
+}
+
+.validators-warning {
+  margin-left: 8px;
+  padding: 2px 10px;
+  border: 1px solid #f2dca8;
+  border-radius: 999px;
+  background: #fdeccc;
+  color: #8a5300;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}

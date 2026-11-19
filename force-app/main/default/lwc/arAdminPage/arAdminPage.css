@@ -1,0 +1,40 @@
+/* Plafond 1400px (session 32, tableau des plafonds — écran d'administration) : partagé par les
+   onglets et leur contenu pour rester alignés sous le header "Administration" (arPricingApp.css
+   .view-header-admin, même plafond). */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 auto 20px;
+  max-width: 1400px;
+  border-bottom: 2px solid #e5e5e5;
+  flex-wrap: wrap;
+}
+
+.admin-tab-content {
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.admin-tab {
+  padding: 9px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.admin-tab-active {
+  font-weight: 700;
+  color: #d31876;
+  border-bottom: 2px solid #d31876;
+}
+
+.admin-denied {
+  padding: 48px 24px;
+  text-align: center;
+  color: #888;
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Ofii_Tax_Rate__c</fullName>
+    <defaultValue>55</defaultValue>
+    <description>Taux de la taxe OFII, en pourcentage du salaire mensuel brut (salaire annuel de la matrice ÷ 12). Sert à calculer le montant proposé dans la matrice ; vide : calcul indisponible.</description>
+    <inlineHelpText>Pourcentage du salaire mensuel brut (salaire annuel de la matrice ÷ 12). Les matrices existantes ne changent pas quand on modifie cette valeur.</inlineHelpText>
+    <label>Taxe OFII — taux (%)</label>
+    <precision>5</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Percent</type>
+</CustomField>

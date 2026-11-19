@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_PTF_Template_Code__c</fullName>
+    <description>Code du gabarit PTF spécifique à ce compte. S&apos;il est vide, le gabarit est déterminé à partir de l&apos;entité puis du gabarit générique.</description>
+    <externalId>false</externalId>
+    <label>Code gabarit PTF (grand compte)</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

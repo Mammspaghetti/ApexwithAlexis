@@ -1,0 +1,130 @@
+<template>
+  <div class="admin-list-header">
+    <div>
+      <h2 class="admin-section-title">{i18n.AR_ARS_Title}</h2>
+      <p class="admin-list-subtitle">{subtitleLabel}</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick={handleAdd}>
+      {i18n.AR_ARS_AddReason}
+    </button>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={showForm}>
+    <c-ar-admin-form-modal
+      heading={i18n.AR_ARS_Heading}
+      saving={isSaving}
+      onsave={handleSave}
+      oncancel={handleCancel}
+    >
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_Common_LabelField}
+          value={formLabel}
+          onchange={handleLabelChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_Common_DisplayOrder}
+          step="1"
+          value={formSortOrder}
+          onchange={handleSortOrderChange}
+        ></lightning-input>
+      </div>
+      <div class="admin-form-row">
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_ARS_ApplicableToDerogation}
+          checked={formAppliesToDerogation}
+          onchange={handleAppliesToDerogationChange}
+        ></lightning-input>
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_ARS_ApplicableToVersionChange}
+          checked={formAppliesToVersion}
+          onchange={handleAppliesToVersionChange}
+        ></lightning-input>
+        <lightning-input
+          type="checkbox"
+          label={i18n.AR_Common_Active}
+          checked={formActive}
+          onchange={handleActiveChange}
+        ></lightning-input>
+      </div>
+    </c-ar-admin-form-modal>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">{i18n.AR_ARS_Empty}</div>
+  </template>
+
+  <template if:false={isEmpty}>
+    <template if:false={isLoading}>
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>{i18n.AR_Common_LabelField}</th>
+              <th>{i18n.AR_DRG_PanelTitle}</th>
+              <th>{i18n.AR_Common_Version}</th>
+              <th>{i18n.AR_Common_Active}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={reasons} for:item="row">
+              <tr key={row.id}>
+                <td>{row.label}</td>
+                <td>
+                  <template if:true={row.appliesToDerogation}
+                    >{i18n.AR_Common_Yes}</template
+                  >
+                  <template if:false={row.appliesToDerogation}
+                    >{i18n.AR_Common_No}</template
+                  >
+                </td>
+                <td>
+                  <template if:true={row.appliesToVersion}
+                    >{i18n.AR_Common_Yes}</template
+                  >
+                  <template if:false={row.appliesToVersion}
+                    >{i18n.AR_Common_No}</template
+                  >
+                </td>
+                <td>
+                  <template if:true={row.active}
+                    >{i18n.AR_Common_Active}</template
+                  >
+                  <template if:false={row.active}
+                    >{i18n.AR_Common_Inactive}</template
+                  >
+                </td>
+                <td class="admin-table-actions">
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleEdit}
+                  >
+                    {i18n.AR_Common_Edit}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+  </template>
+</template>

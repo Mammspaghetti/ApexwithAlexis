@@ -1,0 +1,150 @@
+<template>
+    <lightning-card title="Ma mascotte">
+        <div class="mascotte-container">
+
+            <!-- Feuilles qui tombent sur tout le fond -->
+            <div class="leaf-layer">
+                <span class="leaf l1">🍁</span>
+                <span class="leaf l2">🍂</span>
+                <span class="leaf l3">🍁</span>
+                <span class="leaf l4">🍂</span>
+                <span class="leaf l5">🍁</span>
+                <span class="leaf l6">🍂</span>
+                <span class="leaf l7">🍁</span>
+                <span class="leaf l8">🍂</span>
+                <span class="leaf l9">🍁</span>
+            </div>
+
+            <!-- Colonne de gauche : la mascotte -->
+            <div class="mascotte-colonne">
+
+            <div class="mascotte-nom">
+                ✨ xxxXX-GP-XXxxx ✨
+            </div>
+
+            <!-- Message temporaire (prioritaire), sinon STOP de plus en plus gros quand on la gave -->
+            <div class="stop-zone">
+                <span lwc:if={isVole} class="stop message">C’EST MAL DE VOLER ! 😡</span>
+                <span lwc:elseif={message} class="stop message">{message}</span>
+                <span lwc:elseif={isGros} class={stopClass} style={stopStyle}>{stopTexte}</span>
+                <span lwc:elseif={isTresGrognon} class="stop message">JE VEUX UN CADEAU ! 🤬</span>
+            </div>
+
+            <!-- Zone de la bulle : sert de repère pour la table lancée à gauche -->
+            <div class="bulle-zone">
+
+            <!-- Très grognon : il balance une table qui part en tournant vers la gauche -->
+            <span class="table-lancee" lwc:if={isVisageTresGrognon}>┻━┻</span>
+
+            <!-- "REND-LE-MOI" : bras qui s'agitent de chaque côté de la bulle -->
+            <template lwc:if={isReclame}>
+                <span class="bras-reclame bras-reclame-gauche">ヽ</span>
+                <span class="bras-reclame bras-reclame-droite">ノ</span>
+            </template>
+
+            <div class={bulleClass}>
+
+                <!-- Joues et rot quand elle est grosse -->
+                <template lwc:if={isGros}>
+                    <span class="joue joue-gauche"></span>
+                    <span class="joue joue-droite"></span>
+                    <span class="burp">*burp*</span>
+                </template>
+
+                <!-- Roue de kaomoji -->
+                <div class="kaomoji-wheel">
+                    <span class="k k1">ヽ(｀Д´)ﾉ</span>
+                    <span class="k k2">ಠ益ಠ</span>
+                    <span class="k k3">Σ(ಠ_ಠ)</span>
+                    <span class="k k4">ヽ(`д´*)ノ</span>
+                    <span class="k k5">ಠ_ಠ</span>
+                    <span class="k k6">(ノಠ益ಠ)ノ</span>
+                </div>
+
+                <!-- Visage dynamique -->
+                <span class={visageClass}>{visage}</span>
+                <span class="content" lwc:if={iscontent}>💢</span>
+
+                <!-- Symbole de colère uniquement si grognon -->
+                <span class="colere" lwc:if={isGrognonSimple}>💢</span>
+                <!-- Très grognon : plein de 💢 qui tremblent -->
+                <span class="trescolere" lwc:if={isTresGrognon}>💢💢💢💢💢💢</span>
+
+            </div>
+            </div>
+
+            <div class="mascotte-action">
+                <span class="bras">(╯°□°）╯</span>
+                <span class="table">︵ ┻━┻</span>
+            </div>
+
+            <div class="mascotte-legende">
+                <span>{niveauDeJoie}</span>
+                <span>🍖 Faim : {faim}/5</span>
+            </div>
+
+            <!-- Toute la partie "nourrir" est gérée par la gamelle -->
+            <c-gp-bowl
+                capacite={croquettes}
+                capacite-max={croquettesMax}
+                faim={faim}
+                gave={isGave}
+                ongpmanger={handleManger}
+                ongpremplir={handleRemplir}
+                ongpvol={handleVol}
+                lwc:ref="bolgp"
+            >
+            </c-gp-bowl>
+            </div>
+
+            <!-- Colonne de droite : le cadeau envoyé dans Salesforce (GPGift__c) -->
+            <div class="cadeau-panel">
+                <div class="cadeau">
+                    <div class="cadeau-noeud">
+                        <span class="boucle boucle-gauche"></span>
+                        <span class="boucle boucle-droite"></span>
+                    </div>
+                    <div class="cadeau-couvercle"></div>
+                    <div class="cadeau-boite"></div>
+                </div>
+
+                <lightning-input
+                    class="cadeau-input"
+                    label="Nom du cadeau"
+                    placeholder="Ex : Peluche"
+                    value={nomCadeau}
+                    onchange={handleNomCadeau}
+                    max-length="80"
+                ></lightning-input>
+
+                <lightning-button
+                    class="cadeau-bouton"
+                    variant="brand"
+                    label="Ajouter 🎁"
+                    onclick={creerCadeau}
+                    disabled={isEnvoiImpossible}
+                ></lightning-button>
+
+                <!-- Derniers cadeaux lus en base (GP_Mascotte.listerCadeaux) -->
+                <div class="cadeau-liste">
+                    <div class="cadeau-liste-titre">
+                        <span>🎁 Derniers cadeaux</span>
+                        <span lwc:if={hasCadeaux} class="cadeau-compteur">{compteurDonnes}</span>
+                    </div>
+                    <!-- Croix = retirer ; bouton vert "Donner" si offert__c = false, rouge "Reprendre" si true -->
+                    <div lwc:if={hasCadeaux} class="cadeau-tableau">
+                        <lightning-datatable
+                            key-field="Id"
+                            data={lignes}
+                            columns={colonnes}
+                            hide-checkbox-column
+                            resize-column-disabled
+                            onrowaction={handleRowAction}
+                        ></lightning-datatable>
+                    </div>
+                    <p lwc:else class="cadeau-vide">Aucun cadeau pour l'instant…</p>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

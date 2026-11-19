@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Entity_Ref__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Entité de la matrice, sélectionnée dans le référentiel d&apos;administration des entités PTF. La fiche ne peut pas être supprimée tant que des matrices la référencent.</description>
+    <label>Entité</label>
+    <referenceTo>AR_PTF_Entity_Referential__c</referenceTo>
+    <relationshipLabel>Matrices de prix</relationshipLabel>
+    <relationshipName>AR_Price_Matrices</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

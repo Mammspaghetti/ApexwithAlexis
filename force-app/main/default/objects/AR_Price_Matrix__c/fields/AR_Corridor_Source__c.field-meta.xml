@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Corridor_Source__c</fullName>
+    <description>Origine des seuils figés au calcul : ACCOUNT (grand compte), ENTITY (entité PTF), DEFAULT (paramètres généraux). Vide sur les matrices calculées avant son introduction.</description>
+    <externalId>false</externalId>
+    <label>Origine des seuils appliqués</label>
+    <length>20</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,232 @@
+/* Fenêtre « Affaire gagnée » (session 284) — charte Price Pilot : magenta #d31876 pour la sélection
+   et le bouton principal, cartes blanches arrondies. */
+.slds-modal {
+  top: var(--ar-zone-top, 0px);
+  bottom: auto;
+  height: var(--ar-zone-height, 100dvh);
+}
+.slds-backdrop {
+  top: var(--ar-zone-top, 0px);
+}
+.won-container {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+  max-width: 42rem;
+  width: 92%;
+}
+.won-header,
+.won-footer {
+  flex: none;
+}
+.won-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem 1rem;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #ececec;
+}
+.won-header-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(211, 24, 118, 0.08);
+  border-radius: 0.5rem;
+  --sds-c-icon-color-foreground-default: #d31876;
+  --slds-c-icon-color-foreground-default: #d31876;
+}
+.won-title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+.won-subtitle {
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  margin-top: 0.125rem;
+}
+.won-body {
+  min-height: 0;
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 1rem 1.5rem 1.25rem;
+}
+.won-section-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  margin: 0.75rem 0 0.5rem;
+}
+.won-muted {
+  color: #6b6b6b;
+}
+.ver-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ver-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  background: #ffffff;
+}
+.ver-card:hover {
+  background: #fafafa;
+}
+.ver-card-selected {
+  border-color: #d31876;
+  background: rgba(211, 24, 118, 0.05);
+  box-shadow: 0 0 0 1px #d31876;
+}
+.ver-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.ver-card-title {
+  font-weight: 700;
+  color: #1f1f1f;
+}
+.ver-card-date,
+.ver-card-mc2 {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+}
+.ver-card-tag {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #d31876;
+  background: rgba(211, 24, 118, 0.1);
+  border-radius: 20px;
+  padding: 0.1rem 0.55rem;
+}
+.ver-card-prices {
+  font-size: 0.8125rem;
+  color: #333333;
+  margin-top: 0.2rem;
+}
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.price-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.price-card:hover:not(:disabled) {
+  background: #fafafa;
+}
+.price-card-selected {
+  border-color: #d31876;
+  background: rgba(211, 24, 118, 0.05);
+  box-shadow: 0 0 0 1px #d31876;
+}
+.price-card-disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.price-card-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+.price-card-amount {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+.won-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.9rem;
+  max-width: 16rem;
+}
+.won-field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #444444;
+}
+.won-input {
+  border: 1px solid #d8d8d8;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+.won-input:focus {
+  outline: none;
+  border-color: #d31876;
+  box-shadow: 0 0 0 3px rgba(211, 24, 118, 0.15);
+}
+.won-level {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #d31876;
+}
+.won-error {
+  margin-top: 0.9rem;
+  color: #b91c1c;
+  font-size: 0.8125rem;
+}
+.won-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: #ffffff;
+  padding: 0.9rem 1.5rem 1.1rem;
+  border-top: 1px solid #ececec;
+  border-radius: 0 0 12px 12px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.625rem;
+  padding: 0.55rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(211, 24, 118, 0.28);
+}
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e8e8e8;
+}
+@media (max-width: 40rem) {
+  .price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

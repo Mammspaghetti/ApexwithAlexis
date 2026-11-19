@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Price_Matrix__c</fullName>
+    <deleteConstraint>Cascade</deleteConstraint>
+    <description>La vraie matrice de prix. Obligatoire ; une seule entrée par matrice (unicité portée par AR_Matrix_Key__c). Suppression de la matrice : l&apos;entrée est supprimée avec elle.</description>
+    <label>Matrice de prix</label>
+    <referenceTo>AR_Price_Matrix__c</referenceTo>
+    <relationshipLabel>Matrices validées</relationshipLabel>
+    <relationshipName>AR_Validated_Matrices</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Draft_Purge_Max_Per_Run__c</fullName>
+    <description>Nombre maximum de brouillons traités (avertis ou supprimés) par exécution du batch (200 par défaut) : borne le volume d&apos;e-mails et de suppressions même si le stock existant est important au premier passage.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Purge : plafond par exécution</label>
+    <precision>5</precision>
+    <required>true</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

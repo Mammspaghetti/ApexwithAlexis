@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Position__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Besoin Connexys, copié depuis la matrice. Sert au contrôle de la popup (même besoin que la candidature) et à la purge.</description>
+    <label>Besoin</label>
+    <referenceTo>cxsrec__cxsPosition__c</referenceTo>
+    <relationshipLabel>Matrices validées</relationshipLabel>
+    <relationshipName>AR_Validated_Matrices</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

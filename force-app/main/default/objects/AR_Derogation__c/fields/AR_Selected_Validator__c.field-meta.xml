@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Selected_Validator__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Valideur choisi par le demandeur. Obligatoire dans le formulaire de demande.</description>
+    <label>Valideur sélectionné</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Valideur sélectionné</relationshipLabel>
+    <relationshipName>AR_Derogations_Selected_Validator</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

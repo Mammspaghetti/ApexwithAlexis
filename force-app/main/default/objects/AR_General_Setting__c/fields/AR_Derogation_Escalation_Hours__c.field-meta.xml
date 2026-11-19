@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Derogation_Escalation_Hours__c</fullName>
+    <description>Nombre d&apos;heures entre la demande de dérogation et l&apos;escalade de niveau 2 (48 par défaut). Si le valideur sélectionné est inactif, l&apos;escalade est déclenchée immédiatement.</description>
+    <externalId>false</externalId>
+    <label>Escalade dérogation (heures)</label>
+    <precision>4</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

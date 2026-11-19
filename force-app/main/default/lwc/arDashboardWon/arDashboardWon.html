@@ -1,0 +1,181 @@
+<template>
+  <div class="tab-body">
+    <div class="kpi-row">
+      <div class="kpi-card kpi-tint-green" data-kpi="conversion">
+        <p class="kpi-label">{i18n.WnKpiConversion}</p>
+        <p class="kpi-value">{conversionText}</p>
+      </div>
+      <div class="kpi-card kpi-tint-navy" data-kpi="validatedWon">
+        <p class="kpi-label">{i18n.WnKpiValidatedWon}</p>
+        <p class="kpi-value">{validatedWonText}</p>
+      </div>
+      <div class="kpi-card kpi-tint-green" data-kpi="priceOne">
+        <p class="kpi-label">{i18n.WnKpiPriceOne}</p>
+        <p class="kpi-value">{priceOneText}</p>
+      </div>
+      <div class="kpi-card kpi-tint-amber" data-kpi="pending">
+        <p class="kpi-label">{i18n.WnKpiPending}</p>
+        <p class="kpi-value">{pendingCount}</p>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="section-card block-levels">
+        <p class="section-title">{i18n.WnLevelsTitle}</p>
+        <template if:true={hasLevels}>
+          <div class="donut-row">
+            <c-ar-donut-chart
+              segments={levelSegments}
+              center-label={levelTotal}
+              aria-title={i18n.WnLevelsTitle}
+            ></c-ar-donut-chart>
+            <ul class="legend legend-stacked">
+              <template for:each={levelLegend} for:item="item">
+                <li key={item.label} class="legend-item">
+                  <span class="legend-dot" style={item.style}></span>
+                  <span class="legend-label">{item.label}</span>
+                  <span class="legend-value">{item.detail}</span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+        <template if:false={hasLevels}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+
+      <div class="section-card block-monthly">
+        <p class="section-title">{monthlyTitle}</p>
+        <template if:true={monthlyRows.length}>
+          <div class="table-scroll">
+            <table class="rank-table month-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <template for:each={monthHeaders} for:item="month">
+                    <th key={month.key} class="num">{month.label}</th>
+                  </template>
+                  <th class="num">{i18n.ColMonthlyAverage}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={monthlyRows} for:item="row">
+                  <tr key={row.key}>
+                    <td>{row.label}</td>
+                    <template for:each={row.cells} for:item="cell">
+                      <td key={cell.key} class="num">{cell.value}</td>
+                    </template>
+                    <td class="num">{row.average}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={monthlyRows.length}>
+          <p class="empty-message">{i18n.NoData}</p>
+        </template>
+      </div>
+    </div>
+
+    <div class="section-card block-transform">
+      <p class="section-title">{transformTitle}</p>
+      <template if:true={transformRows.length}>
+        <div class="table-scroll">
+          <table class="rank-table transform-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="num">{i18n.ColSimulated}</th>
+                <th class="num">{i18n.ColValidatedS}</th>
+                <th class="num">{i18n.ColWon}</th>
+                <th>{i18n.ColSimToWon}</th>
+                <th class="num">{i18n.ColValToWon}</th>
+                <th>{i18n.ColPriceLevels}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={transformRows} for:item="row">
+                <tr key={row.key} class={row.className}>
+                  <td>{row.label}</td>
+                  <td class="num">{row.simulated}</td>
+                  <td class="num">{row.validated}</td>
+                  <td class="num">{row.won}</td>
+                  <td>
+                    <div class="cell-bar">
+                      <div class="bar-track">
+                        <div class="bar-fill" style={row.simToWonStyle}></div>
+                      </div>
+                      <span class="cell-bar-value">{row.simToWon}</span>
+                    </div>
+                  </td>
+                  <td class="num">{row.valToWon}</td>
+                  <td class="levels-bar">
+                    <c-ar-stacked-bar
+                      segments={row.levels}
+                      aria-title={row.levelsLabel}
+                    ></c-ar-stacked-bar>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+      <template if:false={transformRows.length}>
+        <p class="empty-message">{i18n.NoData}</p>
+      </template>
+    </div>
+
+    <div class="section-card block-pending">
+      <p class="section-title">{i18n.WnPendingTitle}</p>
+      <template if:true={hasPending}>
+        <div class="table-scroll">
+          <table class="rank-table pending-table">
+            <thead>
+              <tr>
+                <th>{i18n.ColNeed}</th>
+                <th>{i18n.ColAccountName}</th>
+                <th>{i18n.ColConsultant}</th>
+                <th>{i18n.ColBm}</th>
+                <th class="num">{i18n.ColVersions}</th>
+                <th>{i18n.ColWonOn}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={pendingRows} for:item="row">
+                <tr key={row.key}>
+                  <td>{row.positionName}</td>
+                  <td>{row.accountName}</td>
+                  <td>{row.consultantName}</td>
+                  <td>{row.ownerName}</td>
+                  <td class="num">{row.versions}</td>
+                  <td>{row.wonOn}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="action-btn confirm-btn"
+                      data-position={row.positionId}
+                      aria-label={row.ariaLabel}
+                      onclick={handleConfirm}
+                    >
+                      {i18n.WnConfirm}
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <template if:true={pendingMore}>
+          <p class="note">{pendingMore}</p>
+        </template>
+      </template>
+      <template if:false={hasPending}>
+        <p class="empty-message">{i18n.WnPendingNone}</p>
+      </template>
+    </div>
+  </div>
+</template>

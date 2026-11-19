@@ -1,0 +1,618 @@
+:host {
+  --aby-rose: #d31876;
+  --aby-border: #e8e8e8;
+  --aby-bg: #f9f9f9;
+  --aby-text: #111111;
+  --aby-muted: #6b6b6b;
+  display: block;
+  font-family:
+    "Calibri",
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+/*
+ * Hauteur mesurée, pas 100vh (session 12c) : 100vh ignore le chrome Lightning au-dessus de l'app
+ * (~150-172px selon la vue), donc dépassait la hauteur réellement disponible (~180px de trop mesurés
+ * en direct) → double ascenseur (page externe + app). `.app-shell` n'a donc plus de hauteur fixe ici :
+ * elle est posée en inline style par `recalcShellHeight()` dans arPricingApp.js, à partir de
+ * `getBoundingClientRect()` (mesure réelle, recalculée au resize et à chaque changement de vue).
+ * `:host` reste sans hauteur propre (auto) pour s'ajuster exactement à `.app-shell`, sans quoi il
+ * réintroduirait le même dépassement en dehors du shadow DOM.
+ */
+.app-shell {
+  display: flex;
+  background: var(--aby-bg);
+  overflow: hidden;
+}
+
+/* Modale de sortie : limitée à la zone visible de l'appli, corps défilant. */
+.slds-modal {
+  top: var(--ar-zone-top, 0px);
+  bottom: auto;
+  height: var(--ar-zone-height, 100dvh);
+}
+
+.slds-modal__container {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--ar-zone-height, 100dvh) - 2rem);
+}
+
+.slds-modal__header,
+.slds-modal__footer {
+  flex: none;
+}
+
+.slds-modal__content {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.slds-backdrop {
+  top: var(--ar-zone-top, 0px);
+}
+
+/*
+ * AR-BAND-HACK — masquage de la bande grise standard Lightning (icône + libellé « Pricing Tool »).
+ *
+ * Cause : AR_Pricing_Tool est une CustomApplication navType="Standard" avec un seul onglet — ce
+ * bandeau est l'App Nav Bar native de Lightning Experience (chrome de plateforme, rendue par
+ * Salesforce au-dessus de la FlexiPage, hors du DOM de ce composant). Aucune propriété supportée
+ * (CustomApplication, CustomTab, FlexiPage AppPage) ne permet de la désactiver — seule alternative
+ * documentée, navType="Console", change trop profondément le comportement (sous-onglets, favoris)
+ * pour un simple ajustement visuel. D'où le recouvrement CSS assumé ci-dessous.
+ *
+ * Portée : sans risque de collision avec la record page — arPricingApp n'est monté QUE sur la
+ * FlexiPage AR_Pricing_App_Page (app plein écran) ; le simulateur y vit seul sur sa propre
+ * FlexiPage record page (AR_Price_Matrix_Record_Page), jamais via ce composant.
+ *
+ * Mécanique : ce composant est le premier (et seul) élément de la région "main" de la FlexiPage,
+ * donc rendu juste après l'App Nav Bar dans le flux normal. Une marge négative le remonte pour
+ * recouvrir la bande. Le recouvrement doit être opaque sur toute la largeur (background explicite +
+ * z-index) : la marge négative seule ne suffit pas, elle ne fait que repositionner la boîte — sans
+ * fond opaque au-dessus de la bande, celle-ci reste visible en transparence derrière le contenu
+ * remonté. La hauteur n'est PAS compensée ici par un `height: calc(100vh + 62px)` statique (ancienne
+ * version, session 12b) : depuis la session 12c, `recalcShellHeight()` (arPricingApp.js) mesure le
+ * top réel de `.app-shell` — déjà décalé par ce margin-top — via `getBoundingClientRect()` et pose la
+ * hauteur exacte en JS, ce qui couvre à la fois ce décalage et le chrome Lightning au-dessus de l'app.
+ *
+ * Mesures réelles (relevées en direct dans Chrome sur ABYsandbox par Fable, session 12b) : bande
+ * `app_flexipage-header` (`slds-page-header header flexipageHeader`, shadowRoot de
+ * `app_flexipage-lwc-app-flexipage-decorator`) haute de 50px ; distance mesurée entre le haut de la
+ * bande et le haut de `c-ar-pricing-app` = 62px (50px de bande + 12px d'espacement du conteneur).
+ * Valeur de 40px initialement posée sans mesure (session 12) invalidée : insuffisante, le libellé et
+ * l'icône transparaissaient toujours. Retenu : 62px.
+ *
+ * Retrait : supprimer ce commentaire et la règle `.app-shell.AR-BAND-HACK` ci-dessous (et, dans
+ * arPricingApp.js, `recalcShellHeight()` redevient inutile si `.app-shell` n'est plus décalée).
+ */
+.app-shell.AR-BAND-HACK {
+  position: relative;
+  z-index: 2;
+  margin-top: -62px;
+  background: var(--aby-bg);
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────── */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-right: 1px solid var(--aby-border);
+  width: 224px;
+  flex-shrink: 0;
+  /* Même piège flex min-height:auto que .app-main/.app-content (session 20d) : .sidebar-nav est
+     flex:1/overflow-y:auto, même schéma exact, préventif tant qu'il n'a pas encore reproduit le
+     défaut avec un contenu de nav plus long. */
+  min-height: 0;
+  transition: width 0.15s ease;
+}
+
+/* Repli de la barre latérale (session 32, maquette pricing-tool.html Layout ~2486) : 64px replié,
+   224px déplié — cf. arPricingApp.js pour le seuil automatique et la persistance du choix manuel. */
+.sidebar.sidebar-collapsed {
+  width: 64px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 68px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--aby-border);
+  flex-shrink: 0;
+}
+
+.sidebar-logo img {
+  height: 32px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* Replié : logo mark seul (carré 256×256, détouré). */
+.sidebar-collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-collapsed .sidebar-logo img {
+  height: 32px;
+  width: 32px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 8px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 2px;
+  background: transparent;
+  color: #444444;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+/* Replié : icônes centrées, libellés/badges "À venir" masqués (title= assure l'infobulle au survol
+   — cf. arPricingApp.html) ; le compteur de dérogations reste seul signal visible, en pastille sur
+   l'icône comme la maquette (Layout ~2509). */
+.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 9px 6px;
+}
+
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .soon-badge {
+  display: none;
+}
+
+.sidebar-collapsed .pending-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0;
+  font-size: 8px;
+  line-height: 14px;
+}
+
+.nav-item:hover {
+  background: #f9f9f9;
+  color: #111111;
+}
+
+.nav-item-active,
+.nav-item-active:hover {
+  background: var(--aby-rose);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.nav-item .nav-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-divider {
+  border-top: 1px solid var(--aby-border);
+  margin: 8px 0 0;
+  padding-top: 8px;
+}
+
+.nav-item-admin {
+  color: #888888;
+}
+
+.nav-item-admin.nav-item-active {
+  color: #ffffff;
+}
+
+.soon-badge {
+  flex-shrink: 0;
+  background: #f0f0f0;
+  color: #888888;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* Compteur de dérogations en attente : ambre, se distingue du badge "À venir" gris. */
+.pending-badge {
+  flex-shrink: 0;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 9999px;
+  min-width: 18px;
+  text-align: center;
+  padding: 1px 6px;
+}
+
+.nav-item-active .pending-badge {
+  background: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.nav-item-admin.nav-item-active .soon-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Entrées maquette hors périmètre Lot 1 (Matrice CDS, Fiches FI, Propositions PTF) : clic → rien. */
+.nav-item-disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.nav-item-disabled:hover {
+  background: transparent;
+  color: #444444;
+}
+
+/* Bascule manuelle du repli (session 32, maquette Layout ~2544) : toujours visible, quel que soit
+   le seuil automatique — c'est elle qui enregistre le choix manuel prioritaire. */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border: none;
+  border-top: 1px solid var(--aby-border);
+  background: transparent;
+  color: #aaaaaa;
+  cursor: pointer;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+  color: #111111;
+}
+
+/* Sélecteur de langue (au-dessus de la bascule de repli) : même couleur que le toggle, texte
+   court et visible quel que soit l'état replié de la barre latérale. */
+.sidebar-language {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #aaaaaa;
+  cursor: pointer;
+  width: 100%;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  gap: 0.35rem;
+  /* Icône globe : même couleur que le texte, via le hook SLDS de l'icône (hérité dans son Shadow DOM). */
+  --slds-c-icon-color-foreground-default: #aaaaaa;
+}
+
+.sidebar-language:hover {
+  color: #111111;
+  --slds-c-icon-color-foreground-default: #111111;
+}
+
+.sidebar-language:disabled {
+  cursor: default;
+}
+
+.language-code-active {
+  font-weight: 700;
+  color: var(--aby-text);
+}
+
+.language-separator {
+  color: #aaaaaa;
+}
+
+/* Voile pendant le changement de langue : couvre toute l'appli jusqu'au rechargement. */
+.language-switch-veil {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.language-switch-spinner {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.language-switch-message {
+  margin: 0;
+  color: var(--aby-text);
+  font-size: 0.875rem;
+}
+
+/* ─── Main ────────────────────────────────────────────────────────────── */
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Session 20d : sans min-height:0, un item flex row (comme .app-main dans .app-shell) peut
+     rester soumis au piège min-height:auto quand son propre contenu grandit (panneau PTF) — même
+     mécanisme que .nav-item .nav-label avec min-width:0 plus haut, appliqué ici à la hauteur. */
+  min-height: 0;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  /*
+   * Session 20d — double ascenseur revenu après l'ajout du panneau PTF (~250px de contenu en plus).
+   * Cause : un enfant flex `flex: 1` a par défaut `min-height: auto`, qui se résout à la hauteur
+   * intrinsèque de son contenu (pas 0) tant qu'aucune valeur explicite ne l'écrase — cet enfant
+   * refuse alors de rétrécir en dessous de cette hauteur de contenu, même dans un conteneur de
+   * hauteur définie avec overflow. `.app-shell`/`.app-main` gardent une hauteur exacte (JS + stretch)
+   * mais `.app-content` "voulait" être aussi haut que tout son contenu non scrollé (1733px mesurés en
+   * session 20d, contre 811px de hauteur réellement disponible) : assez pour repousser le document
+   * externe, pas seulement le conteneur interne. `min-height: 0` force `.app-content` à respecter la
+   * hauteur qui lui est allouée par le flex layout et à laisser `overflow-y: auto` faire tout le
+   * travail de défilement — aucun second mécanisme de calcul de hauteur ajouté par-dessus le premier.
+   */
+  min-height: 0;
+}
+
+/* Header de vue générique (vues sans composant dédié : Matrice AT, Administration).
+   Mes matrices/File d'approbation portent leur propre header (arMatrixList/arDerogationQueue).
+   Plafond posé par un modificateur par vue (session 32, tableau des plafonds §32) : Matrice AT et
+   Administration ne partagent plus le même plafond que les vues de type table. */
+.view-header {
+  margin: 0 auto 1.5rem;
+}
+
+.view-header-simulator {
+  max-width: 1500px;
+}
+
+.view-header-admin {
+  max-width: 1400px;
+}
+
+.view-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Fil d'Ariane de la fiche matrice (session 166), sur la ligne du titre. min-width:0 sur toute la
+   chaîne flex pour que le dernier élément se tronque avec une ellipse au lieu de déborder. */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.breadcrumb-back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+}
+
+.breadcrumb-back:hover {
+  background: #f1f5f9;
+  color: var(--aby-rose);
+}
+
+.breadcrumb-back:focus-visible,
+.breadcrumb-link:focus-visible {
+  outline: 2px solid var(--aby-rose);
+  outline-offset: 2px;
+}
+
+.breadcrumb-list {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.breadcrumb-item-current {
+  flex: 1 1 auto;
+}
+
+.breadcrumb-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 400;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.breadcrumb-link:hover {
+  color: var(--aby-rose);
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  margin: 0 8px;
+  color: #94a3b8;
+}
+
+.breadcrumb-current {
+  min-width: 0;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* Plafond 1500px (session 32, tableau des plafonds) : écran de saisie, ne gagne pas à s'élargir
+   comme les vues de type table. */
+.simulator-container {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.placeholder-card {
+  max-width: 480px;
+  margin: 48px auto;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid var(--aby-border);
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  color: var(--aby-muted);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Boutons de la modale de navigation (session 13) — même famille que arPriceMatrixSimulator.css :
+   primaire dégradé rose, secondaire blanc bordé, texte = pas de fond ni de bordure. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  opacity: 0.92;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e8e8e8;
+}
+.btn-secondary:hover {
+  background: #f9f9f9;
+}
+
+.btn-text {
+  background: transparent;
+  color: #64748b;
+  padding: 0.55rem 0.5rem;
+}
+.btn-text:hover {
+  color: #333333;
+}
+
+.dirty-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Session 26 §2 : précision quand « Enregistrer le brouillon » est retiré (taux de change manquant). */
+.dirty-modal-no-save-note {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: #b3372b;
+}
+
+/* État vide, même rendu que celui de la file d'approbation (arDerogationQueue). */
+.empty-state {
+  max-width: 420px;
+  margin: 2.5rem auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-state-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111111;
+  margin: 0;
+}
+
+.empty-state-text {
+  font-size: 0.8125rem;
+  color: #6b6b6b;
+  margin: 0;
+}

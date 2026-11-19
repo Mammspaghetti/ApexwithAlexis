@@ -1,0 +1,464 @@
+<template>
+    <template if:true={loading}>
+        <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+    </template>
+    
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-account" title="account">
+                        <lightning-icon icon-name="standard:data_streams" alternative-text="Sync" title="Sync pratoFlex"></lightning-icon>
+                        <span class="slds-assistive-text">{labels.dashboardTitle}</span>
+                    </span>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <a  class="slds-card__header-link slds-truncate" title="PratoFlex">
+                            <span>{labels.dashboardTitle}</span>
+                        </a>
+                    </h2>
+                </div>
+
+                <div class="slds-no-flex slds-size_6-of-12 slds-text-align_right" style="margin-top:0.5%">
+
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Refresh" style="margin-top:-1%;float:right">
+                        <lightning-icon size="x-small" icon-name="utility:collapse_all" onclick={collapseAll} alternative-text="Refresh"></lightning-icon>
+                    </button>
+        
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Refresh" style="margin-top:-1%;float:right;margin-right:1%">
+                        <lightning-icon size="x-small" icon-name="utility:refresh" onclick={refreshPanel} alternative-text="Refresh"></lightning-icon>
+                    </button>
+
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Search" style="margin-top:-1%;float:right" onclick={searchPanel} >
+                        <lightning-icon size="x-small" icon-name="utility:search"  alternative-text="Search"></lightning-icon>
+                    </button>
+                    
+                    <input onchange={searchEvent} data-name="search" type="text" class="hide" style="line-height: normal;height: 32px;width: 344px; border: 1px solid black;padding-top: 5px; outline: none !important;border-right: 0px;margin-top:-1%;float:right"/>
+
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Search" style="margin-top:-1%;float:right" onclick={sorteringChange}>
+                        <template if:true={sortDesc}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-alpha-up" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10.082 5.629 9.664 7H8.598l1.789-5.332h1.234L13.402 7h-1.12l-.419-1.371zm1.57-.785L11 2.687h-.047l-.652 2.157z"/>
+                                <path d="M12.96 14H9.028v-.691l2.579-3.72v-.054H9.098v-.867h3.785v.691l-2.567 3.72v.054h2.645zm-8.46-.5a.5.5 0 0 1-1 0V3.707L2.354 4.854a.5.5 0 1 1-.708-.708l2-1.999.007-.007a.5.5 0 0 1 .7.006l2 2a.5.5 0 1 1-.707.708L4.5 3.707z"/>
+                            </svg>
+                        </template>
+                        <template if:false={sortDesc}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-alpha-down" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10.082 5.629 9.664 7H8.598l1.789-5.332h1.234L13.402 7h-1.12l-.419-1.371zm1.57-.785L11 2.687h-.047l-.652 2.157z"/>
+                                <path d="M12.96 14H9.028v-.691l2.579-3.72v-.054H9.098v-.867h3.785v.691l-2.567 3.72v.054h2.645zM4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293z"/>
+                            </svg>
+                        </template>
+                    </button>
+
+                    <lightning-combobox
+                    name="progress"
+                    value='CreatedDate'
+                    options={options}
+                    variant="label-hidden"
+                    onchange={handleChange} style="width:150px; float:right;margin-right:1%;margin-top:-1%" ></lightning-combobox>
+
+                </div> 
+            </header>
+        </div> 
+    </article>
+ 
+    <div class="slds-form-element__row slds-grid">
+        <div class="slds-form-element slds-size_6-of-12 slds-var-p-around_small"></div>
+        <div class="slds-form-element slds-size_6-of-12 slds-var-p-around_small">   
+            <div class="slds-text-align_right slds-p-top_xx-small " style="float:right">
+              
+                <lightning-button disabled={bDisableFirst} icon-name="utility:jump_to_left" label={labels.dashboardFirst} class="slds-p-horizontal_x-small" alternative-text="first page" onclick={firstPage}></lightning-button>
+                <lightning-button disabled={bDisableFirst} icon-name="utility:chevronleft" label={labels.dashboardPrevious} alternative-text="Previous" onclick={previousPage}></lightning-button>
+                &nbsp;
+                <span class="slds-badge">{labels.dashboardShowing} {pageNumber} &nbsp;{labels.dashboardOf}&nbsp; {pageSize} &nbsp;&nbsp;{labels.dashboardPages} - {labels.dashboardTotalRecords}: {countVacancies}</span>
+                &nbsp;
+                <lightning-button disabled={bDisableLast} icon-name="utility:chevronright" label={labels.dashboardNext} alternative-text="Next" onclick={nextPage} class="slds-p-horizontal_x-small" icon-position="right"></lightning-button>
+                <lightning-button disabled={bDisableLast} icon-name="utility:jump_to_right" label={labels.dashboardLast} alternative-text="last page" onclick={lastPage} icon-position="right"></lightning-button>
+            </div>
+        </div>
+    </div>
+    <div class="slds-form-element__row slds-grid">
+        <div class="slds-form-element slds-size_12-of-12 slds-var-p-around_small"> 
+            <div class="slds-grid slds-p-top_xx-small">  
+                <template for:each={filters} for:item="filter" for:index="id">
+                    <div class="slds-size_2-of-12 slds-m-right_xx-small" key={filter.Name}><c-vacancy-Dashboard-filters class="slds-m-right_xx-small" filters={filter} onfacetselect={handleFilterSelect} ></c-vacancy-Dashboard-filters></vacancy-Dashboard-filters></div>
+                </template> 
+            </div>
+        </div>
+    </div>
+
+    <div class="slds-form-element__row slds-grid">
+        <div class="slds-form-element slds-size_12-of-12">   
+            <template if:true={filterTooltip}>
+                <div style="background-color:#DCDCDC; margin-top: -17px;" class=" slds-var-p-around_small">
+                    <template for:each={selectedFilters} for:item="filter">
+                        <span class="slds-pill__label slds-m-horizontal--xx-small"  key={filter.label}>{filter.label}</span>
+                        <ul class="slds-listbox_horizontal"  key={filter.label}>
+                            <template for:each={filter.selectedfilters} for:item="itm">
+                                <li class="slds-listbox-item" key={itm.value} data-value={itm.value} data-label={filter.code} onclick={removeFilter}>
+                                    <span class="slds-pill">
+                                        <span class="slds-pill__label" title="label">{itm.label}</span>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </span> 
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <template for:each={vacancies} for:item="vacancy">
+        <div class="slds-form-element__row slds-grid" key={vacancy.Id} >
+            <div class="slds-form-element slds-size_2-of-2 slds-var-p-around_small">   
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid slds-p-left_medium slds-p-top_xx-small slds-p-bottom_xx-small slds-m-around_none" style={colorTitle}>
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                            <div class="circlePriority" style={vacancy.prioriteColor} title={labels.dashboardPriorite}></div>
+                            <div class="circlePriority" style={vacancy.perimetreColor} title={labels.dashboardPrioriteSourcing}></div>
+                                <a onclick={openVacancy} data-id={vacancy.Id}>{vacancy.name}</a>  <lightning-icon  onclick={openVacancy} data-id={vacancy.Id} icon-name="utility:new_window" style="margin-left:0.5%;cursor:pointer"  size="xx-small" alternative-text="" title={vacancy.name}></lightning-icon>
+                                <div class="center" style="text-align:center">
+                                    <label class="dashboardLabel">{labels.dashboardAccount}:&nbsp;</label>
+                                    <a onclick={openAccount} data-id={vacancy.accountId}>{vacancy.account}</a>   <lightning-icon  onclick={openAccount} data-id={vacancy.accountId} icon-name="utility:new_window" style="margin-left:0.5%;cursor:pointer"  size="xx-small" alternative-text="" title={vacancy.account}></lightning-icon>
+                                </div>
+                                <div class="right" style="text-align:right">
+                                    <label class="dashboardLabel">{labels.dashboardCreatedDate}:&nbsp;</label> <label style="font-weight: 100;">&nbsp;{vacancy.createdDate}</label>
+                                </div>
+                            </h2>
+                        </div>
+                        <div class="slds-no-flex"> 
+                            <lightning-button label={labels.dashboardOpenTAModal} onclick={openModalTA} data-id={vacancy.Id} class="slds-m-left_xx-small slds-m-right_xx-small"></lightning-button>  
+                            <lightning-button label={labels.dashboardOpenCandidateModal} title="Non-primary action" onclick={handlerCandidates} data-id={vacancy.Id} class="slds-m-left_xx-small slds-m-right_xx-small"></lightning-button>  
+                            <lightning-button label={labels.dashboardModifyNeed} title="Non-primary action" onclick={openModifyNeed} data-id={vacancy.Id} class="slds-m-left_xx-small slds-m-right_xx-small"></lightning-button>
+
+                            <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Collapse" style="margin-top:-2%">
+                                <lightning-icon size="x-small" icon-name="utility:collapse_all" onclick={collapseOne} data-id={vacancy.Id} alternative-text="Collapse"></lightning-icon>
+                            </button>
+                        </div>
+                        
+                    </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner slds-m-around_none extraInfo" data-id={vacancy.Id}>
+                        <table>
+                            <tr>
+                                <td style="width:10%">
+                                    <label class="dashboardLabel">{labels.dashboardDateDeDemarrage}</label>
+                                    <p>{vacancy.dateDeDemarrage}</p>
+                                    <label class="dashboardLabel">{labels.dashboardDateDeQualification}</label>
+                                    <p>{vacancy.dateDeQualification}</p>
+                                </td>
+                                <td style="width:10%">
+                                    <label class="dashboardLabel">{labels.dashboardPriorite}</label>
+                                    <p style={vacancy.prioriteOnlyColor}>{vacancy.priorite}</p>
+                                    <label class="dashboardLabel">{labels.dashboardPrioriteSourcing}</label>
+                                    <p style={vacancy.perimetreOnlyColor}>{vacancy.prioriteSourcing}</p>
+                                </td>
+                                <td style="width:10%">
+                                    <label class="dashboardLabel">{labels.dashboardBM}</label>
+                                    <p>{vacancy.BM}</p>
+                                    <label class="dashboardLabel">{labels.dashboardLocation}</label>
+                                    <p>{vacancy.location}</p>
+                                </td>
+                                <td style="width:10%">
+                                    <label class="dashboardLabel">{labels.dashboardTA}</label>
+                                    <template if:true={vacancy.usersVisibleTA}>
+                                        <ul class="candidateList" onclick={openModalTA} data-id={vacancy.Id}>
+                                            <template for:each={vacancy.usersTA} for:item="candidate">
+                                                <!-- MAx 5 candidates -->
+                                                <li key={candidate.Id}>{candidate.User__r.Name}</li>
+
+                                            </template>
+                                        </ul>
+                                    </template>
+                                   
+                                </td>
+                                <td style="width:10%;max-width: 170px;overflow: auto;">
+                                    <label class="dashboardLabel">{labels.dashboardAvancement}</label>
+                                    <p  onclick={handlerExtraInfo} data-id={vacancy.Id} data-name="avancements"  if:true={vacancy.avancementVisible} style="list-style: none;border: 1px solid lightgray; margin-right: 4%;padding: 1%;margin-bottom: 1%;cursor: pointer;margin-top: 1%;" >{vacancy.avancement}</p>
+                                </td>
+                                <td style="width:10%;max-width: 170px;overflow: auto;">
+                                    <label class="dashboardLabel">{labels.dashboardTJM}</label>
+                                    <p>{vacancy.TJM}</p>
+                                </td>
+                              
+                                <td style="width:10%">
+                                    <label class="dashboardLabel">{labels.dashboardExperience}</label>
+                                    <ul class="expList">
+                                        <template for:each={vacancy.experience} for:item="exp">
+                                            <li key={exp.name}>{exp.name}</li>
+                                        </template>
+                                    </ul>
+                                </td>
+                                <td style="width:10%" data-id={vacancy.Id}>
+                                    <label class="dashboardLabel">{labels.dashboardCandidats}</label>
+                                    <template if:true={vacancy.matchesVisible}>
+                                        <ul class="candidateList" onclick={handlerCandidates} data-id={vacancy.Id}>
+                                            <template for:each={vacancy.matches} for:item="candidate">
+                                                <!-- MAx 5 candidates -->
+                                                <li key={candidate.Id}>{candidate.cxsrec__Candidate__r.Name}</li>
+
+                                            </template>
+                                        </ul>
+                                    </template>
+                                </td>
+                                <td  style="width:10%;max-width: 170px;overflow: auto;">
+                                    <label class="dashboardLabel">{labels.dashboardInfosSolution}</label>
+                                    <p onclick={handlerExtraInfo} data-id={vacancy.Id} data-name="infoSolutions" if:true={vacancy.infosSolutionVisible} style="list-style: none;border: 1px solid lightgray; margin-right: 4%;padding: 1%;cursor: pointer;margin-top: 1%;margin-bottom: 1%;">{vacancy.infosSolution}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </article>
+            </div>
+        </div> 
+    </template>
+
+    <div class="slds-form-element__row slds-grid">
+        <div class="slds-form-element slds-size_6-of-12 slds-var-p-around_small" style="float:right">   
+
+        </div>
+        <div class="slds-form-element slds-size_6-of-12 slds-var-p-around_small" style="float:right">   
+
+            <div class="slds-text-align_right slds-p-top_xx-small " style="float:right">
+                <lightning-button disabled={bDisableFirst} icon-name="utility:jump_to_left" label={labels.dashboardFirst} class="slds-p-horizontal_x-small" alternative-text="first page" onclick={firstPage}></lightning-button>
+                <lightning-button disabled={bDisableFirst} icon-name="utility:chevronleft" label={labels.dashboardPrevious} alternative-text="Previous" onclick={previousPage}></lightning-button>
+                &nbsp;
+                <span class="slds-badge">{labels.dashboardShowing} {pageNumber} &nbsp;{labels.dashboardOf}&nbsp; {pageSize} &nbsp;&nbsp;{labels.dashboardPages} - {labels.dashboardTotalRecords}: {countVacancies}</span>
+                &nbsp;
+                <lightning-button disabled={bDisableLast} icon-name="utility:chevronright" label={labels.dashboardNext} alternative-text="Next" onclick={nextPage} class="slds-p-horizontal_x-small" icon-position="right"></lightning-button>
+                <lightning-button disabled={bDisableLast} icon-name="utility:jump_to_right" label={labels.dashboardLast} alternative-text="last page" onclick={lastPage} icon-position="right"></lightning-button>
+            </div>
+        </div>
+    </div>
+
+    <template if:true={openFullInfo}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">{fullInfoTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-var-p-around_medium" id="modal-content-id-2">
+                    {fullInfo}
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleDashboardButtonClose}>{labels.dashboardClose}</button>
+                </footer>
+            </div>
+        </section>
+        <!-- modal backdrop -->
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <template if:true={openEditNeed}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+           
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{labels.dashboardEditNeed}</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-var-p-around_medium modalBody" id="modal-content-id-1">
+                   
+                        <template if:true={showLoading}>
+                            <lightning-spinner alternative-text="Loading" size="medium" class="spinnerClass"></lightning-spinner>
+                        </template>
+
+                        <lightning-record-edit-form object-api-name={objectApiName}  onsubmit={onsubmit} record-id={recordId}>
+                            <div class="slds-form-element__row slds-grid">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input-field field-name="Name"> </lightning-input-field>
+                                    <lightning-input-field field-name="Priorit__c"></lightning-input-field>
+                                    <lightning-input-field field-name="TP_Manager__c"></lightning-input-field>
+                                    <lightning-input-field field-name="cxsrec__Account__c"></lightning-input-field>
+                                     <lightning-input-field field-name="Avancement__c"> </lightning-input-field>
+                                    <lightning-input-field field-name="Infos_Solution__c"> </lightning-input-field>
+                                    <lightning-input-field field-name="cxsrec__Location__c"> </lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input-field field-name="cxsrec__Status__c"> </lightning-input-field>
+                                    <lightning-input-field field-name="Priorit_sourcing__c"> </lightning-input-field>
+                                    <lightning-input-field field-name="TP_Experience__c"> </lightning-input-field>
+                                    <lightning-input-field field-name="TP_Date_de_d_marrage_attendue__c"></lightning-input-field>
+                                    <lightning-input-field field-name="HL_Date_de_qualification__c"></lightning-input-field>
+                                     
+                                </div>
+                            </div>
+                      
+                            <div class="slds-var-m-top_medium">
+                                <button class="slds-button slds-button_neutral" onclick={handleDashboardButtonClose}>{labels.dashboardClose}</button>
+                                <!-- float right -->
+                                <div class="slds-float_right">
+                                    
+                                    <lightning-button class="slds-float_right" variant="brand" type="submit" label={labels.dashboardSave}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+
+                        </lightning-record-edit-form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- modal backdrop -->
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={openCandidates}>
+
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+
+             <div class="slds-modal__container">
+                
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-2" class="slds-text-heading_medium slds-hyphenate">{labels.dashboardModalTitleCandidates}</h2>
+                </header> 
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-var-p-around_medium" id="modal-content-id-3" style="position:relative;overflow:scroll;max-height:500px">
+                    <template if:true={loadingModal}>
+                        <lightning-spinner alternative-text="Loading" size="medium" variant="brand" class="bottomSpinner"></lightning-spinner>
+                    </template>
+                    <div class="slds-form-element slds-p-horizontal_medium slds-p-bottom_small" style="background-color:#c9c9c9">
+                        <div class="slds-form-element__row slds-grid">
+                            <div class="slds-col slds-size_5-of-6">
+                                <lightning-record-picker
+                                        onchange={handleInputChange}
+                                        name="addCandidate"
+                                        label={labels.dashboardLblCreateCandidate}
+                                        object-api-name="cxsrec__cxsCandidate__c"
+                                        value={selectedCandidate}
+                                ></lightning-record-picker>
+                            </div>
+                            <div class="slds-col slds-size_1-of-6">
+                                <div class=" slds-p-left_medium" style="margin-top: 16%">
+                                    <template if:true={btnCreateVisible}>
+                                        <lightning-button variant="brand" label={labels.dashboardCreateCandidate} title="Primary action" onclick={handleCandidateClick} class="slds-m-left_x-small"></lightning-button>
+                                    </template>
+                                </div> 
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+
+                    <div class="slds-form-element__row slds-grid slds-grid_vertical-align-end slds-p-top_small" style="overflow:initial">
+                        <table>
+                            <tr>
+                                <th style="padding:4px">{labels.dashboardCandidateStatus}</th>
+                                <th style="padding:4px">{labels.dashboardCandidateFullName}</th>
+                                <th style="padding:4px">{labels.dashboardCandidateJobTitle}</th>
+                                <th style="padding:4px">{labels.dashboardCandidateRecordType}</th>
+                                <th style="padding:4px">{labels.dashboardCandidateRecrutementStatus}</th>
+                                <th style="padding:4px;text-align:center"></th>
+                            </tr>
+                            <template for:each={matches} for:item="match">
+                                <tr key={match.Id} style="border-top:1px solid black">
+                                    <td style="padding:4px">{match.TP_Statut_Parcours_Besoin__c}</td>
+                                    <td style="padding:4px">{match.cxsrec__Candidate__r.Name}</td>
+                                    <td style="padding:4px">{match.cxsrec__Candidate__r.cxsrec__Current_position__c}</td>
+                                    <td style="padding:4px">{match.cxsrec__Candidate__r.RecordType.Name}</td>
+                                    <td style="padding:4px">{match.cxsrec__Candidate__r.Statut_de_recrutement__c}</td>
+                                    <th style="padding:4px;text-align:center">
+                                        
+                                        <lightning-button-menu alternative-text="Show menu" style="overflow:initial"   menu-alignment="bottom-right" icon-name="utility:settings" class="slds-m-left_xx-large" dropdown-alignment="top">
+                                            <lightning-menu-item value="MenuItemOne" label={labels.dashboardOpenCandidate} onclick={openCandidate} data-id={match.cxsrec__Candidate__r.Id}></lightning-menu-item>
+                                            <!-- //<lightning-menu-item value="MenuItemTwo" label="Open Match" onclick={openMatch} data-id={match.Id}></lightning-menu-item> -->
+                                            <lightning-menu-item value="MenuItemThree" label={labels.dashboardCloseApplicationAbylsen} onclick={matchToKO} data-name="KO Abylsen" data-id={match.Id}></lightning-menu-item>
+                                            <lightning-menu-item value="MenuItemFour" label={labels.dashboardCloseApplicationClient} onclick={matchToKO} data-name="KO Client" data-id={match.Id}></lightning-menu-item>
+                                            <lightning-menu-item value="MenuItemFive" label={labels.dashboardCloseApplicationCandidat} onclick={matchToKO} data-name="KO Candidat" data-id={match.Id}></lightning-menu-item>
+                                        </lightning-button-menu>
+                                    </th>
+                                </tr>
+                            </template>
+                        </table>
+                    </div>
+                  
+
+                  
+                </div>
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleDashboardButtonClose}>{labels.dashboardClose}</button>
+ 
+                </div>
+
+            </div>
+        </section>
+        <!-- modal backdrop -->
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+
+    <template if:true={showModalTA}>
+
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+
+             <div class="slds-modal__container">
+                
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-4" class="slds-text-heading_medium slds-hyphenate">{labels.dashboardModalTitleTA}</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-var-p-around_medium" id="modal-content-id-4" style="position:relative;overflow:initial">
+                    <template if:true={loadingModalTA}>
+                        <lightning-spinner alternative-text="Loading" size="medium" variant="brand" class="bottomSpinner"></lightning-spinner>
+                    </template>
+                    <div class="slds-form-element slds-p-horizontal_medium slds-p-bottom_small" style="background-color:#c9c9c9">
+                        <div class="slds-form-element__row slds-grid">
+                            <div class="slds-col slds-size_5-of-6">
+                                <lightning-record-picker
+                                        onchange={handleInputChangeUserTA}
+                                        name="addUser"
+                                        label={labels.dashboardLblCreateTA}
+                                        object-api-name="User"
+                                ></lightning-record-picker>
+                            </div>
+                            <div class="slds-col slds-size_1-of-6">
+                                <div class=" slds-p-left_medium" style="margin-top: 16%">
+                                    <lightning-button variant="brand" label={labels.dashboardBtnAddTa}  onclick={handleUserClick} class="slds-m-left_x-small"></lightning-button>
+                                </div> 
+                            </div>
+                        </div>
+                       
+                    </div>
+
+                    <div class="slds-form-element__row slds-grid slds-grid_vertical-align-end">
+                        <template if:true={tableVisibleTA}>
+                            <table>
+                                <tr>
+                                    <th style="padding:4px">{labels.dashboardTAFullName}</th>
+                                    <th style="padding:4px;text-align:center"></th>
+                                </tr>
+                                <template for:each={usersTA} for:item="user">
+                                    <tr key={user.Id} style="border-top:1px solid black">
+                                        <td style="padding:4px">{user.User__r.Name}</td>
+                                    
+                                        <th style="padding:4px;text-align:right">
+                                            <lightning-button-menu alternative-text="Show menu" style="overflow:initial"   menu-alignment="right" icon-name="utility:settings" class="slds-m-left_xx-large" dropdown-alignment="top">
+                                                <lightning-menu-item value="MenuItemThree" label={labels.dashboardDeleteTA} onclick={deleteTA}  data-id={user.User__r.Id}></lightning-menu-item>
+                                            </lightning-button-menu>
+                                        </th>
+                                    </tr>
+                                </template>
+                            </table>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleDashboardButtonClose}>{labels.dashboardClose}</button>
+ 
+                </div>
+            </div>
+        </section>
+        <!-- modal backdrop -->
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

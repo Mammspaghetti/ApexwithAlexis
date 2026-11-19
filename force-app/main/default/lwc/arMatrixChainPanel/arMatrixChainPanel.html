@@ -1,0 +1,80 @@
+<template>
+  <template if:true={hasLoadError}>
+    <div
+      class="slds-notify slds-notify_alert slds-theme_error slds-m-bottom_small"
+      role="alert"
+    >
+      {loadErrorMessage}
+    </div>
+  </template>
+  <template if:true={hasMultipleVersions}>
+    <div class="chain-panel slds-box slds-m-bottom_medium">
+      <h3 class="slds-text-heading_small slds-m-bottom_small">
+        {i18n.AR_MCP_Title}
+      </h3>
+
+      <template if:true={partiallyVisible}>
+        <div
+          class="slds-notify slds-notify_alert slds-theme_alert-texture slds-m-bottom_small"
+          role="alert"
+        >
+          {i18n.AR_MCP_PartiallyVisible}
+        </div>
+      </template>
+
+      <!-- Session 163 : grille commune (subgrid) pour aligner chaque colonne d'une version à l'autre ;
+           chaque maillon non courant est un bouton qui ouvre la version (événement openmatrix). Les
+           cellules motifs/badge sont toujours rendues (éventuellement vides) pour ne pas décaler la grille. -->
+      <ul class="chain-list">
+        <template for:each={nodes} for:item="node">
+          <li key={node.matrixId} class="chain-item">
+            <template if:true={node.isCurrent}>
+              <div class="chain-node chain-node-current" aria-current="true">
+                <span class="chain-version">{node.versionLabel}</span>
+                <span class="chain-status">{node.statusLabel}</span>
+                <span class="chain-tjm">{node.formattedTjm}</span>
+                <span
+                  if:true={node.tjmPeriodsDetail}
+                  class="slds-text-body_small slds-text-color_weak"
+                >
+                  {node.tjmPeriodsDetail}
+                </span>
+                <span class="chain-mc2-label">MC2</span>
+                <span class="chain-mc2">{node.mc2Label}</span>
+                <span class="chain-reasons">{node.reasonsLabel}</span>
+                <span class="chain-badge-cell"
+                  ><span class="chain-current-badge"
+                    >{i18n.AR_MCP_CurrentVersion}</span
+                  ></span
+                >
+              </div>
+            </template>
+            <template if:false={node.isCurrent}>
+              <button
+                type="button"
+                class="chain-node chain-link"
+                data-matrix-id={node.matrixId}
+                title={node.openTitle}
+                onclick={handleOpenVersion}
+              >
+                <span class="chain-version">{node.versionLabel}</span>
+                <span class="chain-status">{node.statusLabel}</span>
+                <span class="chain-tjm">{node.formattedTjm}</span>
+                <span
+                  if:true={node.tjmPeriodsDetail}
+                  class="slds-text-body_small slds-text-color_weak"
+                >
+                  {node.tjmPeriodsDetail}
+                </span>
+                <span class="chain-mc2-label">MC2</span>
+                <span class="chain-mc2">{node.mc2Label}</span>
+                <span class="chain-reasons">{node.reasonsLabel}</span>
+                <span class="chain-badge-cell"></span>
+              </button>
+            </template>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </template>
+</template>

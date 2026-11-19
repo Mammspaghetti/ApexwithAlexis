@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <description>Session 180d — enchaînement client de la génération du document d'avenant (snapshot puis rendu, deux appels Apex distincts)</description>
+    <isExposed>false</isExposed>
+</LightningComponentBundle>

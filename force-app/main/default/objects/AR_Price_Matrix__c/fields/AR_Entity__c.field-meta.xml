@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Entity__c</fullName>
+    <description>Entité juridique House of ABY portant la mission. Réutilise le référentiel existant (Global Value Set Companies_Abylsen, déjà utilisé par User.TP_Abylsen_Company__c) plutôt qu&apos;une saisie libre.</description>
+    <label>Entité House of ABY</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Companies_Abylsen</valueSetName>
+    </valueSet>
+</CustomField>

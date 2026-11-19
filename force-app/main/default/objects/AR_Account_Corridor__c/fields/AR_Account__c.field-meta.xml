@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Account__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Grand compte auquel s&apos;appliquent ces seuils de corridor personnalisés.</description>
+    <label>Compte</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Compte</relationshipLabel>
+    <relationshipName>AR_Account_Corridors</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,262 @@
+<template>
+  <div class="app-shell AR-BAND-HACK">
+    <template if:true={isSwitchingLanguage}>
+      <div class="language-switch-veil" role="status" aria-live="polite">
+        <div class="language-switch-spinner">
+          <lightning-spinner
+            alternative-text={languageSwitchMessage}
+            size="medium"
+          ></lightning-spinner>
+        </div>
+        <p class="language-switch-message">{languageSwitchMessage}</p>
+      </div>
+    </template>
+    <aside class={sidebarCssClass}>
+      <div class="sidebar-logo">
+        <img src={logoUrl} alt="Price Pilot" />
+      </div>
+      <nav class="sidebar-nav">
+        <template for:each={navItems} for:item="item">
+          <button
+            key={item.view}
+            class={item.cssClass}
+            data-view={item.view}
+            data-disabled={item.disabled}
+            onclick={handleNavClick}
+            type="button"
+            title={item.label}
+          >
+            <lightning-icon
+              icon-name={item.iconName}
+              size="x-small"
+              class="nav-icon"
+            ></lightning-icon>
+            <span class="nav-label">{item.label}</span>
+            <template if:true={item.hasPendingBadge}>
+              <span class="pending-badge">{item.pendingBadge}</span>
+            </template>
+            <template if:true={item.disabled}>
+              <span class="soon-badge">{i18n.AR_App_ComingSoon}</span>
+            </template>
+          </button>
+        </template>
+        <template if:true={hasAdminAccess}>
+          <div class="sidebar-divider">
+            <button
+              class={adminItem.cssClass}
+              data-view={adminItem.view}
+              onclick={handleNavClick}
+              type="button"
+              title={adminItem.label}
+            >
+              <lightning-icon
+                icon-name={adminItem.iconName}
+                size="x-small"
+                class="nav-icon"
+              ></lightning-icon>
+              <span class="nav-label">{adminItem.label}</span>
+            </button>
+          </div>
+        </template>
+      </nav>
+      <button
+        class="sidebar-language"
+        onclick={handleLanguageToggle}
+        type="button"
+        disabled={isSwitchingLanguage}
+        title={languageToggle.title}
+        aria-label={languageToggle.title}
+      >
+        <lightning-icon
+          icon-name="utility:world"
+          size="xx-small"
+        ></lightning-icon>
+        <template if:true={sidebarCollapsed}>
+          <span class="language-code language-code-active"
+            >{activeLanguageCode}</span
+          >
+        </template>
+        <template if:false={sidebarCollapsed}>
+          <span class={frLanguageClass}>FR</span>
+          <span class="language-separator">|</span>
+          <span class={enLanguageClass}>EN</span>
+        </template>
+      </button>
+      <button
+        class="sidebar-toggle"
+        onclick={handleSidebarToggle}
+        type="button"
+        title={sidebarToggleLabel}
+        aria-label={sidebarToggleLabel}
+      >
+        <lightning-icon
+          icon-name={sidebarToggleIcon}
+          size="x-small"
+        ></lightning-icon>
+      </button>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-content">
+        <template if:true={isDashboard}>
+          <c-ar-pricing-dashboard
+            onopenmatrix={handleOpenMatrix}
+          ></c-ar-pricing-dashboard>
+        </template>
+
+        <template if:true={isSimulator}>
+          <div class="view-header view-header-simulator">
+            <template lwc:if={showBreadcrumb}>
+              <h1 class="slds-assistive-text">{i18n.AR_App_MatrixAT}</h1>
+              <nav class="breadcrumb" aria-label={labels.breadcrumbAriaLabel}>
+                <button
+                  class="breadcrumb-back"
+                  type="button"
+                  onclick={handleBreadcrumbBack}
+                  aria-label={labels.breadcrumbBackAriaLabel}
+                  title={labels.breadcrumbBackAriaLabel}
+                >
+                  <lightning-icon
+                    icon-name="utility:back"
+                    size="x-small"
+                  ></lightning-icon>
+                </button>
+                <ol class="breadcrumb-list">
+                  <li class="breadcrumb-item">
+                    <button
+                      class="breadcrumb-link"
+                      type="button"
+                      onclick={handleBreadcrumbBack}
+                    >
+                      {labels.breadcrumbMatrices}
+                    </button>
+                  </li>
+                  <template lwc:if={hasBreadcrumbLabel}>
+                    <li class="breadcrumb-item breadcrumb-item-current">
+                      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+                      <span
+                        class="breadcrumb-current"
+                        aria-current="page"
+                        title={simulatorMatrixLabel}
+                        >{simulatorMatrixLabel}</span
+                      >
+                    </li>
+                  </template>
+                </ol>
+              </nav>
+            </template>
+            <template lwc:else>
+              <h1 class="view-title">{i18n.AR_App_MatrixAT}</h1>
+            </template>
+          </div>
+          <div class="simulator-container">
+            <template lwc:if={simulatorMounted}>
+              <c-ar-price-matrix-simulator
+                lwc:ref="simulator"
+                record-id={simulatorRecordId}
+                focus-section={simulatorFocusSection}
+                onopenmatrix={handleOpenMatrix}
+                onmatrixidchange={handleMatrixIdChange}
+                onmatrixunavailable={handleMatrixUnavailable}
+                onmatrixlabelchange={handleMatrixLabelChange}
+                onopendecision={handleOpenDecision}
+              ></c-ar-price-matrix-simulator>
+            </template>
+          </div>
+        </template>
+
+        <template if:true={isMatrices}>
+          <c-ar-matrix-list
+            initial-state={matrixListState}
+            onopenmatrix={handleOpenMatrix}
+            onstatechange={handleMatrixListStateChange}
+          ></c-ar-matrix-list>
+        </template>
+
+        <template if:true={isDerogations}>
+          <c-ar-derogation-queue
+            focus-derogation-id={selectedDerogationId}
+            onderogationselect={handleDerogationSelect}
+            onopenmatrix={handleOpenMatrix}
+          ></c-ar-derogation-queue>
+        </template>
+
+        <template if:true={isDerogationsForbidden}>
+          <div class="empty-state">
+            <lightning-icon
+              icon-name="utility:lock"
+              size="small"
+            ></lightning-icon>
+            <p class="empty-state-title">
+              {labels.validatorPermissionMissingTitle}
+            </p>
+            <p class="empty-state-text">
+              {labels.validatorPermissionMissingText}
+            </p>
+          </div>
+        </template>
+
+        <template if:true={isAdmin}>
+          <div class="view-header view-header-admin">
+            <h1 class="view-title">{i18n.AR_App_Administration}</h1>
+            <p class="view-subtitle"></p>
+          </div>
+          <c-ar-admin-page></c-ar-admin-page>
+        </template>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modale de navigation avec saisie non sauvegardée (session 13) -->
+  <template if:true={showDirtyModal}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      class="slds-modal slds-fade-in-open dirty-modal-root"
+      aria-modal="true"
+      aria-labelledby="dirty-modal-heading"
+    >
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <h2 id="dirty-modal-heading" class="slds-text-heading_medium">
+            {i18n.AR_App_UnsavedChangesTitle}
+          </h2>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium">
+          <p>{i18n.AR_App_UnsavedChangesText}</p>
+          <template if:false={dirtyModalCanSaveDraft}>
+            <p class="dirty-modal-no-save-note">
+              {i18n.AR_App_DraftCannotBeSaved}
+            </p>
+          </template>
+        </div>
+        <footer class="slds-modal__footer dirty-modal-footer">
+          <button
+            class="btn btn-text"
+            onclick={handleDirtyCancel}
+            type="button"
+          >
+            {i18n.AR_Common_Cancel}
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick={handleDirtyDiscard}
+            type="button"
+          >
+            {i18n.AR_App_LeaveWithoutSaving}
+          </button>
+          <template if:true={dirtyModalCanSaveDraft}>
+            <button
+              class="btn btn-primary"
+              onclick={handleDirtySaveAndLeave}
+              type="button"
+            >
+              {i18n.AR_PTF_SaveDraft}
+            </button>
+          </template>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+</template>

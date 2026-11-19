@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Escalated__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indique qu&apos;une escalade de niveau 2 a été envoyée. Chaque dérogation ne fait l&apos;objet que d&apos;une seule escalade à ce niveau.</description>
+    <label>Escaladée (palier 2)</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

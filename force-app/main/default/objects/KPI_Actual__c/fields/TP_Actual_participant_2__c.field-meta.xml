@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TP_Actual_participant_2__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Actual participant 2</label>
+    <referenceTo>TP_Actual__c</referenceTo>
+    <relationshipLabel>KPI Actuals (Actual participant 2)</relationshipLabel>
+    <relationshipName>KPI_Actuals2</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Data__c</fullName>
+    <description>Payload JSON sérialisé de AR_PTFData pour l&apos;aperçu (isPreview=true, version non consommée)</description>
+    <label>Données</label>
+    <length>131072</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

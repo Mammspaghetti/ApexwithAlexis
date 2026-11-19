@@ -1,0 +1,102 @@
+<template>
+  <div class="admin-list-header">
+    <div>
+      <h2 class="admin-section-title">{i18n.AR_AVR_Title}</h2>
+      <p class="admin-list-subtitle">{countLabel}</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick={handleAdd}>
+      {i18n.AR_AVR_AddCountry}
+    </button>
+  </div>
+
+  <template if:true={isLoading}>
+    <lightning-spinner
+      alternative-text={i18n.AR_Common_Loading}
+      size="small"
+    ></lightning-spinner>
+  </template>
+
+  <template if:true={errorMessage}>
+    <div class="error-message">{errorMessage}</div>
+  </template>
+
+  <template if:true={showForm}>
+    <c-ar-admin-form-modal
+      heading={i18n.AR_AVR_Title}
+      saving={isSaving}
+      onsave={handleSave}
+      oncancel={handleCancel}
+    >
+      <div class="admin-form-row">
+        <lightning-input
+          type="text"
+          label={i18n.AR_Common_Country}
+          value={formCountry}
+          onchange={handleCountryChange}
+        ></lightning-input>
+        <lightning-input
+          type="number"
+          label={i18n.AR_AVR_DailyAllowance}
+          step="0.01"
+          min="0"
+          value={formDailyAllowance}
+          onchange={handleAllowanceChange}
+        ></lightning-input>
+        <lightning-combobox
+          label={i18n.AR_Common_Currency}
+          options={currencyOptions}
+          value={formCurrencyCode}
+          onchange={handleCurrencyChange}
+        ></lightning-combobox>
+      </div>
+    </c-ar-admin-form-modal>
+  </template>
+
+  <template if:true={isEmpty}>
+    <div class="empty-state">{i18n.AR_AVR_Empty}</div>
+  </template>
+
+  <template if:false={isEmpty}>
+    <template if:false={isLoading}>
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>{i18n.AR_Common_Country}</th>
+              <th>{i18n.AR_AVR_DailyAllowance}</th>
+              <th>{i18n.AR_Common_Currency}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={rows} for:item="row">
+              <tr key={row.id}>
+                <td>{row.country}</td>
+                <td>{row.dailyAllowance}</td>
+                <td>{row.currencyCode}</td>
+                <td class="admin-table-actions">
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleEdit}
+                  >
+                    {i18n.AR_Common_Edit}
+                  </button>
+                  <button
+                    class="btn btn-text"
+                    type="button"
+                    data-id={row.id}
+                    onclick={handleDelete}
+                  >
+                    {i18n.AR_Common_Delete}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </template>
+  </template>
+</template>

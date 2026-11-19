@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BP_department__c</fullName>
+    <label>BP department</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Commercial / Grands comptes</fullName>
+                <default>false</default>
+                <label>Commercial / Grands comptes</label>
+            </value>
+            <value>
+                <fullName>Communication</fullName>
+                <default>false</default>
+                <label>Communication</label>
+            </value>
+            <value>
+                <fullName>Finance - Newco</fullName>
+                <default>false</default>
+                <label>Finance - Newco</label>
+            </value>
+            <value>
+                <fullName>Finance - Entité</fullName>
+                <default>false</default>
+                <label>Finance - Entité</label>
+            </value>
+            <value>
+                <fullName>IT</fullName>
+                <default>false</default>
+                <label>IT</label>
+            </value>
+            <value>
+                <fullName>Marketing</fullName>
+                <default>false</default>
+                <label>Marketing</label>
+            </value>
+            <value>
+                <fullName>QRSE</fullName>
+                <default>false</default>
+                <label>QRSE</label>
+            </value>
+            <value>
+                <fullName>Recrutement</fullName>
+                <default>false</default>
+                <label>Recrutement</label>
+            </value>
+            <value>
+                <fullName>RH - Newco</fullName>
+                <default>false</default>
+                <label>RH - Newco</label>
+            </value>
+            <value>
+                <fullName>RH - Entité</fullName>
+                <default>false</default>
+                <label>RH - Entité</label>
+            </value>
+            <value>
+                <fullName>Corporate</fullName>
+                <default>false</default>
+                <label>Corporate</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

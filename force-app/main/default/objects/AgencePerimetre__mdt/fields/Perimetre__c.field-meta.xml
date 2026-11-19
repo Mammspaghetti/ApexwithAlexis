@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Perimetre__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Périmètre</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Gamma</fullName>
+                <default>false</default>
+                <label>Gamma</label>
+            </value>
+            <value>
+                <fullName>NEO/NORD</fullName>
+                <default>false</default>
+                <label>NEO/NORD</label>
+            </value>
+            <value>
+                <fullName>NEO/OUEST</fullName>
+                <default>false</default>
+                <label>NEO/OUEST</label>
+            </value>
+            <value>
+                <fullName>NEO/EST</fullName>
+                <default>false</default>
+                <label>NEO/EST</label>
+            </value>
+            <value>
+                <fullName>NEO/LUX</fullName>
+                <default>false</default>
+                <label>NEO/LUX</label>
+            </value>
+            <value>
+                <fullName>3SI/STRA</fullName>
+                <default>false</default>
+                <label>3SI/STRA</label>
+            </value>
+            <value>
+                <fullName>3SI/SUD</fullName>
+                <default>false</default>
+                <label>3SI/SUD</label>
+            </value>
+            <value>
+                <fullName>3SI/CH</fullName>
+                <default>true</default>
+                <label>3SI/CH</label>
+            </value>
+            <value>
+                <fullName>3SI/IT</fullName>
+                <default>false</default>
+                <label>3SI/IT</label>
+            </value>
+            <value>
+                <fullName>Sigma SO</fullName>
+                <default>false</default>
+                <label>Sigma SO</label>
+            </value>
+            <value>
+                <fullName>BE</fullName>
+                <default>false</default>
+                <label>BE</label>
+            </value>
+            <value>
+                <fullName>ABY NEWCO</fullName>
+                <default>false</default>
+                <label>ABY NEWCO</label>
+            </value>
+            <value>
+                <fullName>Belgatech</fullName>
+                <default>false</default>
+                <label>Belgatech</label>
+            </value>
+            <value>
+                <fullName>GreenWorking</fullName>
+                <default>false</default>
+                <label>GreenWorking</label>
+            </value>
+            <value>
+                <fullName>Mykelson-Consutling</fullName>
+                <default>false</default>
+                <label>Mykelson-Consutling</label>
+            </value>
+            <value>
+                <fullName>Pharmacos</fullName>
+                <default>false</default>
+                <label>Pharmacos</label>
+            </value>
+            <value>
+                <fullName>PI</fullName>
+                <default>false</default>
+                <label>PI</label>
+            </value>
+            <value>
+                <fullName>Eastelson</fullName>
+                <default>false</default>
+                <label>Eastelson</label>
+            </value>
+            <value>
+                <fullName>Pharmacos R&amp;D</fullName>
+                <default>false</default>
+                <label>Pharmacos R&amp;D</label>
+            </value>
+            <value>
+                <fullName>ABMI Canada</fullName>
+                <default>false</default>
+                <label>ABMI Canada</label>
+            </value>
+            <value>
+                <fullName>ABMI NORD IDF</fullName>
+                <default>false</default>
+                <label>ABMI NORD IDF</label>
+            </value>
+            <value>
+                <fullName>ABMI OUEST</fullName>
+                <default>false</default>
+                <label>ABMI OUEST</label>
+            </value>
+            <value>
+                <fullName>ABMI SUD &amp; EST</fullName>
+                <default>false</default>
+                <label>ABMI SUD &amp; EST</label>
+            </value>
+            <value>
+                <fullName>Lahocy</fullName>
+                <default>false</default>
+                <label>Lahocy</label>
+            </value>
+            <value>
+                <fullName>ABMI UK</fullName>
+                <default>false</default>
+                <label>ABMI UK</label>
+            </value>
+            <value>
+                <fullName>HOA MRC</fullName>
+                <default>false</default>
+                <label>HOA MRC</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

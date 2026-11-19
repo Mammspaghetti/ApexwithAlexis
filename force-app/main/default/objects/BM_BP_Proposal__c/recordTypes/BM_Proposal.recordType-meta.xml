@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BM_Proposal</fullName>
+    <active>true</active>
+    <compactLayoutAssignment>BM_proposal_Layout</compactLayoutAssignment>
+    <label>BM Proposal</label>
+    <picklistValues>
+        <picklist>AB_Area_of_mobility__c</picklist>
+        <values>
+            <fullName>Auvergne-Rhône-Alpes</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Auvergne-Rhône-Alpes et Bourgogne-Franche-Comté</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bretagne</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Centre Normandie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grand Est et Franche-Comté</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Hauts de France et Normandie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ile de France%2C Centre val de Loire%2C Pays de la Loire%2C Normandie%2C Oise et Poitou Charentes</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ile de France%2C Oise%2C Centre Val-De-Loire%2C Normandie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ile-De-France</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nouvelle-Aquitaine et Occitanie</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pays de la Loire et Nouvelle-Aquitaine</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Provence Alpes Cote d%27Azure%2C Monaco%2C Rhône Alpes%2C Occitanie</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Lucca_Cat_gorie__c</picklist>
+        <values>
+            <fullName>Agent de Maîtrise</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Cadre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Dirigeant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employé</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Lucca_ETAM_Executive_position__c</picklist>
+        <values>
+            <fullName>1%2E1 95</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>1%2E2 100</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E1 105</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E1 115</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E1 275</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E2 130</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E2 310</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E3 150</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>2%2E3 355</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E1 170</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E1 400</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E2 210</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E2 450</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E3 270</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3%2E3 500</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Non_competition_clause_delay__c</picklist>
+        <values>
+            <fullName>1 year</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>4 months</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>6 months</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Proposal_language__c</picklist>
+        <values>
+            <fullName>Allemand</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Anglais</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Espagnol</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Français</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Italien</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Néerlandais</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Trial_period__c</picklist>
+        <values>
+            <fullName>2 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>3 mois</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>4 mois</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>AB_Working_hours__c</picklist>
+        <values>
+            <fullName>35h</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>36h30</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>36h45</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>39h</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>40h</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Forfait jours</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Abylsen_agency__c</picklist>
+        <values>
+            <fullName>Aix-en-Provence</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Annecy</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Antwerp</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Barcelone</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Blagnac</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bordeaux</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Brest</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bristol</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Bruxelles</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Caen</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Casablanca</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Chalon-sur-Saone</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Chambery</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Chartres</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Clermont-Ferrand</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Eindhoven</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ghent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grenoble</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lausanne</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Liège</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Luxembourg</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lyon</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Metz</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Milano</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Montgermont</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Montpellier</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nanterre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nantes</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Paris</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pierrelatte</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Rennes</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Rochefort</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Rotterdam</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Rouen</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Saint-Brieuc</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Saint-Herblain</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Saint-Nazaire</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sophia-Antipolis</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Strasbourg</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Torino</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Toronto</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Toulouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tours</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Valence</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vaulx-en-Velin</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Villeneuve-d%27Ascq</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Wavre</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Zurich</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Abylsen_company__c</picklist>
+        <values>
+            <fullName>ABMI Belgium</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ABMI Canada</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ABMI Groupe</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ABMI UK</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ABY Engineering</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen BELGIUM</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen EST</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen Espana</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen GAMMA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen ITALIA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen LUXEMBOURG</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen SIGMA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen STRA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen SUD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Abylsen SWITZERLAND</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Eastelson</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>House of ABY Morocco</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lahocy</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Newco Abylsen</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Openium</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pharmacos</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RTone</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TEC</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>BP_department__c</picklist>
+        <values>
+            <fullName>Commercial %2F Grands comptes</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Communication</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Corporate</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Finance - Entité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Finance - Newco</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>IT</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Marketing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>QRSE</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RH - Entité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RH - Newco</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Recrutement</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Contract_Type__c</picklist>
+        <values>
+            <fullName>Apprentissage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CDD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CDI</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>IBO</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Professionnalisation</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sous-traitant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Stage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>VIE</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Proposal_type__c</picklist>
+        <values>
+            <fullName>BM</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>BP</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>TP_Seniority__c</picklist>
+        <values>
+            <fullName>Directeur d%27Activité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ingénieur d%27affaires</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ingénieur d%27affaires stage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Manager</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Manager Coach</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Responsable d%27Activité</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Responsable du développement commercial</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

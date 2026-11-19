@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Nearshore_Country__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Pays retenu dans le référentiel Nearshore au moment de la saisie. Conservé même si le CJM (AR_CJM_Nearshore__c) est ensuite surchargé manuellement, cf.</description>
+    <label>Pays Nearshore (référentiel)</label>
+    <referenceTo>AR_Nearshore_Referential__c</referenceTo>
+    <relationshipLabel>Matrices de prix</relationshipLabel>
+    <relationshipName>AR_Price_Matrices_Nearshore_Country</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

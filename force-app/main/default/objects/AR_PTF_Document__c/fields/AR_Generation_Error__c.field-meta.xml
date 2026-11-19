@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Generation_Error__c</fullName>
+    <description>Message d&apos;erreur si AR_Generation_Status__c = Échec. Renseigné par AR_PTFRenderQueueable en cas d&apos;exception pendant le rendu ou le stockage : un échec de génération ne doit jamais rester silencieux.</description>
+    <label>Erreur de génération</label>
+    <length>500</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

@@ -1,0 +1,20 @@
+<template>
+  <template if:true={hasOptions}>
+    <lightning-checkbox-group
+      name="reasons"
+      label={label}
+      options={options}
+      value={selectedIds}
+      required={required}
+      onchange={handleChange}
+    ></lightning-checkbox-group>
+  </template>
+  <template if:true={hasLoadError}>
+    <p class="slds-text-body_small slds-text-color_error">{loadErrorMessage}</p>
+  </template>
+  <template if:true={showNoOptionsMessage}>
+    <p class="slds-text-body_small slds-text-color_weak">
+      {i18n.AR_RMS_NoReason}
+    </p>
+  </template>
+</template>

@@ -1,0 +1,178 @@
+<template>
+    <lightning-card title="Ma macotte">
+       <main class="container">
+
+        <div class="mascot">
+
+            <div class="emoji emoji-top">😂</div>
+            <div class="emoji emoji-left">⭐</div>
+            <div class="emoji emoji-right">🚀</div>
+
+            <div class="arm left"></div>
+            <div class="arm right"></div>
+
+            <div class="cloud"></div>
+
+            <div class="face">
+                <div class="eye"></div>
+                <div class="eye"></div>
+                <div class="mouth"></div>
+                <div class="cheek left-cheek"></div>
+                <div class="cheek right-cheek"></div>
+            </div>
+
+            <div class="legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+            </div>
+
+        </div>
+
+        <h1>Salesforce ☁️</h1>
+
+        <p class="subtitle">
+            Ton CRM préféré... même le lundi matin ! 🤪
+        </p>
+
+        <c-hh-bol 
+        capacity={croquette} 
+        onmangerhh={handleServir}
+        lwc:ref="bol"
+        >
+      
+        </c-hh-bol>
+
+       <lightning-button label="Grandir" onclick={grandir}>
+            
+        </lightning-button>
+
+        <p> Nombre de croquette : {croquette}</p>
+
+        <button onclick={changeMessage}>
+            Fais-moi rire 😂
+        </button>
+
+        <lightning-button label="Fais-moi rire 😂 SF" onclick={faisMoiRire}>
+            
+        </lightning-button>
+    
+      <div class="speech">
+            {message} -- {rire}
+        </div>
+        
+        <button>
+            Fais-moi rire GP 😂 {niveauDeJoie}
+        </button>
+
+
+        <div class="gift-container">
+
+            <div class="gift-card">
+
+                <div class="gift-decoration">🎄 ✨ 🎅</div>
+
+                <h1 class="gift-title">La magie de Noël</h1>
+
+                <p class="gift-subtitle">
+                    Crée ton cadeau magique !
+                </p>
+
+                <lightning-input
+                    class="gift-input"
+                    label="Nom du cadeau"
+                    value={nomCadeau}
+                    onchange={handleNomCadeau}>
+                </lightning-input>
+
+                <lightning-button
+                    class="gift-button"
+                    label="🎁 Créer mon cadeau"
+                    onclick={creerCadeau}>
+                </lightning-button>
+
+                <template lwc:if={messagec}>
+                    <div class="gift-message">
+                        <span class="gift-icon">🎁</span>
+                        <h2>Joyeux Noël !</h2>
+                        <p>Cadeau pour Noël :</p>
+                        <strong>{messagec}</strong>
+                        <div class="gift-sparkles">✨ ⭐ ✨</div>
+                    </div>
+                </template>
+
+            </div>
+
+        </div>
+
+    <div class="christmas-container">
+
+        <div class="christmas-header">
+            <div class="snowflakes">❄️ ✨ 🎄 ❄️</div>
+            <h1>🎅 LE CLASSEMENT DES CADEAUX 🎁</h1>
+            <p>Le grand jury du Père Noël a rendu son verdict !</p>
+            <span class="header-badge">ÉDITION SPÉCIALE NOËL 2026</span>
+        </div>
+
+        <div class="gift-table-card">
+
+            <div class="table-title">
+                <h2>🏆 Le Top des cadeaux</h2>
+                <span>⭐ Classement officiel ⭐</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="gift-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Cadeau</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr for:each={cadeauxEnStock} for:item="cadeau" key={cadeau.id}>
+                            <td><span class="medal">🎖️{cadeau.Id}</span></td>
+                            <td class="gift-name">{cadeau.Name}</td> 
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+
+            <div class="table-footer">
+                <span>🎄 Fait avec amour et beaucoup de chocolat 🍫</span>
+                <span>🎅 Validé par le Père Noël</span>
+            </div>
+
+        </div>
+
+        <div class="christmas-message">
+            <div class="message-icon">🎁</div>
+            <div>
+                <h2>Le verdict final du Père Noël !</h2>
+                <p>
+                    Cette année, tout le monde a été sage...
+                    Enfin, presque ! 😂
+                </p>
+            </div>
+            <div class="message-icon">🎅</div>
+        </div>
+
+                    <lightning-datatable      key-field="Id"
+        data={cadeauxEnStock}
+        columns={colonnes}
+        onrowaction={handleRowAction}
+        hide-checkbox-column>
+
+            </lightning-datatable>
+
+    </div>
+
+
+
+    </main>
+    </lightning-card>
+</template>

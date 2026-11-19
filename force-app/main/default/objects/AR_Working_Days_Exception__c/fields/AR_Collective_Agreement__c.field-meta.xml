@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Collective_Agreement__c</fullName>
+    <description>Convention collective concernée par l&apos;exception. Texte libre : aucun référentiel de conventions n&apos;existe encore dans l&apos;org.</description>
+    <externalId>false</externalId>
+    <label>Convention collective</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

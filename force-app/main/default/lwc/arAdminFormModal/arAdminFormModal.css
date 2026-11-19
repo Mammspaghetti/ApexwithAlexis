@@ -1,0 +1,109 @@
+/* Session 170 — Modale générique des formulaires d'ajout/modification de l'administration.
+   Mêmes styles que arMatrixDuplicateModal (SLDS slds-modal + backdrop). Les styles d'un composant
+   LWC ne traversent pas le Shadow DOM : les classes .btn* sont redéclarées ici. Le contenu du slot
+   reste stylé par l'onglet parent (.admin-form-row, etc.). */
+
+/* Position (session 176i, 2e piste après la 181) : la 181 réservait un haut de fenêtre fixe (7rem)
+   pour l'en-tête Salesforce — une mesure en dur, fausse dès que ce chrome change de hauteur
+   (bandeau sandbox, notification, zoom), et la modale restait en `position: fixed` donc calée sur
+   la fenêtre. Elle est maintenant ancrée à `.app-shell` (arPricingApp : `position: relative`,
+   `overflow: hidden`, dont le haut est mesuré et recalé en JS juste sous le chrome Salesforce, cf.
+   recalcShellHeight) : le bord supérieur de la modale ne peut plus passer sous l'en-tête Salesforce,
+   quelle que soit sa hauteur, et elle ne couvre que la zone de l'appli. Aucun ancêtre positionné
+   n'existe entre ce composant et `.app-shell` (vérifié : .app-main / .app-content ne le sont pas),
+   donc le bloc conteneur d'un élément `absolute` est bien `.app-shell`. Les huit onglets
+   d'administration qui montent cette modale vivent tous dans arPricingApp.
+   Marge haute 3rem : l'en-tête de la modale (titre) reste entièrement visible sous le haut de l'appli,
+   corps défilant, pied (Annuler / Enregistrer) toujours visible (flex colonne, max-height: 100 %). */
+.afm-modal {
+  position: absolute;
+  align-items: flex-start;
+  padding: 3rem 0 1.5rem;
+}
+
+.afm-backdrop {
+  position: absolute;
+}
+
+/* slds-modal__container porte un padding vertical propre qui, sur fond blanc, s'ajoutait sous les
+   boutons (pied de modale trop haut) : on le neutralise, l'espacement est porté par .afm-footer. */
+.afm-container {
+  max-width: 44rem;
+  width: 92%;
+  height: auto;
+  max-height: 100%;
+  margin: 0 auto;
+  padding: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.afm-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #ececec;
+  border-radius: 12px 12px 0 0;
+}
+
+.afm-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+/* Le corps reprend la hauteur de son contenu et ne rogne rien : une liste déroulante ou le
+   calendrier passent par-dessus le pied. Seule une modale plus haute que l'espace disponible
+   défile, et c'est arAdminFormModal qui pose `afm-body_scroll` dans ce cas (mesure du contenu). */
+.afm-body {
+  padding: 1.25rem 1.5rem 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.afm-body.afm-body_scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.afm-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-top: 1px solid #ececec;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d31876, #a81260);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #333;
+  border: 1px solid #d4d4d4;
+}

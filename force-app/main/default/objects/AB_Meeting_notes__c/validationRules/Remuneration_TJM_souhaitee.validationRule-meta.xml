@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Remuneration_TJM_souhaitee</fullName>
+    <active>true</active>
+    <description>Soit une rémunération annuelle supérieure à 15k soit un TJM obligatoire.</description>
+    <errorConditionFormula>IF( ISNEW(), false,
+IF ( RecordType.Id &lt;&gt; $Label.ABY_Meeting_notes_record_type, false, 
+OR(
+ AND( ISNULL( AB_Daily_rate__c ) , AB_Pretentions_salariales__c &lt; 15000),
+ AND( ISNULL( AB_Daily_rate__c ) , ISNULL( AB_Pretentions_salariales__c)),
+ AND( NOT(ISNULL( AB_Daily_rate__c )) , AB_Pretentions_salariales__c &lt; 15000)
+)
+)
+)</errorConditionFormula>
+    <errorMessage>Rémunération annuelle minimum de 15K ou renseignement d&apos;un TJM.</errorMessage>
+</ValidationRule>

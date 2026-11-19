@@ -1,0 +1,91 @@
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 2px;
+}
+
+/* Boutons maquette : succès vert, danger rouge (session 10). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+.btn-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+/* Session 33 §2 : bandeau de verrouillage visuel post-décision — le blocage est déjà garanti côté
+   serveur (AR_DerogationTrigger, session 28b), ce style rend l'état visible sans qu'on ait besoin
+   de tenter une modification pour le découvrir. */
+.locked-banner {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid transparent;
+}
+
+.locked-banner-title {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  margin: 0 0 4px;
+}
+
+.locked-banner-line {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.locked-approved {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.locked-rejected {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Curseur non-texte + grisé : ces valeurs sont un rappel visuel, pas le mécanisme de blocage
+   (assuré côté serveur) — cf. protocole de vérification CLAUDE.md, un champ qui "paraît" saisissable
+   sans rien persister est pire qu'un champ absent. */
+.locked-fields {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.reason-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 0;
+}

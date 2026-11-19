@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AR_Floor_Percent__c</fullName>
+    <description>Plancher de marge propre à cette entité. Facultatif : les trois seuils doivent être renseignés ensemble, sinon l&apos;entité ne surcharge rien et les paramètres généraux s&apos;appliquent. Le grand compte reste prioritaire.</description>
+    <label>% Plancher (entité)</label>
+    <precision>5</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Percent</type>
+</CustomField>
